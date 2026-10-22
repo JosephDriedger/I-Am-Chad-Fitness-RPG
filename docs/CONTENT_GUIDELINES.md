@@ -59,8 +59,9 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 
 ## Art, audio and licensing
 
-- Use original assets or assets with documented commercial licences. Record the source and licence for each in `docs/ASSET_LICENSES.md` when the first asset is added.
+- Use original assets or assets with documented commercial licences. Today everything is original: characters, props and backdrops are drawn in code (`lib/game/art`), and the sound effects are synthesized by `tool/gen_sfx.mjs`. If any third-party asset is added, record its source and licence in `docs/ASSET_LICENSES.md` first.
 - Chad is an original character. Do not reproduce recognisable meme photography or third-party characters.
+- Offer a range of appearances (hair styles, outfit colours and six skin tones) and never tie a body type or skin tone to any in-game value or role.
 - Audio should reward effort without overwhelming the workout. It must be mutable and never required.
 - Exercise demonstration material, when added, needs a licensed or original source, simple form cues and an easier alternative.
 
