@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
-import '../../app/theme.dart';
 import '../../app/widgets.dart';
 import '../../domain/items.dart';
 import '../../domain/player_state.dart';
@@ -26,7 +25,12 @@ class CharacterScreen extends ConsumerWidget {
       children: [
         Center(
           child: HeroAvatar(
-              style: h.appearanceStyle, color: h.appearanceColor, size: 96),
+            style: h.appearanceStyle,
+            color: h.appearanceColor,
+            skin: h.appearanceSkin,
+            equipped: {for (final i in player.equipped) i.id},
+            size: 96,
+          ),
         ),
         const SizedBox(height: 8),
         Center(child: Text(h.name, style: t.headlineSmall)),
@@ -108,8 +112,9 @@ class CharacterScreen extends ConsumerWidget {
   Future<void> _customise(
       BuildContext context, WidgetRef ref, PlayerStatus player) async {
     final name = TextEditingController(text: player.hero.name);
-    var style = player.hero.appearanceStyle;
-    var color = player.hero.appearanceColor;
+    var pickStyle = player.hero.appearanceStyle;
+    var pickColor = player.hero.appearanceColor;
+    var pickSkin = player.hero.appearanceSkin;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -123,40 +128,33 @@ class CharacterScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: HeroAvatar(style: style, color: color, size: 80)),
+                Center(child: HeroAvatar(style: pickStyle, color: pickColor, skin: pickSkin, size: 80)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: name,
                   maxLength: 20,
                   decoration: const InputDecoration(labelText: 'Name'),
                 ),
-                Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (var i = 0; i < HeroLook.icons.length; i++)
-                    ChoiceChip(
-                      avatar: Icon(HeroLook.icons[i], size: 20),
-                      label: Text('Style ${i + 1}'),
-                      selected: style == i,
-                      onSelected: (_) => setState(() => style = i),
-                    ),
-                ]),
                 const SizedBox(height: 8),
-                Wrap(spacing: 8, runSpacing: 8, children: [
-                  for (var i = 0; i < HeroLook.colors.length; i++)
-                    ChoiceChip(
-                      avatar: CircleAvatar(backgroundColor: HeroLook.colors[i]),
-                      label: Text(HeroLook.colorNames[i]),
-                      selected: color == i,
-                      onSelected: (_) => setState(() => color = i),
-                    ),
-                ]),
+                AppearancePicker(
+                  style: pickStyle,
+                  color: pickColor,
+                  skin: pickSkin,
+                  onChanged: ({int? style, int? color, int? skin}) => setState(() {
+                    pickStyle = style ?? pickStyle;
+                    pickColor = color ?? pickColor;
+                    pickSkin = skin ?? pickSkin;
+                  }),
+                ),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () async {
                     final n = name.text.trim();
                     await ref.read(repositoryProvider).updateHeroDetails(
                           name: n.isEmpty ? null : n,
-                          appearanceStyle: style,
-                          appearanceColor: color,
+                          appearanceStyle: pickStyle,
+                          appearanceColor: pickColor,
+                          appearanceSkin: pickSkin,
                         );
                     if (ctx.mounted) Navigator.pop(ctx);
                   },

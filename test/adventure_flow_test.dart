@@ -1,61 +1,79 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:i_am_chad/app/app.dart';
-import 'package:i_am_chad/app/providers.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/data/repository.dart';
 import 'package:i_am_chad/domain/activity.dart';
 import 'package:i_am_chad/domain/hero.dart';
 import 'package:i_am_chad/domain/workout.dart';
 
-Future<void> _settle(WidgetTester tester) async {
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 50));
+import 'helpers.dart';
+
+bool _enabled(WidgetTester tester, String label) {
+  final f = find.widgetWithText(FilledButton, label);
+  return f.evaluate().isNotEmpty && tester.widget<FilledButton>(f).onPressed != null;
+}
+
+Future<void> _smartMove(WidgetTester tester) async {
+  if (_enabled(tester, 'Potion')) {
+    await tester.tap(find.text('Potion'));
+  } else if (_enabled(tester, 'Power Strike')) {
+    await tester.tap(find.text('Power Strike'));
+  } else if (_enabled(tester, 'Attack')) {
+    await tester.tap(find.text('Attack'));
+  }
+}
+
+/// Plays whatever is on screen until the result panel shows.
+Future<void> _playToTheEnd(WidgetTester tester) async {
+  for (var guard = 0; guard < 600; guard++) {
+    if (find.text('Back to the Guild').evaluate().isNotEmpty) return;
+    if (_enabled(tester, 'Onward')) {
+      await tester.tap(find.text('Onward'));
+    } else if (_enabled(tester, 'Continue')) {
+      await tester.tap(find.text('Continue'));
+    } else if (_enabled(tester, 'See results')) {
+      await tester.tap(find.text('See results'));
+    } else {
+      await _smartMove(tester);
+    }
+    await settle(tester, frames: 6);
   }
 }
 
 void main() {
   testWidgets('earn energy, play a practice duel and a full expedition',
       (tester) async {
-    tester.view.physicalSize = const Size(800, 2000);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    final semantics = tester.ensureSemantics();
+    usePhone(tester);
 
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     final repo = GameRepository(db);
     final now = DateTime(2026, 10, 22, 10);
     await tester.runAsync(() => repo.createHero(const HeroProfile(
-      name: 'Ada',
-      appearanceStyle: 0,
-      appearanceColor: 0,
-      experience: ExperienceLevel.starting,
-      preferredCategories: {ActivityCategory.cardio},
-      hasDumbbells: false,
-    )));
+          name: 'Ada',
+          appearanceStyle: 0,
+          appearanceColor: 0,
+          experience: ExperienceLevel.starting,
+          preferredCategories: {ActivityCategory.cardio},
+          hasDumbbells: false,
+        )));
 
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        databaseProvider.overrideWithValue(db),
-        clockProvider.overrideWithValue(() => now),
-      ],
-      child: const IAmChadApp(),
-    ));
-    await _settle(tester);
+    await bootApp(tester, db, now: now);
 
-    await tester.tap(find.text('Adventure').last);
-    await _settle(tester);
-
-    // No energy yet: the expedition is locked, practice is free.
+    // No energy yet: the hall shows it, the expedition is locked, practice is free.
+    expect(find.bySemanticsLabel('Adventure energy: 0'), findsOneWidget);
+    await tester.tap(find.text('Adventure'));
+    await settle(tester, frames: 30);
     expect(find.text('Need 2 energy'), findsOneWidget);
 
     await tester.tap(find.text('Practice duel'));
-    await _settle(tester);
-    await _fightToTheEnd(tester);
-    expect(find.text('Rewards'), findsOneWidget);
+    await settle(tester, frames: 30);
+    expect(find.text('Attack'), findsOneWidget);
+    await _playToTheEnd(tester);
+    expect(find.text('Back to the Guild'), findsOneWidget);
     await tester.tap(find.text('Back to the Guild'));
-    await _settle(tester);
+    await settle(tester, frames: 20);
 
     // Log a walk elsewhere (ten minutes -> 2 energy) and the expedition unlocks.
     await tester.runAsync(() => repo.addWorkout(WorkoutEntry(
@@ -63,72 +81,27 @@ void main() {
           performedAt: now,
           durationSeconds: 600,
         )));
-    await _settle(tester);
+    await settle(tester);
     expect(find.text('Set out'), findsOneWidget);
 
     await tester.tap(find.text('Set out'));
-    await _settle(tester);
-    expect(find.text('Battle 1 of 3'), findsOneWidget);
+    await settle(tester, frames: 30);
+    expect(find.text('Attack'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Expedition progress: step 1 of 4')), findsOneWidget);
 
-    // Play through battles and the event until the result screen.
-    for (var guard = 0; guard < 400; guard++) {
-      if (find.text('Back to the Guild').evaluate().isNotEmpty) break;
-      if (find.text('Onward').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Onward'));
-      } else if (find.text('Continue').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Continue'));
-      } else if (find.text('See results').evaluate().isNotEmpty) {
-        await tester.tap(find.text('See results'));
-      } else {
-        await _smartMove(tester);
-      }
-      await _settle(tester);
-    }
+    await _playToTheEnd(tester);
     expect(find.text('Back to the Guild'), findsOneWidget);
     expect(find.textContaining('XP'), findsWidgets);
 
     await tester.tap(find.text('Back to the Guild'));
-    await _settle(tester);
+    await settle(tester, frames: 20);
 
     // Energy was spent exactly once and results were saved.
     final hero = await tester.runAsync(() => repo.watchHero().first);
     expect(hero!.energySpent, 2);
     expect(hero.adventureXp, greaterThan(0));
-    expect(find.text('0 energy'), findsOneWidget);
 
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 1));
-    await tester.runAsync(db.close);
+    semantics.dispose();
+    await shutDown(tester, db);
   });
-}
-
-Future<void> _smartMove(WidgetTester tester) async {
-  bool enabled(String label) {
-    final f = find.widgetWithText(FilledButton, label);
-    return f.evaluate().isNotEmpty &&
-        tester.widget<FilledButton>(f).onPressed != null;
-  }
-
-  if (enabled('Potion') && find.textContaining('winding').evaluate().isEmpty) {
-    // Only drink when the button is live (i.e. we are hurt).
-    await tester.tap(find.text('Potion'));
-  } else if (enabled('Power Strike')) {
-    await tester.tap(find.text('Power Strike'));
-  } else {
-    await tester.tap(find.text('Attack'));
-  }
-}
-
-Future<void> _fightToTheEnd(WidgetTester tester) async {
-  for (var guard = 0; guard < 200; guard++) {
-    if (find.text('Back to the Guild').evaluate().isNotEmpty) return;
-    if (find.text('Continue').evaluate().isNotEmpty) {
-      await tester.tap(find.text('Continue'));
-    } else if (find.text('See results').evaluate().isNotEmpty) {
-      await tester.tap(find.text('See results'));
-    } else {
-      await _smartMove(tester);
-    }
-    await _settle(tester);
-  }
 }

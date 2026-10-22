@@ -1,13 +1,17 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/feedback.dart';
 import '../../app/providers.dart';
-import '../../app/widgets.dart';
 import '../../domain/chad.dart';
 import '../../domain/combat.dart';
 import '../../domain/expedition.dart';
 import '../../domain/items.dart';
 import '../../domain/rng.dart';
+import '../../game/battle_scene.dart';
+import '../../game/core.dart' show Sfx;
+import '../../game/look.dart';
 
 enum _View { battle, battleOver, event, result }
 
@@ -24,17 +28,24 @@ class ExpeditionScreen extends ConsumerStatefulWidget {
 
 class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   late final ExpeditionRun _run;
+  late final BattleScene _scene;
   BattleState? _battle;
   _View _view = _View.battle;
 
+  bool _busy = true;
   bool _saved = false;
   bool _lootWasNew = false;
+  bool _showChad = true;
+  List<String> _log = const [];
   late final String _chadStart;
+  int _battlesStarted = 0;
 
   @override
   void initState() {
     super.initState();
     final player = ref.read(playerProvider)!;
+    final prefs = ref.read(prefsProvider);
+    final fx = ref.read(feedbackProvider);
     final expedition = widget.practice
         ? Expedition.practice(seed: widget.seed, heroLevel: player.level)
         : Expedition.generate(seed: widget.seed, heroLevel: player.level);
@@ -49,20 +60,81 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       rng: GameRng(widget.seed ^ 0x5bd1e995),
     );
     _chadStart = ChadDialogue.line(ChadContext.adventureStart, seed: widget.seed);
-    _advance();
+
+    _scene = BattleScene(
+      look: HeroLook(
+        style: player.hero.appearanceStyle,
+        color: player.hero.appearanceColor,
+        skin: player.hero.appearanceSkin,
+        equipped: {for (final i in player.equipped) i.id},
+      ),
+      heroName: player.hero.name,
+      reducedMotion: prefs.reducedMotion,
+      onSfx: fx.sfx,
+      onHaptic: fx.haptic,
+    );
+    _begin();
   }
 
-  /// Moves to whatever comes next in the run.
-  void _advance() {
+  Future<void> _begin() async {
+    await _scene.sceneReady;
+    if (!mounted) return;
+    await _beginStep();
+  }
+
+  Biome _biomeFor(EnemyTemplate e) {
+    if (widget.practice) return Biome.meadow;
+    if (e.boss) return Biome.arena;
+    return _battlesStarted <= 1 ? Biome.meadow : Biome.forest;
+  }
+
+  /// Starts whatever comes next in the run.
+  Future<void> _beginStep() async {
     if (_run.finished) {
-      _view = _View.result;
-      _save();
-    } else if (_run.current!.kind == StepKind.event) {
-      _view = _View.event;
-    } else {
-      _battle = _run.startBattle();
-      _view = _View.battle;
+      await _finish();
+      return;
     }
+    final step = _run.current!;
+    if (step.kind == StepKind.event) {
+      setState(() {
+        _view = _View.event;
+        _busy = true;
+      });
+      await _scene.showEvent(step.event!.kind);
+      if (mounted) setState(() => _busy = false);
+      return;
+    }
+    final b = _run.startBattle();
+    _battlesStarted++;
+    setState(() {
+      _battle = b;
+      _view = _View.battle;
+      _busy = true;
+      _log = b.log;
+    });
+    _scene.setFocus(b.focus);
+    await _scene.beginBattle(
+      template: step.enemy!,
+      foe: b.enemy,
+      heroNow: b.player,
+      intent: b.intent,
+      biome: _biomeFor(step.enemy!),
+    );
+    if (mounted) setState(() => _busy = false);
+  }
+
+  Future<void> _finish() async {
+    await _save();
+    if (!mounted) return;
+    setState(() => _view = _View.result);
+    final victory = _run.victory;
+    final loot = ItemCatalog.byId(_run.expedition.lootItemId);
+    await _scene.showFinale(
+      victory: victory,
+      chest: victory && !widget.practice,
+      item: victory && !widget.practice ? loot : null,
+      isNew: _lootWasNew,
+    );
   }
 
   Future<void> _save() async {
@@ -72,7 +144,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
     if (widget.practice) {
       if (_run.victory) await repo.addCoins(Expedition.practiceCoins);
     } else {
-      final isNew = await repo.recordExpedition(
+      _lootWasNew = await repo.recordExpedition(
         seed: widget.seed,
         victory: _run.victory,
         battlesWon: _run.battlesWon,
@@ -80,23 +152,48 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         coins: _run.coins,
         lootItemId: _run.expedition.lootItemId,
       );
-      _lootWasNew = isNew;
     }
     if (mounted) setState(() {});
   }
 
-  void _act(BattleAction a) {
+  Future<void> _act(BattleAction a) async {
+    final before = _battle;
+    if (_busy || before == null || !before.canAct(a)) return;
+    ref.read(feedbackProvider).sfx(Sfx.tap);
+    final next = BattleEngine.act(before, a, _run.rng);
     setState(() {
-      _battle = BattleEngine.act(_battle!, a, _run.rng);
-      if (_battle!.isOver) _view = _View.battleOver;
+      _busy = true;
+      _showChad = false;
+      _log = next.log;
     });
+    await _scene.play(
+      next.events,
+      heroAfter: next.player,
+      enemyAfter: next.enemy,
+      focusAfter: next.focus,
+    );
+    if (!mounted) return;
+    setState(() {
+      _battle = next;
+      _busy = false;
+      if (next.isOver) _view = _View.battleOver;
+    });
+    if (!next.isOver) _scene.setIntent(next.intent);
   }
 
-  void _continueAfterBattle() {
-    setState(() {
-      _run.finishBattle(_battle!);
-      _advance();
-    });
+  Future<void> _continueAfterBattle() async {
+    if (_busy) return;
+    _run.finishBattle(_battle!);
+    await _beginStep();
+  }
+
+  Future<void> _onward() async {
+    if (_busy) return;
+    final kind = _run.current!.event!.kind;
+    setState(() => _busy = true);
+    _run.resolveEvent();
+    await _scene.applyEvent(kind, heroHp: _run.hero.hp);
+    if (mounted) await _beginStep();
   }
 
   Future<bool> _confirmLeave() async {
@@ -123,6 +220,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   @override
   Widget build(BuildContext context) {
     final done = _view == _View.result;
+    // Keep the scene in step with the Reduce motion setting.
+    _scene.reducedMotion = ref.watch(prefsProvider.select((p) => p.reducedMotion));
+
     return PopScope(
       canPop: done,
       onPopInvokedWithResult: (didPop, _) async {
@@ -139,285 +239,263 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
           title: Text(widget.practice ? 'Practice duel' : 'Expedition'),
         ),
         body: SafeArea(
-          child: switch (_view) {
-            _View.battle || _View.battleOver => _battleView(context),
-            _View.event => _eventView(context),
-            _View.result => _resultView(context),
-          },
+          child: Column(
+            children: [
+              if (!widget.practice) _PathBar(run: _run, view: _view),
+              Expanded(
+                child: ClipRect(
+                  child: GameWidget(game: _scene),
+                ),
+              ),
+              _panel(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ---- Battle -------------------------------------------------------------
-
-  Widget _battleView(BuildContext context) {
-    final b = _battle!;
-    final t = Theme.of(context).textTheme;
+  Widget _panel(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final over = b.isOver;
-    final step = _run.expedition.steps
-        .take(_run.stepIndex + 1)
-        .where((s) => s.kind == StepKind.battle)
-        .length;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHigh,
+        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      ),
+      child: switch (_view) {
+        _View.battle => _battlePanel(context),
+        _View.battleOver => _overPanel(context),
+        _View.event => _eventPanel(context),
+        _View.result => _resultPanel(context),
+      },
+    );
+  }
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
+  Widget _battlePanel(BuildContext context) {
+    final b = _battle;
+    if (b == null) return const SizedBox(height: 96);
+    final t = Theme.of(context).textTheme;
+    final heavy = b.intent == EnemyMove.windUp;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (!widget.practice)
-          Text('Battle $step of ${_run.expedition.battleCount}',
-              style: t.labelLarge),
-        if (_run.stepIndex == 0 && b.turn == 1 && !over) ...[
-          const SizedBox(height: 8),
-          ChadBubble(text: _chadStart),
-        ],
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(b.enemy.name, style: t.titleLarge),
-                const SizedBox(height: 8),
-                StatBar(
-                  label: 'Enemy HP',
-                  value: b.enemy.hp,
-                  max: b.enemy.maxHp,
-                  color: scheme.error,
-                  icon: Icons.favorite_border,
-                ),
-                if (!over) ...[
-                  const SizedBox(height: 12),
-                  _Intent(move: b.intent),
-                ],
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(b.player.name, style: t.titleMedium),
-                const SizedBox(height: 8),
-                StatBar(
-                  label: 'Your HP',
-                  value: b.player.hp,
-                  max: b.player.maxHp,
-                  icon: Icons.favorite,
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Semantics(
-                      label: 'Focus ${b.focus} of ${BattleState.maxFocus}',
-                      child: ExcludeSemantics(
-                        child: Row(children: [
-                          const Text('Focus '),
-                          for (var i = 0; i < BattleState.maxFocus; i++)
-                            Icon(
-                              i < b.focus ? Icons.circle : Icons.circle_outlined,
-                              size: 14,
-                            ),
-                        ]),
-                      ),
-                    ),
-                    const Spacer(),
-                    StatChip(
-                      icon: Icons.local_drink_outlined,
-                      text: '${b.potions}',
-                      tip: '${b.potions} potions',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Semantics(
-          liveRegion: true,
-          child: Card(
+        if (_showChad)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text('Chad: $_chadStart', style: t.bodySmall),
+          )
+        else
+          Semantics(
+            liveRegion: true,
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  for (final line in b.log) Text(line),
-                ],
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                _busy ? _log.join(' ') : _intentLine(b, heavy),
+                style: t.bodyMedium?.copyWith(
+                  fontWeight: heavy && !_busy ? FontWeight.w700 : null,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
+        GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          childAspectRatio: 0.95,
+          children: [
+            for (final a in BattleAction.values)
+              _ActionButton(
+                action: a,
+                enabled: !_busy && b.canAct(a),
+                badge: switch (a) {
+                  BattleAction.item => '${b.potions}',
+                  BattleAction.skill => '${b.focus}/${BattleState.skillCost}',
+                  _ => null,
+                },
+                onTap: () => _act(a),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _intentLine(BattleState b, bool heavy) => heavy
+      ? '${b.enemy.name} is winding up a heavy blow. Guarding will soften it.'
+      : '${b.enemy.name} is about to strike.';
+
+  Widget _overPanel(BuildContext context) {
+    final b = _battle!;
+    final won = b.phase == BattlePhase.victory;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(won ? '${b.enemy.name} is defeated!' : 'You are knocked out.',
+            style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(won
+            ? 'Rewards from this battle: +${Expedition.xpForBattle(_run.current!.enemy!)} XP, '
+                '+${Expedition.coinsForBattle(_run.current!.enemy!)} coins.'
+            : 'Rewards from battles already won are kept.'),
+        const SizedBox(height: 12),
+        FilledButton(
+          onPressed: _busy ? null : _continueAfterBattle,
+          child: Text(won ? 'Continue' : 'See results'),
+        ),
+      ],
+    );
+  }
+
+  Widget _eventPanel(BuildContext context) {
+    final ev = _run.current?.event;
+    final t = Theme.of(context).textTheme;
+    if (ev == null) return const SizedBox(height: 96);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(ev.title, style: t.titleMedium),
+        const SizedBox(height: 4),
+        Text(ev.text),
+        const SizedBox(height: 6),
+        Text(
+          switch (ev.kind) {
+            EventKind.restock => '+1 potion',
+            EventKind.rest => 'Recover 40% of your max HP',
+            EventKind.treasure => '+8 coins',
+          },
+          style: t.labelLarge,
         ),
         const SizedBox(height: 12),
-        if (over)
-          FilledButton(
-            onPressed: _continueAfterBattle,
-            child: Text(b.phase == BattlePhase.victory ? 'Continue' : 'See results'),
-          )
-        else
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            childAspectRatio: 1.9,
-            children: [
-              for (final a in BattleAction.values)
-                _ActionButton(
-                  action: a,
-                  enabled: b.canAct(a),
-                  onTap: () => _act(a),
-                ),
-            ],
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _busy ? null : _onward,
+            child: const Text('Onward'),
           ),
-      ],
-    );
-  }
-
-  // ---- Events and results ---------------------------------------------------
-
-  Widget _eventView(BuildContext context) {
-    final ev = _run.current!.event!;
-    final t = Theme.of(context).textTheme;
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(ev.title, style: t.titleLarge),
-                const SizedBox(height: 8),
-                Text(ev.text),
-                const SizedBox(height: 8),
-                Text(
-                  switch (ev.kind) {
-                    EventKind.restock => '+1 potion',
-                    EventKind.rest => 'Recover 40% of your max HP',
-                    EventKind.treasure => '+8 coins',
-                  },
-                  style: t.labelLarge,
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        FilledButton(
-          onPressed: () => setState(() {
-            _run.resolveEvent();
-            _advance();
-          }),
-          child: const Text('Onward'),
         ),
       ],
     );
   }
 
-  Widget _resultView(BuildContext context) {
+  Widget _resultPanel(BuildContext context) {
     final t = Theme.of(context).textTheme;
     final victory = _run.victory;
     final loot = ItemCatalog.byId(_run.expedition.lootItemId);
-    final seed = widget.seed;
-
-    return ListView(
-      padding: const EdgeInsets.all(16),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(victory ? Icons.emoji_events : Icons.healing,
-            size: 56, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(height: 8),
         Text(
           widget.practice
               ? (victory ? 'Duel won!' : 'Good practice!')
               : (victory ? 'Expedition complete!' : 'Regrouping for next time'),
-          style: t.headlineSmall,
-          textAlign: TextAlign.center,
+          style: t.titleLarge,
         ),
-        const SizedBox(height: 16),
-        ChadBubble(
-          text: ChadDialogue.line(
-            victory ? ChadContext.victory : ChadContext.defeat,
-            seed: seed,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Rewards', style: t.titleMedium),
-                const SizedBox(height: 8),
-                if (widget.practice)
-                  Text(victory
-                      ? '+${Expedition.practiceCoins} coins'
-                      : 'No coins this time. Practice is free, so try again '
-                          'whenever you like.')
-                else ...[
-                  Text('Battles won: ${_run.battlesWon}'),
-                  Text('+${_run.xp} XP'),
-                  Text('+${_run.coins} coins'),
-                  if (victory && loot != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _lootWasNew
-                          ? 'New equipment: ${loot.name} (${loot.bonusLabel})'
-                          : 'You already own ${loot.name}, so it became '
-                              '10 coins.',
-                      style: t.titleSmall,
-                    ),
-                  ],
-                ],
-              ],
+        const SizedBox(height: 4),
+        Text(ChadDialogue.line(
+          victory ? ChadContext.victory : ChadContext.defeat,
+          seed: widget.seed,
+        )),
+        const SizedBox(height: 8),
+        if (widget.practice)
+          Text(victory
+              ? '+${Expedition.practiceCoins} coins'
+              : 'No coins this time. Practice is free, so try again whenever you like.')
+        else ...[
+          Text('Battles won: ${_run.battlesWon}   +${_run.xp} XP   +${_run.coins} coins'),
+          if (victory && loot != null)
+            Text(
+              _lootWasNew
+                  ? 'New equipment: ${loot.name} (${loot.bonusLabel})'
+                  : 'You already own ${loot.name}, so it became 10 coins.',
+              style: t.titleSmall,
             ),
+        ],
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _saved ? () => Navigator.of(context).pop() : null,
+            child: const Text('Back to the Guild'),
           ),
-        ),
-        const SizedBox(height: 16),
-        FilledButton(
-          onPressed: _saved ? () => Navigator.of(context).pop() : null,
-          child: const Text('Back to the Guild'),
         ),
       ],
     );
   }
 }
 
-class _Intent extends StatelessWidget {
-  const _Intent({required this.move});
+class _PathBar extends StatelessWidget {
+  const _PathBar({required this.run, required this.view});
 
-  final EnemyMove move;
+  final ExpeditionRun run;
+  final _View view;
 
   @override
   Widget build(BuildContext context) {
-    final heavy = move == EnemyMove.windUp;
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: heavy ? scheme.errorContainer : scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(10),
+    final steps = run.expedition.steps;
+    return Semantics(
+      label: 'Expedition progress: step ${run.stepIndex.clamp(0, steps.length - 1) + 1} of ${steps.length}',
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
+        color: scheme.surfaceContainerHigh,
+        child: Row(
+          children: [
+            for (var i = 0; i < steps.length; i++) ...[
+              if (i > 0)
+                Expanded(
+                  child: Container(
+                    height: 3,
+                    color: i <= run.stepIndex ? scheme.primary : scheme.outlineVariant,
+                  ),
+                ),
+              _node(context, i, steps[i]),
+            ],
+          ],
+        ),
       ),
-      child: Row(
-        children: [
-          Icon(heavy ? Icons.warning_amber_rounded : Icons.flash_on, size: 20),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              heavy
-                  ? 'Next: heavy blow! Guarding will soften it.'
-                  : 'Next: a regular strike.',
-            ),
-          ),
-        ],
+    );
+  }
+
+  Widget _node(BuildContext context, int i, ExpeditionStep s) {
+    final scheme = Theme.of(context).colorScheme;
+    final done = i < run.stepIndex || run.victory;
+    final current = i == run.stepIndex && !run.finished;
+    final boss = s.enemy?.boss ?? false;
+    final icon = done
+        ? Icons.check
+        : s.kind == StepKind.event
+            ? Icons.local_fire_department
+            : boss
+                ? Icons.whatshot
+                : Icons.shield;
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: done
+            ? scheme.primary
+            : current
+                ? scheme.primaryContainer
+                : scheme.surfaceContainerHighest,
+        border: Border.all(
+          color: current ? scheme.primary : scheme.outlineVariant,
+          width: current ? 2.5 : 1,
+        ),
+      ),
+      child: Icon(
+        icon,
+        size: 18,
+        color: done ? scheme.onPrimary : scheme.onSurfaceVariant,
       ),
     );
   }
@@ -428,11 +506,13 @@ class _ActionButton extends StatelessWidget {
     required this.action,
     required this.enabled,
     required this.onTap,
+    this.badge,
   });
 
   final BattleAction action;
   final bool enabled;
   final VoidCallback onTap;
+  final String? badge;
 
   static const _icons = {
     BattleAction.attack: Icons.bolt,
@@ -443,20 +523,30 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: action.help,
-      child: FilledButton.tonal(
-        onPressed: enabled ? onTap : null,
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(_icons[action]),
-            const SizedBox(height: 2),
-            Text(action.label),
-          ],
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: '${action.label}. ${action.help}${badge != null ? ' ($badge)' : ''}',
+      child: ExcludeSemantics(
+        child: FilledButton.tonal(
+          onPressed: enabled ? onTap : null,
+          style: FilledButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+            minimumSize: const Size(48, 56),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(_icons[action], size: 22),
+              const SizedBox(height: 2),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(action.label, style: const TextStyle(fontSize: 12)),
+              ),
+              if (badge != null)
+                Text(badge!, style: const TextStyle(fontSize: 11)),
+            ],
+          ),
         ),
       ),
     );

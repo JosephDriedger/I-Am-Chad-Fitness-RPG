@@ -47,6 +47,20 @@ class SettingsScreen extends ConsumerWidget {
               value: prefs.quietChad,
               onChanged: (v) => repo.saveSettings(prefs.copyWith(quietChad: v)),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Sound effects'),
+              subtitle: const Text('Short, quiet cues for hits, loot and level-ups.'),
+              value: prefs.soundOn,
+              onChanged: (v) => repo.saveSettings(prefs.copyWith(soundOn: v)),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Vibration'),
+              subtitle: const Text('Gentle haptic feedback during battles.'),
+              value: prefs.hapticsOn,
+              onChanged: (v) => repo.saveSettings(prefs.copyWith(hapticsOn: v)),
+            ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 4),
               child: Text(
