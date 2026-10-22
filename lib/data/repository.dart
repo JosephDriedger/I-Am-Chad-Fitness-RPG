@@ -121,6 +121,7 @@ class GameRepository {
           name: h.name,
           appearanceStyle: Value(h.appearanceStyle),
           appearanceColor: Value(h.appearanceColor),
+          appearanceSkin: Value(h.appearanceSkin),
           experience: h.experience.name,
           preferredCategories:
               Value(h.preferredCategories.map((c) => c.name).join(',')),
@@ -134,6 +135,7 @@ class GameRepository {
     String? name,
     int? appearanceStyle,
     int? appearanceColor,
+    int? appearanceSkin,
   }) async {
     await (_db.update(_db.heroes)..where((h) => h.id.equals(1))).write(
       HeroesCompanion(
@@ -144,6 +146,9 @@ class GameRepository {
         appearanceColor: appearanceColor == null
             ? const Value.absent()
             : Value(appearanceColor),
+        appearanceSkin: appearanceSkin == null
+            ? const Value.absent()
+            : Value(appearanceSkin),
       ),
     );
   }
@@ -254,6 +259,8 @@ class GameRepository {
               useMetric: r.useMetric,
               reducedMotion: r.reducedMotion,
               quietChad: r.quietChad,
+              soundOn: r.soundOn,
+              hapticsOn: r.hapticsOn,
             ));
 
   Future<void> saveSettings(AppPrefs p) async {
@@ -263,6 +270,8 @@ class GameRepository {
             useMetric: Value(p.useMetric),
             reducedMotion: Value(p.reducedMotion),
             quietChad: Value(p.quietChad),
+            soundOn: Value(p.soundOn),
+            hapticsOn: Value(p.hapticsOn),
           ),
         );
   }
@@ -346,6 +355,7 @@ class GameRepository {
         name: r.name,
         appearanceStyle: r.appearanceStyle,
         appearanceColor: r.appearanceColor,
+        appearanceSkin: r.appearanceSkin,
         experience: ExperienceLevel.values.firstWhere(
           (e) => e.name == r.experience,
           orElse: () => ExperienceLevel.starting,
