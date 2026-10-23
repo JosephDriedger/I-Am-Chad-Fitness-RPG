@@ -85,7 +85,7 @@ class PlayerStatus {
   final int energyEarned;
   final List<EquipmentItem> equipped;
 
-  int get totalXp => activityXp + hero.adventureXp;
+  int get totalXp => activityXp + hero.adventureXp + hero.streakXp;
   int get level => Progression.levelForXp(totalXp);
   double get levelProgress => Progression.levelProgress(totalXp);
   int get levelStartXp => Progression.xpForLevel(level);

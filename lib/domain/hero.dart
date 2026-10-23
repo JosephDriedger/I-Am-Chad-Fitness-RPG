@@ -14,7 +14,7 @@ enum ExperienceLevel {
   final String label;
   final String blurb;
 
-  /// Flexible weekly goal (days with any movement). Never a streak.
+  /// Flexible weekly goal (days with any movement). Streaks are separate (see streaks.dart).
   int get weeklyDaysGoal => switch (this) {
         ExperienceLevel.starting => 2,
         ExperienceLevel.returning => 3,
@@ -35,6 +35,7 @@ class HeroProfile {
     this.adventureXp = 0,
     this.coins = 0,
     this.victories = 0,
+    this.streakXp = 0,
   });
 
   final String name;
@@ -51,6 +52,9 @@ class HeroProfile {
   final int coins;
   final int victories;
 
+  /// XP paid out for streak milestones.
+  final int streakXp;
+
   HeroProfile copyWith({
     String? name,
     int? appearanceStyle,
@@ -63,6 +67,7 @@ class HeroProfile {
     int? adventureXp,
     int? coins,
     int? victories,
+    int? streakXp,
   }) =>
       HeroProfile(
         name: name ?? this.name,
@@ -76,6 +81,7 @@ class HeroProfile {
         adventureXp: adventureXp ?? this.adventureXp,
         coins: coins ?? this.coins,
         victories: victories ?? this.victories,
+        streakXp: streakXp ?? this.streakXp,
       );
 }
 

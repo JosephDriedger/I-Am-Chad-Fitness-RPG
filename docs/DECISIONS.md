@@ -20,9 +20,9 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 **Alternatives considered:** An append-only reward ledger (harder to keep correct on edit and delete), or recomputing everything on every read (silently rewrites history after a rebalance).
 **Consequence:** Energy available is `earned − spent`, clamped at 0, so deleting a workout after spending its energy cannot go negative.
 
-## 4. Daily cap with diminishing returns, no streaks
+## 4. Daily cap with diminishing returns, no daily-login rewards
 
-**Decision:** Full value for the first 20 effort minutes of a day, half for the next 20, nothing after. No streaks, daily login rewards or countdowns.
+**Decision:** Full value for the first 20 effort minutes of a day, half for the next 20, nothing after. No daily login rewards or countdowns. (This decision originally also ruled out streaks; see [decision 28](#28-forgiving-streaks).)
 **Why:** The GDD forbids punishment and compulsion, and warns about overexercise for rewards. A cap bounds the incentive; the half-value band avoids a hard cliff.
 **Consequence:** Maximum 120 XP and 6 energy per day. See [Reward rules](REWARD_RULES.md).
 
@@ -147,3 +147,9 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 **Decision:** The catalog grew from 11 to 79 exercises across six categories (Core and Sports & Play are new), each tagged with the equipment it needs. The Train screen gained search, category chips and an At Home Only switch. Every new exercise has an animated demo built from a small keyframe rig on top of the existing IK, rather than hand-coded poses, and a tool renders contact sheets so each one was checked by eye. Easier versions are described in text (and as variants where there is a distinct demo), and all earn exactly what harder ones do.
 **Why:** People log very different things, and the original eleven left out most of what a beginner at home, a gym regular or a casual sports player actually does. The rig keeps limb lengths, floor contact and smooth loops true by construction, and the existing demo tests then cover the whole catalog. Search and filters keep a long list usable, and "At Home Only" respects people without equipment.
 **Trade-off:** A side-on 2D figure cannot show every move honestly, so a handful are drawn face-on and say so. The demos and cues are original and conservative, but they still need review by a qualified trainer. Rewards use two simple numbers per exercise (seconds per rep, an effort multiplier) and tests keep them in a sane range, so no exercise is a shortcut to the daily cap.
+
+## 28. Forgiving streaks
+
+**Decision:** Streaks exist, in a deliberately gentle form. A streak is days active in a row with rest days built in (up to 2 or 3 quiet days by experience, always covering a weekend off). Rewards are one-time coin and XP milestones from 3 days to a year, paid once and never taken back. A lapse restarts the count, keeps the best run, and is met with kind words, with no countdown and no "don't break it" messages. The streak shows on the hall HUD, the quest board and the workout-saved dialog.
+**Why:** Players asked for a reward for consistency, and consistency is something worth recognising. The original "no streaks" rule was about the harm that strict daily streaks do: pressure to train when tired, hurt or ill, and guilt after a missed day. Building rest days in, paying for showing up instead of doing more, and never removing anything keeps the benefit and removes those harms. This reverses part of decision 4; the daily cap, the no-login-rewards rule and the no-countdowns rule stand.
+**Trade-off:** Any streak can still feel like pressure to some people, so the wording is kept calm, the rest allowance is generous, and the reward sizes are small next to a real day's exercise. If it ever tests badly with beginners, the first lever is a larger rest allowance, and the second is removing the HUD flame. Rewards can be back-dated, which is accepted for a single-player game.

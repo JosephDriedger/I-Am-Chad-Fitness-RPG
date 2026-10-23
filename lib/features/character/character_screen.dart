@@ -97,6 +97,7 @@ class CharacterScreen extends ConsumerWidget {
               _Record('Total XP', '${player.totalXp}'),
               _Record('  From Workouts', '${player.activityXp}'),
               _Record('  From Adventures', '${h.adventureXp}'),
+              _Record('  From Streaks', '${h.streakXp}'),
               _Record('Coins', '${h.coins}'),
               _Record('Expeditions Won', '${h.victories}'),
             ],

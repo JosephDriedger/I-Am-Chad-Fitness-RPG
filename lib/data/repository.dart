@@ -8,6 +8,7 @@ import '../domain/hero.dart';
 import '../domain/items.dart';
 import '../domain/player_state.dart';
 import '../domain/rewards.dart';
+import '../domain/streaks.dart';
 import '../domain/workout.dart';
 import 'database.dart';
 
@@ -268,6 +269,47 @@ class GameRepository {
         updates: {_db.heroes},
       );
 
+  // ---- Streaks ------------------------------------------------------------
+
+  /// Where the streak stands right now, from everything ever logged.
+  Future<StreakStatus> streakStatus({required DateTime today}) async {
+    final heroRow = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+    final experience = heroRow == null ? ExperienceLevel.starting : _toHero(heroRow).experience;
+    final workouts = (await _db.select(_db.workouts).get()).map(_toEntry);
+    return StreakRules.evaluate(workouts: workouts, today: today, experience: experience);
+  }
+
+  /// The milestones the player has already been paid for.
+  Stream<Set<int>> watchClaimedStreaks() =>
+      _db.select(_db.streakRewards).watch().map((rows) => {for (final r in rows) r.days});
+
+  /// Pays every streak milestone that has been reached and not yet claimed, in
+  /// one transaction, and returns what was paid. Safe to call any time: with
+  /// nothing due it does nothing, and a claimed milestone is never paid twice
+  /// or taken back.
+  Future<List<StreakMilestone>> claimStreakRewards({required DateTime today}) {
+    return _db.transaction(() async {
+      final heroRow = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (heroRow == null) return const <StreakMilestone>[];
+      final hero = _toHero(heroRow);
+      final workouts = (await _db.select(_db.workouts).get()).map(_toEntry);
+      final status = StreakRules.evaluate(workouts: workouts, today: today, experience: hero.experience);
+      final claimed = {for (final r in await _db.select(_db.streakRewards).get()) r.days};
+      final due = StreakRules.due(current: status.current, claimed: claimed);
+      for (final m in due) {
+        await _db.into(_db.streakRewards).insert(
+              StreakRewardsCompanion.insert(days: Value(m.days), claimedAt: today, coins: m.coins, xp: m.xp),
+            );
+        await _db.customUpdate(
+          'UPDATE heroes SET coins = coins + ?, streak_xp = streak_xp + ? WHERE id = 1',
+          variables: [Variable.withInt(m.coins), Variable.withInt(m.xp)],
+          updates: {_db.heroes},
+        );
+      }
+      return due;
+    });
+  }
+
   // ---- Inventory ----------------------------------------------------------
 
   Stream<List<OwnedItem>> watchItems() => _db.select(_db.ownedItems).watch().map(
@@ -337,6 +379,7 @@ class GameRepository {
         .get();
     final hero = await (_db.select(_db.heroes)).getSingleOrNull();
     final grants = await _db.select(_db.rewardGrants).get();
+    final streaks = await (_db.select(_db.streakRewards)..orderBy([(t) => OrderingTerm.asc(t.days)])).get();
     final data = {
       'app': 'I Am Chad: Fitness RPG',
       'exportVersion': 1,
@@ -360,7 +403,12 @@ class GameRepository {
           'adventureXp': hero.adventureXp,
           'coins': hero.coins,
           'victories': hero.victories,
+          'streakXp': hero.streakXp,
         },
+      'streakRewards': [
+        for (final r in streaks)
+          {'days': r.days, 'claimedAt': r.claimedAt.toIso8601String(), 'coins': r.coins, 'xp': r.xp}
+      ],
     };
     return const JsonEncoder.withIndent('  ').convert(data);
   }
@@ -424,5 +472,6 @@ class GameRepository {
         adventureXp: r.adventureXp,
         coins: r.coins,
         victories: r.victories,
+        streakXp: r.streakXp,
       );
 }

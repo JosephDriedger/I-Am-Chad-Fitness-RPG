@@ -14,6 +14,8 @@ enum ChadContext {
   defeat,
   lowEnergy,
   capReached,
+  streakReward,
+  freshStart,
 }
 
 class ChadDialogue {
@@ -75,6 +77,18 @@ class ChadDialogue {
     ChadContext.capReached: [
       'That\'s the most today\'s rewards can give. Anything more is just for '
           'you. Rest well!',
+    ],
+    ChadContext.streakReward: [
+      'A streak, and what a lovely one! Rest days count too. This guild is '
+          'not strict about calendars.',
+      'Day after day, the chronicle grows. The guild notices. The guild is '
+          'proud.',
+      'Consistency suits you. So does that grin.',
+    ],
+    ChadContext.freshStart: [
+      'A fresh start is a good start. Your best run is still on the wall, and '
+          'so are you.',
+      'Welcome back, hero. The guild kept your chair warm.',
     ],
   };
 

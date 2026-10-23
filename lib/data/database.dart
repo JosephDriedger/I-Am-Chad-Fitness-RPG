@@ -55,6 +55,9 @@ class Heroes extends Table {
   IntColumn get adventureXp => integer().withDefault(const Constant(0))();
   IntColumn get coins => integer().withDefault(const Constant(0))();
   IntColumn get victories => integer().withDefault(const Constant(0))();
+
+  /// XP from streak rewards (activity XP is derived; this is paid out once).
+  IntColumn get streakXp => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -81,6 +84,19 @@ class ExpeditionRuns extends Table {
   IntColumn get xp => integer()();
   IntColumn get coins => integer()();
   TextColumn get lootItemId => text().nullable()();
+}
+
+/// A streak milestone the player has been paid for. Once claimed it is never
+/// taken back, even if workouts are later edited (see docs/REWARD_RULES.md).
+@DataClassName('StreakRewardRow')
+class StreakRewards extends Table {
+  IntColumn get days => integer()();
+  DateTimeColumn get claimedAt => dateTime()();
+  IntColumn get coins => integer()();
+  IntColumn get xp => integer()();
+
+  @override
+  Set<Column> get primaryKey => {days};
 }
 
 /// The expedition the player is in the middle of, if any (id is always 1).
@@ -123,6 +139,7 @@ class AppSettings extends Table {
     OwnedItems,
     ExpeditionRuns,
     ActiveExpeditions,
+    StreakRewards,
     AppSettings,
   ],
 )
@@ -141,7 +158,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -158,6 +175,10 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 4) {
             await m.addColumn(workouts, workouts.cameraCounted);
+          }
+          if (from < 5) {
+            await m.createTable(streakRewards);
+            await m.addColumn(heroes, heroes.streakXp);
           }
         },
         beforeOpen: (details) async {

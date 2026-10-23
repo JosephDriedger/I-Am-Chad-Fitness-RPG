@@ -75,6 +75,8 @@ class QuestsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
+          const _StreakPanel(),
+          const SizedBox(height: 16),
           GamePanel(
             title: 'Weekly Goal',
             child: Column(
@@ -86,7 +88,7 @@ class QuestsScreen extends ConsumerWidget {
                   goal.met
                       ? 'Goal reached! Anything extra is a bonus, and rest days are well earned.'
                       : 'Move on ${goal.target} days this week, with any activity. '
-                          'There are no streaks: a quiet day never resets anything.',
+                          'A quiet day never takes anything away.',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
               ],
@@ -203,12 +205,20 @@ class _QuestCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    GameChip(text: '+${reward.xp} XP', icon: Icons.star_rounded),
-                    const SizedBox(width: 8),
-                    GameChip(text: '+${reward.energy} Energy', icon: Icons.bolt_rounded, color: GameColors.teal),
-                    const Spacer(),
-                    if (!done)
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          GameChip(text: '+${reward.xp} XP', icon: Icons.star_rounded),
+                          GameChip(text: '+${reward.energy} Energy', icon: Icons.bolt_rounded, color: GameColors.teal),
+                        ],
+                      ),
+                    ),
+                    if (!done) ...[
+                      const SizedBox(width: 8),
                       GameButton(
                         label: 'Start',
                         icon: Icons.play_arrow_rounded,
@@ -216,6 +226,7 @@ class _QuestCard extends ConsumerWidget {
                         small: true,
                         onPressed: onStart,
                       ),
+                    ],
                   ],
                 ),
               ],
@@ -315,3 +326,97 @@ class _WeekTokens extends StatelessWidget {
   }
 }
 
+
+/// The streak: days active in a row, with rest days built in, and the next
+/// reward. Never a countdown, and it never speaks of loss.
+class _StreakPanel extends ConsumerWidget {
+  const _StreakPanel();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(streakProvider);
+    final claimed = ref.watch(claimedStreaksProvider).value ?? const <int>{};
+    if (s == null) return const SizedBox.shrink();
+    final next = s.next!;
+    final rest = s.allowedRestDays;
+    return GamePanel(
+      title: 'Streak',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.local_fire_department_rounded,
+                  size: 44, color: s.hasStreak ? const Color(0xFFFF7043) : GameColors.inkSoft),
+              const SizedBox(width: 8),
+              Semantics(
+                label: s.hasStreak ? 'Streak: ${s.current} active days in a row' : 'No streak yet',
+                child: ExcludeSemantics(child: Text('${s.current}', style: gameTitle(40))),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      s.current == 1 ? 'active day in a row' : 'active days in a row',
+                      style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.ink),
+                    ),
+                    if (s.best > 0) ...[
+                      const SizedBox(height: 4),
+                      GameChip(text: 'Best ${s.best}', icon: Icons.emoji_events_rounded),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            s.hasStreak
+                ? 'Any logged movement counts for the day.'
+                : s.lapsed
+                    ? 'A fresh start is a good start. Move on any day to begin a new run. Your best run stays on the wall.'
+                    : 'Move on any day to start a streak.',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Text('Next: ${next.title}, at ${next.days} days', style: gameTitle(17)),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: s.progressToNext,
+              minHeight: 12,
+              color: GameColors.gold,
+              backgroundColor: const Color(0xFFE6D3A8),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            '+${next.coins} Coins and +${next.xp} XP',
+            style: const TextStyle(fontWeight: FontWeight.w700, color: GameColors.inkSoft),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Rest days are built in: up to $rest quiet ${rest == 1 ? 'day' : 'days'} in a row keep it going, '
+            'so a weekend off never breaks it. Rewards come from showing up, not from doing more.',
+            style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600),
+          ),
+          if (claimed.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final d in (claimed.toList()..sort()))
+                  GameChip(text: '$d Days', icon: Icons.check_circle_rounded, color: GameColors.cream),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

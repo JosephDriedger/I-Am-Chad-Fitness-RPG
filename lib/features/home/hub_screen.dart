@@ -156,7 +156,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
         SafeArea(
           child: Column(
             children: [
-              _Hud(player: player, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, onSettings: () {
+              _Hud(player: player, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, streak: ref.watch(streakProvider)?.current ?? 0, onSettings: () {
                 Navigator.of(context).push(
                     gameRoute<void>(const SettingsScreen()));
               }),
@@ -194,12 +194,14 @@ class _Hud extends StatelessWidget {
     required this.player,
     required this.goalDone,
     required this.goalTarget,
+    required this.streak,
     required this.onSettings,
   });
 
   final PlayerStatus player;
   final int goalDone;
   final int goalTarget;
+  final int streak;
   final VoidCallback onSettings;
 
   @override
@@ -269,6 +271,8 @@ class _Hud extends StatelessWidget {
                       _Stat(Icons.bolt, '${player.energy}', const Color(0xFF5AD1C4), 'Adventure energy: ${player.energy}'),
                       _Stat(Icons.monetization_on, '${h.coins}', const Color(0xFFF2C94C), '${h.coins} coins'),
                       _Stat(Icons.calendar_today, '$goalDone/$goalTarget', const Color(0xFFFFB067), 'Active days this week: $goalDone of $goalTarget'),
+                      if (streak > 0)
+                        _Stat(Icons.local_fire_department_rounded, '$streak', const Color(0xFFFF7043), 'Streak: $streak active days in a row'),
                     ],
                   ),
                 ],

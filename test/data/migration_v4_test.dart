@@ -17,6 +17,21 @@ void main() {
           distance_meters REAL, load_kg REAL, perceived_effort INTEGER,
           notes TEXT
         );
+        CREATE TABLE heroes (
+          id INTEGER NOT NULL PRIMARY KEY,
+          name TEXT NOT NULL,
+          appearance_style INTEGER NOT NULL DEFAULT 0,
+          appearance_color INTEGER NOT NULL DEFAULT 0,
+          appearance_skin INTEGER NOT NULL DEFAULT 0,
+          experience TEXT NOT NULL,
+          preferred_categories TEXT NOT NULL DEFAULT '',
+          has_dumbbells INTEGER NOT NULL DEFAULT 0,
+          energy_spent INTEGER NOT NULL DEFAULT 0,
+          adventure_xp INTEGER NOT NULL DEFAULT 0,
+          coins INTEGER NOT NULL DEFAULT 0,
+          victories INTEGER NOT NULL DEFAULT 0,
+          created_at INTEGER NOT NULL
+        );
         CREATE TABLE reward_grants (
           day TEXT NOT NULL PRIMARY KEY,
           effort_minutes REAL NOT NULL,
