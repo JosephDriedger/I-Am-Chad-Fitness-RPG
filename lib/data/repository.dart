@@ -8,6 +8,8 @@ import '../domain/hero.dart';
 import '../domain/items.dart';
 import '../domain/player_state.dart';
 import '../domain/rewards.dart';
+import '../domain/shop.dart';
+import '../domain/streaks.dart';
 import '../domain/workout.dart';
 import 'database.dart';
 
@@ -41,8 +43,12 @@ class GameRepository {
     await _db.transaction(() async {
       final old = await (_db.select(_db.workouts)..where((t) => t.id.equals(id)))
           .getSingleOrNull();
+      // When an entry was logged never changes, and an old entry from before
+      // that was recorded counts as logged when it was performed. So moving a
+      // workout to an earlier day makes it a back-dated one.
+      final logged = old?.loggedAt ?? old?.performedAt ?? e.loggedAt;
       await (_db.update(_db.workouts)..where((t) => t.id.equals(id)))
-          .write(_toCompanion(e));
+          .write(_toCompanion(e.copyWith(loggedAt: logged)));
       await _recomputeDay(e.performedAt);
       if (old != null && dayKey(old.performedAt) != dayKey(e.performedAt)) {
         await _recomputeDay(old.performedAt);
@@ -79,11 +85,13 @@ class GameRepository {
   Future<void> _recomputeDay(DateTime t) async {
     final key = dayKey(t);
     final rows = await _workoutsOnDay(t);
-    if (rows.isEmpty) {
+    // Back-dated workouts are kept in the journal but earn nothing.
+    final eligible = rows.map(_toEntry).where((e) => e.countsForRewards).toList();
+    if (eligible.isEmpty) {
       await (_db.delete(_db.rewardGrants)..where((g) => g.day.equals(key))).go();
       return;
     }
-    final r = rules.rewardForDay(rows.map(_toEntry));
+    final r = rules.rewardForDay(eligible);
     await _db.into(_db.rewardGrants).insertOnConflictUpdate(
           RewardGrantsCompanion.insert(
             day: key,
@@ -177,10 +185,20 @@ class GameRepository {
 
   /// Spends the energy and saves the starting point in one step, so closing
   /// the app at any moment can never lose the energy without the expedition.
-  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost}) {
+  ///
+  /// [broughtPotions] come out of the potion pouch and are part of
+  /// `p.potions`. Any not used come back when the expedition ends.
+  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost, int broughtPotions = 0}) {
     return _db.transaction(() async {
       await spendEnergy(energyCost);
       await saveExpeditionProgress(p);
+      if (broughtPotions > 0) {
+        await _db.customUpdate(
+          'UPDATE heroes SET potion_stock = MAX(0, potion_stock - ?) WHERE id = 1',
+          variables: [Variable.withInt(broughtPotions)],
+          updates: {_db.heroes},
+        );
+      }
     });
   }
 
@@ -220,6 +238,7 @@ class GameRepository {
     required int xp,
     required int coins,
     required String lootItemId,
+    int potionsLeft = 0,
   }) {
     return _db.transaction(() async {
       var newItem = false;
@@ -258,6 +277,15 @@ class GameRepository {
         ],
         updates: {_db.heroes},
       );
+      // Unused pouch potions come home with the hero.
+      final back = Shop.potionsReturned(potionsLeft);
+      if (back > 0) {
+        await _db.customUpdate(
+          'UPDATE heroes SET potion_stock = MIN(?, potion_stock + ?) WHERE id = 1',
+          variables: [Variable.withInt(Shop.potionPouchMax), Variable.withInt(back)],
+          updates: {_db.heroes},
+        );
+      }
       return newItem;
     });
   }
@@ -267,6 +295,87 @@ class GameRepository {
         variables: [Variable.withInt(coins)],
         updates: {_db.heroes},
       );
+
+  // ---- Shop ---------------------------------------------------------------
+
+  /// Buys a piece of gear with coins. Nothing is charged unless it is bought.
+  Future<PurchaseResult> buyItem(String itemId) {
+    return _db.transaction(() async {
+      final price = Shop.priceOf(itemId);
+      if (price == null || ItemCatalog.byId(itemId) == null) return PurchaseResult.unavailable;
+      final hero = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (hero == null) return PurchaseResult.unavailable;
+      final owned = await (_db.select(_db.ownedItems)..where((o) => o.itemId.equals(itemId))).getSingleOrNull();
+      if (owned != null) return PurchaseResult.alreadyOwned;
+      if (hero.coins < price) return PurchaseResult.notEnoughCoins;
+      await _db.customUpdate(
+        'UPDATE heroes SET coins = coins - ? WHERE id = 1',
+        variables: [Variable.withInt(price)],
+        updates: {_db.heroes},
+      );
+      await _db.into(_db.ownedItems).insert(
+            OwnedItemsCompanion.insert(itemId: itemId, acquiredAt: DateTime.now()),
+          );
+      return PurchaseResult.bought;
+    });
+  }
+
+  /// Buys one healing potion for the pouch.
+  Future<PurchaseResult> buyPotion() {
+    return _db.transaction(() async {
+      final hero = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (hero == null) return PurchaseResult.unavailable;
+      if (hero.potionStock >= Shop.potionPouchMax) return PurchaseResult.pouchFull;
+      if (hero.coins < Shop.potionPrice) return PurchaseResult.notEnoughCoins;
+      await _db.customUpdate(
+        'UPDATE heroes SET coins = coins - ?, potion_stock = potion_stock + 1 WHERE id = 1',
+        variables: [Variable.withInt(Shop.potionPrice)],
+        updates: {_db.heroes},
+      );
+      return PurchaseResult.bought;
+    });
+  }
+
+  // ---- Streaks ------------------------------------------------------------
+
+  /// Where the streak stands right now, from everything ever logged.
+  Future<StreakStatus> streakStatus({required DateTime today}) async {
+    final heroRow = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+    final experience = heroRow == null ? ExperienceLevel.starting : _toHero(heroRow).experience;
+    final workouts = (await _db.select(_db.workouts).get()).map(_toEntry);
+    return StreakRules.evaluate(workouts: workouts, today: today, experience: experience);
+  }
+
+  /// The milestones the player has already been paid for.
+  Stream<Set<int>> watchClaimedStreaks() =>
+      _db.select(_db.streakRewards).watch().map((rows) => {for (final r in rows) r.days});
+
+  /// Pays every streak milestone that has been reached and not yet claimed, in
+  /// one transaction, and returns what was paid. Safe to call any time: with
+  /// nothing due it does nothing, and a claimed milestone is never paid twice
+  /// or taken back.
+  Future<List<StreakMilestone>> claimStreakRewards({required DateTime today}) {
+    return _db.transaction(() async {
+      final heroRow = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (heroRow == null) return const <StreakMilestone>[];
+      final hero = _toHero(heroRow);
+      final workouts = (await _db.select(_db.workouts).get()).map(_toEntry);
+      final status = StreakRules.evaluate(workouts: workouts, today: today, experience: hero.experience);
+      final claimed = {for (final r in await _db.select(_db.streakRewards).get()) r.days};
+      final due = StreakRules.due(current: status.current, claimed: claimed);
+      for (final m in due) {
+        await _db.into(_db.streakRewards).insert(
+              StreakRewardsCompanion.insert(days: Value(m.days), claimedAt: today, coins: m.coins, xp: m.xp),
+            );
+        await _db.customUpdate(
+          'UPDATE heroes SET coins = coins + ?, streak_xp = streak_xp + ? WHERE id = 1',
+          variables: [Variable.withInt(m.coins), Variable.withInt(m.xp)],
+          updates: {_db.heroes},
+        );
+      }
+      return due;
+    });
+  }
 
   // ---- Inventory ----------------------------------------------------------
 
@@ -337,6 +446,7 @@ class GameRepository {
         .get();
     final hero = await (_db.select(_db.heroes)).getSingleOrNull();
     final grants = await _db.select(_db.rewardGrants).get();
+    final streaks = await (_db.select(_db.streakRewards)..orderBy([(t) => OrderingTerm.asc(t.days)])).get();
     final data = {
       'app': 'I Am Chad: Fitness RPG',
       'exportVersion': 1,
@@ -360,7 +470,13 @@ class GameRepository {
           'adventureXp': hero.adventureXp,
           'coins': hero.coins,
           'victories': hero.victories,
+          'streakXp': hero.streakXp,
+          'potionStock': hero.potionStock,
         },
+      'streakRewards': [
+        for (final r in streaks)
+          {'days': r.days, 'claimedAt': r.claimedAt.toIso8601String(), 'coins': r.coins, 'xp': r.xp}
+      ],
     };
     return const JsonEncoder.withIndent('  ').convert(data);
   }
@@ -389,6 +505,7 @@ class GameRepository {
         perceivedEffort: r.perceivedEffort,
         notes: r.notes,
         cameraCounted: r.cameraCounted,
+        loggedAt: r.loggedAt,
       );
 
   static WorkoutsCompanion _toCompanion(WorkoutEntry e) => WorkoutsCompanion(
@@ -403,6 +520,7 @@ class GameRepository {
         perceivedEffort: Value(e.perceivedEffort),
         notes: Value(e.notes),
         cameraCounted: Value(e.cameraCounted),
+        loggedAt: Value(e.loggedAt),
       );
 
   static HeroProfile _toHero(HeroRow r) => HeroProfile(
@@ -424,5 +542,7 @@ class GameRepository {
         adventureXp: r.adventureXp,
         coins: r.coins,
         victories: r.victories,
+        streakXp: r.streakXp,
+        potionStock: r.potionStock,
       );
 }

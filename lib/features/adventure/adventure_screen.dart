@@ -6,6 +6,8 @@ import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/chad.dart';
 import '../../domain/expedition.dart';
+import '../../domain/shop.dart';
+import '../shop/shop_screen.dart';
 import 'expedition_screen.dart';
 
 /// The expedition gate: a level-select map, a way back into an unfinished
@@ -87,6 +89,35 @@ class AdventureScreen extends ConsumerWidget {
           ),
         const SizedBox(height: 16),
         GamePanel(
+          title: 'Guild Shop',
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Spend your coins on gear and healing potions. Potions in your pouch come along on expeditions.',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              Wrap(spacing: 8, runSpacing: 8, children: [
+                GameChip(text: '${player.hero.coins} Coins', icon: Icons.monetization_on, color: GameColors.gold),
+                GameChip(
+                  text: 'Potion Pouch ${player.hero.potionStock}/${Shop.potionPouchMax}',
+                  icon: Icons.local_drink,
+                  color: GameColors.green,
+                ),
+              ]),
+              const SizedBox(height: 12),
+              GameButton(
+                label: 'Visit the Shop',
+                icon: Icons.storefront_rounded,
+                kind: GameButtonKind.secondary,
+                onPressed: () => Navigator.of(context).push(gameRoute<void>(const ShopScreen())),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        GamePanel(
           title: 'Practice Yard',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,9 +149,20 @@ class AdventureScreen extends ConsumerWidget {
 
   Future<void> _start(BuildContext context, WidgetRef ref, int level, int maxHp) async {
     final seed = ref.read(clockProvider)().millisecondsSinceEpoch & 0x7FFFFFFF;
-    final progress = ExpeditionProgress.fresh(seed: seed, heroLevel: level, heroMaxHp: maxHp);
-    // Energy and the saved starting point are written together.
-    await ref.read(repositoryProvider).startExpedition(progress, energyCost: Expedition.energyCost);
+    // Potions from the pouch come along, up to a limit, on top of the free ones.
+    final bring = Shop.potionsToBring(ref.read(heroProvider).value?.potionStock ?? 0);
+    final progress = ExpeditionProgress.fresh(
+      seed: seed,
+      heroLevel: level,
+      heroMaxHp: maxHp,
+      potions: Shop.basePotions + bring,
+    );
+    // Energy, the pouch potions and the saved starting point are written together.
+    await ref.read(repositoryProvider).startExpedition(
+          progress,
+          energyCost: Expedition.energyCost,
+          broughtPotions: bring,
+        );
     if (!context.mounted) return;
     await Navigator.of(context).push(
       gameRoute<void>(ExpeditionScreen(seed: seed, practice: false, progress: progress)),
@@ -234,6 +276,7 @@ class _ResumeCard extends ConsumerWidget {
             xp: progress.xp,
             coins: progress.coins,
             lootItemId: '',
+            potionsLeft: progress.potions,
           );
     }
   }

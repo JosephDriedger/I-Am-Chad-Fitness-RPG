@@ -12,7 +12,7 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 
 - **Fitness first.** A useful workout log and history, even if you ignore the RPG.
 - **Beginner friendly.** Easier versions of an exercise earn exactly the same as harder ones.
-- **Progress without punishment.** No streaks. Rest days are valid. Missed days cost nothing.
+- **Progress without punishment.** Streaks are gentle: rest days are built in, nothing is ever taken away, and a missed stretch just starts a fresh run. Missed days cost nothing.
 - **Adventure with agency.** You are the hero, and Chad is the mentor.
 - **Trustworthy.** Transparent rewards, offline-first, data stays on your device, no pay-to-win.
 
@@ -26,6 +26,9 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 | Exercise catalog | Done. **79 exercises** in 6 categories (Bodyweight, Core, Cardio, Resistance, Mobility & Recovery, Sports & Play), searchable and filterable, with an "At Home Only" switch. See the [exercise catalog](docs/EXERCISE_CATALOG.md) |
 | Exercise demonstrations | Done. Every exercise has a looping animated figure with step-by-step cues, props (bars, benches, machines, bikes, water) and easier variants (wall, incline and knee push-ups, chair squats, small crunches, and more) |
 | Camera rep counting (push-ups and squats) | First version built and run on an Android emulator, **not yet tried on a real person**. Needs a phone stand; counts reps on-device with generous leeway for beginners, never saves video, and is optional. See [camera notes](docs/ROADMAP.md#camera-rep-checking) |
+| Guild Shop | Done. Spend coins on gear and healing potions (a pouch of up to 5, with up to 3 taken on each expedition and unused ones returned) |
+| Back-dating | Done. Past workouts can be logged for the journal but earn no rewards, streaks or quest credit |
+| Streaks | Done. Days active in a row, with rest days built in. Milestone rewards of coins and XP from 3 days up to a year, shown on the hall HUD and the quest board. Never a countdown, never lost |
 | Honesty check on implausible entries | Done. A friendly warning, never a lock |
 | Expedition resume | Done. Leave mid-run and pick it up later |
 | Reward rules (XP and energy, daily cap, diminishing returns) | Done, versioned, explained to the player after each log |

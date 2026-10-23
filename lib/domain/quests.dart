@@ -32,7 +32,7 @@ class QuestSuggestion {
   ActivityType get activity => ActivityCatalog.byId(activityId)!;
 
   bool isDoneBy(Iterable<WorkoutEntry> todays) =>
-      todays.any((e) => e.activityId == activityId);
+      todays.any((e) => e.countsForRewards && e.activityId == activityId);
 }
 
 class WeeklyGoal {
@@ -211,7 +211,7 @@ class QuestBoard {
     final nextMonday = monday.add(const Duration(days: 7));
     final days = <String>{
       for (final e in entries)
-        if (!e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
+        if (e.countsForRewards && !e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
           dayKey(e.performedAt),
     };
     return WeeklyGoal(target: level.weeklyDaysGoal, daysActive: days.length);
@@ -228,7 +228,7 @@ class QuestBoard {
     final nextMonday = monday.add(const Duration(days: 7));
     return {
       for (final e in entries)
-        if (!e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
+        if (e.countsForRewards && !e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
           e.performedAt.toLocal().weekday,
     };
   }

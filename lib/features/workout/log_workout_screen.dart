@@ -14,6 +14,7 @@ import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
 import '../../domain/rep_counter.dart';
 import '../../domain/rewards.dart';
+import '../../domain/streaks.dart';
 import '../../domain/workout.dart';
 import '../../game/look.dart';
 import 'camera_reps_screen.dart';
@@ -222,7 +223,17 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       perceivedEffort: _effort,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
       cameraCounted: _cameraCounted,
+      // Entered now; an entry being edited keeps the time it was first logged.
+      loggedAt: widget.editing == null ? ref.read(clockProvider)() : widget.editing!.loggedAt,
     );
+  }
+
+  /// Whether this workout, dated as it is now, would earn rewards. A workout
+  /// moved to an earlier day is back-dated: journal only.
+  bool get _earnsRewards {
+    final e = widget.editing;
+    final logged = e == null ? ref.read(clockProvider)() : (e.loggedAt ?? e.performedAt);
+    return WorkoutEntry(activityId: a.id, performedAt: _when, loggedAt: logged).countsForRewards;
   }
 
   /// Anything about [entry] that looks unlikely to be real. Never blocks.
@@ -282,7 +293,43 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     } else {
       await repo.updateWorkout(entry);
     }
+    if (!_earnsRewards) {
+      // Back-dated: saved for the journal, nothing to pay.
+      if (!mounted) return;
+      await showGameDialog<void>(
+        context: context,
+        title: 'Saved to Your Journal',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This workout was from an earlier day, so it is in your journal but earns no rewards. '
+              'Rewards are for workouts you log on the day you do them.',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 14),
+            ChadBubble(text: ChadDialogue.line(ChadContext.backDated, seed: entry.performedAt.day)),
+          ],
+        ),
+        actions: [
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'Got It',
+              icon: Icons.check_circle,
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        ],
+      );
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
     final reward = await repo.rewardForDay(entry.performedAt);
+    // Pay any streak milestone this workout has reached. Never takes anything away.
+    final today = ref.read(clockProvider)();
+    final streakPaid = await repo.claimStreakRewards(today: today);
+    final streak = await repo.streakStatus(today: today);
     if (!mounted) return;
     await showGameDialog<void>(
       context: context,
@@ -290,13 +337,19 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       content: _RewardContent(
         reward: reward,
         rules: repo.rules,
-        forToday: dayKey(entry.performedAt) == dayKey(ref.read(clockProvider)()),
+        forToday: dayKey(entry.performedAt) == dayKey(today),
+        streakPaid: streakPaid,
+        streak: streak,
         chadLine: ChadDialogue.line(
           firstEver
               ? ChadContext.firstWorkout
-              : reward.capReached
-                  ? ChadContext.capReached
-                  : ChadContext.afterWorkout,
+              : streakPaid.isNotEmpty
+                  ? ChadContext.streakReward
+                  : streak.startedFresh
+                      ? ChadContext.freshStart
+                      : reward.capReached
+                          ? ChadContext.capReached
+                          : ChadContext.afterWorkout,
           seed: entry.performedAt.day,
         ),
       ),
@@ -504,6 +557,30 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                   trailing: const Icon(Icons.edit_calendar_outlined),
                   onTap: _pickWhen,
                 ),
+                if (!_earnsRewards)
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE3B8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: GameColors.goldDark, width: 2),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.history_toggle_off_rounded, color: GameColors.goldDark),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Back-dated: this goes in your journal but earns no rewards. '
+                            'Rewards are for workouts you log on the day you do them.',
+                            style: TextStyle(fontWeight: FontWeight.w700, color: GameColors.ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),
@@ -604,6 +681,8 @@ class _RewardContent extends StatelessWidget {
     required this.rules,
     required this.forToday,
     required this.chadLine,
+    required this.streakPaid,
+    required this.streak,
   });
 
   final DayReward reward;
@@ -611,9 +690,14 @@ class _RewardContent extends StatelessWidget {
   final bool forToday;
   final String chadLine;
 
+  /// Streak milestones paid by this save (usually none).
+  final List<StreakMilestone> streakPaid;
+  final StreakStatus streak;
+
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return SingleChildScrollView(
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -630,9 +714,83 @@ class _RewardContent extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(rules.explain(reward)),
+        for (final m in streakPaid) ...[
+          const SizedBox(height: 14),
+          _StreakRewardCard(milestone: m),
+        ],
+        if (streak.hasStreak && streakPaid.isEmpty) ...[
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department_rounded, color: Color(0xFFFF7043), size: 20),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${streak.current} active ${streak.current == 1 ? 'day' : 'days'} in a row. '
+                  'Next reward at ${streak.next!.days}.',
+                  style: const TextStyle(fontWeight: FontWeight.w700, color: GameColors.inkSoft),
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 14),
         ChadBubble(text: chadLine),
       ],
+      ),
+    );
+  }
+}
+
+/// The golden card shown when a workout reaches a streak milestone.
+class _StreakRewardCard extends StatelessWidget {
+  const _StreakRewardCard({required this.milestone});
+
+  final StreakMilestone milestone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'Streak reward: ${milestone.title}. ${milestone.days} active days in a row. '
+          'Plus ${milestone.coins} coins and ${milestone.xp} XP.',
+      child: ExcludeSemantics(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFE3B8),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: GameColors.gold, width: 2.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.local_fire_department_rounded, color: Color(0xFFFF7043)),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text('Streak Reward!', style: gameTitle(19))),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text('${milestone.title}: ${milestone.days} active days in a row',
+                  style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.ink)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.monetization_on, color: GameColors.goldDark, size: 20),
+                  const SizedBox(width: 4),
+                  Text('+${milestone.coins} Coins', style: gameTitle(17)),
+                  const SizedBox(width: 16),
+                  const Icon(Icons.star_rounded, color: GameColors.goldDark, size: 20),
+                  const SizedBox(width: 4),
+                  Text('+${milestone.xp} XP', style: gameTitle(17)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import '../../game/art/painters.dart';
 import '../../game/battle_scene.dart' show paintItemIcon;
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/look.dart';
+import '../shop/shop_screen.dart';
 
 /// The character sheet: your hero on a lit stage with equipment slots, stat
 /// bars and a collection book of every piece of gear in the game.
@@ -97,10 +98,18 @@ class CharacterScreen extends ConsumerWidget {
               _Record('Total XP', '${player.totalXp}'),
               _Record('  From Workouts', '${player.activityXp}'),
               _Record('  From Adventures', '${h.adventureXp}'),
+              _Record('  From Streaks', '${h.streakXp}'),
               _Record('Coins', '${h.coins}'),
               _Record('Expeditions Won', '${h.victories}'),
             ],
           ),
+        ),
+        const SizedBox(height: 14),
+        GameButton(
+          label: 'Visit the Guild Shop',
+          icon: Icons.storefront_rounded,
+          kind: GameButtonKind.secondary,
+          onPressed: () => Navigator.of(context).push(gameRoute<void>(const ShopScreen())),
         ),
         const SizedBox(height: 14),
         GamePanel(
@@ -109,7 +118,7 @@ class CharacterScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Win expeditions to find every piece. Tap one you own to wear it.',
+                'Win expeditions or visit the Guild Shop to fill the collection. Tap one you own to wear it.',
                 style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
@@ -396,7 +405,7 @@ class _Slot extends ConsumerWidget {
       context: context,
       title: '${slot.label} Slot',
       content: have.isEmpty
-          ? const Text('Nothing to wear here yet. Win expeditions to find gear.')
+          ? const Text('Nothing to wear here yet. Win expeditions or visit the Guild Shop to get gear.')
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

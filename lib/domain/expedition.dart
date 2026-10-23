@@ -235,13 +235,14 @@ class ExpeditionProgress {
     required int seed,
     required int heroLevel,
     required int heroMaxHp,
+    int potions = 2,
   }) =>
       ExpeditionProgress(
         seed: seed,
         heroLevel: heroLevel,
         stepIndex: 0,
         heroHp: heroMaxHp,
-        potions: 2,
+        potions: potions,
         battlesWon: 0,
         xp: 0,
         coins: 0,

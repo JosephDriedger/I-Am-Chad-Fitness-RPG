@@ -127,7 +127,8 @@ class _WorkoutTile extends ConsumerWidget {
           title: Text(a?.name ?? 'Unknown activity', style: gameTitle(18)),
           subtitle: Text(
             '${DateFormat('h:mm a').format(entry.performedAt)} · ${entry.summary(metric: metric)}'
-            '${entry.cameraCounted ? ' · Camera Counted' : ''}',
+            '${entry.cameraCounted ? ' · Camera Counted' : ''}'
+            '${entry.countsForRewards ? '' : ' · Journal Only'}',
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           trailing: IconButton(

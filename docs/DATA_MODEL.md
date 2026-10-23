@@ -22,6 +22,7 @@ One row per logged activity. Fully editable and deletable by the player.
 | `load_kg` | real? | |
 | `perceived_effort` | int? | 1 to 5, informational only |
 | `notes` | text? | |
+| `logged_at` | datetime? | When it was entered (schema v6). Null for older entries, which count as logged when performed. Never changes when an entry is edited. A workout only earns rewards if logged on the day it happened (see [Reward rules](REWARD_RULES.md#back-dated-workouts)). |
 
 `camera_counted` (bool, default false) marks entries whose reps were counted by the phone camera. It is cleared if the player changes the numbers afterwards. It never changes rewards.
 
@@ -49,6 +50,8 @@ A single row with `id = 1`.
 | `has_dumbbells` | Filters equipment-based suggestions |
 | `energy_spent` | Lifetime energy spent on expeditions |
 | `adventure_xp`, `coins`, `victories` | Earned through play |
+| `streak_xp` | XP paid out for streak milestones (schema v5) |
+| `potion_stock` | Healing potions in the pouch, bought in the shop (schema v6) |
 | `created_at` | |
 
 ### `owned_items`
@@ -62,6 +65,10 @@ A single row with `id = 1`.
 ### `expedition_runs`
 
 An append-only history of finished runs: `seed`, `finished_at`, `victory`, `battles_won`, `xp`, `coins`, `loot_item_id`. Expeditions themselves are regenerated from a seed and level, so the full sequence is never stored.
+
+### `streak_rewards`
+
+One row per streak milestone the player has been paid for: `days` (primary key), `claimed_at`, `coins`, `xp`. A row is written in the same transaction that adds the coins and `heroes.streak_xp`, so a milestone is paid exactly once. Rows are never deleted when workouts are later edited or removed, so nothing already earned is taken back. `deleteEverything()` clears it.
 
 ### `active_expeditions`
 
@@ -93,7 +100,7 @@ No account, analytics or network calls exist in the app.
 
 ## Migrations
 
-`schemaVersion` is currently **4**. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
+`schemaVersion` is currently **6**. Version 6 added `workouts.logged_at` and `heroes.potion_stock`; `test/data/shop_test.dart` proves a v5 save keeps its workouts, rewards and hero. Version 5 added the `streak_rewards` table and `heroes.streak_xp`; `test/data/streak_rewards_test.dart` proves a v4 save keeps its workouts and hero. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
 
 1. Edit the table in `database.dart` and bump `schemaVersion`.
 2. Add the matching step in `MigrationStrategy.onUpgrade`.
