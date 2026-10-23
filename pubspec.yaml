@@ -42,7 +42,8 @@ dependencies:
   intl: ^0.20.3
   flame: ^1.38.2
   flame_audio: ^2.12.2
-
+  camera: ^0.12.1
+  google_mlkit_pose_detection: ^0.16.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

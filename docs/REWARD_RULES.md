@@ -93,6 +93,7 @@ The note appears live under the effort fields while the player types, and again 
 
 - **It never blocks and never changes a reward.** Choosing "It's Accurate" saves exactly what was entered with the normal rewards. A typo should never cost anything, and the game does not punish.
 - **It never accuses.** The wording says the numbers look unusual and that only the player knows. Limits are deliberately generous, so honest players, including beginners and people doing very gentle activity, are not flagged.
+- Reps counted by the phone camera need no second opinion, so those entries skip the check. They earn exactly the same rewards as typed entries.
 - Thresholds live on `ActivityType` (`plausibleRepsPerSet`, `plausibleKmh`) and in `HonestyCheck`, and `test/domain/honesty_test.dart` covers them.
 
 ## Versioning and history

@@ -12,10 +12,13 @@ import '../../domain/activity.dart';
 import '../../domain/chad.dart';
 import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
+import '../../domain/rep_counter.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
 import '../../game/look.dart';
+import 'camera_reps_screen.dart';
 import 'exercise_demo_card.dart';
+import 'pose_camera.dart';
 
 const _kmPerMile = 1.609344;
 const _lbPerKg = 2.2046226;
@@ -51,6 +54,11 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
   late DateTime _when;
   bool _saving = false;
   bool _prefilledUnits = false;
+
+  /// What the camera counted, if it did. The entry only counts as
+  /// camera-counted while the fields still match it.
+  int? _camSets;
+  int? _camReps;
 
   Timer? _ticker;
   DateTime? _timerStart;
@@ -89,6 +97,32 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     _variant = e.variant;
     _effort = e.perceivedEffort;
     _notes.text = e.notes ?? '';
+    if (e.cameraCounted) {
+      _camSets = e.sets;
+      _camReps = e.reps;
+    }
+  }
+
+  bool get _cameraCounted =>
+      _camSets != null && _camReps != null && _int(_sets) == _camSets && _int(_reps) == _camReps;
+
+  Future<void> _countWithCamera() async {
+    final result = await Navigator.of(context).push<CameraRepResult>(
+      gameRoute(CameraRepsScreen(activity: a, variant: _variant)),
+    );
+    if (result == null || !mounted) return;
+    final sets = result.sets;
+    final reps = (result.total / sets.length).round();
+    setState(() {
+      _sets.text = '${sets.length}';
+      _reps.text = '$reps';
+      _camSets = sets.length;
+      _camReps = reps;
+      // Uneven sets are averaged, so keep what was really counted.
+      if (_notes.text.trim().isEmpty && sets.toSet().length > 1) {
+        _notes.text = 'Camera counted: ${sets.join(', ')}';
+      }
+    });
   }
 
   static String _fmt(double v) =>
@@ -187,12 +221,14 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
           : null,
       perceivedEffort: _effort,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+      cameraCounted: _cameraCounted,
     );
   }
 
   /// Anything about [entry] that looks unlikely to be real. Never blocks.
+  /// Reps the camera counted need no second opinion.
   List<HonestyNote> _honestyNotes(WorkoutEntry entry, bool metric) {
-    if (!entry.hasMeasurement) return const [];
+    if (!entry.hasMeasurement || entry.cameraCounted) return const [];
     final day = dayKey(entry.performedAt);
     final sameDay = (ref.read(workoutsProvider).value ?? const <WorkoutEntry>[])
         .where((w) => dayKey(w.performedAt) == day);
@@ -356,6 +392,35 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                       if (a.usesReps) Expanded(child: _intField(_reps, 'Reps per Set', 500)),
                     ],
                   ),
+                if (RepProfile.supports(a.id) && ref.watch(poseCameraFactoryProvider) != null) ...[
+                  const SizedBox(height: 12),
+                  GameButton(
+                    label: 'Count My Reps With the Camera',
+                    icon: Icons.videocam_rounded,
+                    kind: GameButtonKind.secondary,
+                    onPressed: _countWithCamera,
+                  ),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([_sets, _reps]),
+                    builder: (context, _) => !_cameraCounted
+                        ? const SizedBox.shrink()
+                        : const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.videocam_rounded, size: 18, color: GameColors.goldDark),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Counted by the camera. Change the numbers any time.',
+                                    style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
                 if (a.usesDuration) ...[
                   const SizedBox(height: 12),
                   Row(

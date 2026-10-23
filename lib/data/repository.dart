@@ -388,6 +388,7 @@ class GameRepository {
         loadKg: r.loadKg,
         perceivedEffort: r.perceivedEffort,
         notes: r.notes,
+        cameraCounted: r.cameraCounted,
       );
 
   static WorkoutsCompanion _toCompanion(WorkoutEntry e) => WorkoutsCompanion(
@@ -401,6 +402,7 @@ class GameRepository {
         loadKg: Value(e.loadKg),
         perceivedEffort: Value(e.perceivedEffort),
         notes: Value(e.notes),
+        cameraCounted: Value(e.cameraCounted),
       );
 
   static HeroProfile _toHero(HeroRow r) => HeroProfile(

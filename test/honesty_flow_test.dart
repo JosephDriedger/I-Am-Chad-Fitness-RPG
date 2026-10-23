@@ -113,6 +113,8 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, 'Sets'), '1');
     await tester.enterText(find.widgetWithText(TextField, 'Reps per Set'), '2');
     await settle(tester);
+    await tester.scrollUntilVisible(find.text('Does This Look Right?'), 200,
+        scrollable: find.byType(Scrollable).first);
     expect(find.text('Does This Look Right?'), findsOneWidget);
     expect(find.textContaining('under 20 seconds'), findsOneWidget);
     await shutDown(tester, db);

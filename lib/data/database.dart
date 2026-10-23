@@ -17,6 +17,9 @@ class Workouts extends Table {
   RealColumn get loadKg => real().nullable()();
   IntColumn get perceivedEffort => integer().nullable()();
   TextColumn get notes => text().nullable()();
+
+  /// The reps were counted by the camera rather than typed in.
+  BoolColumn get cameraCounted => boolean().withDefault(const Constant(false))();
 }
 
 /// One derived reward per local day, stamped with the rules version used.
@@ -138,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -152,6 +155,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await m.createTable(activeExpeditions);
+          }
+          if (from < 4) {
+            await m.addColumn(workouts, workouts.cameraCounted);
           }
         },
         beforeOpen: (details) async {
