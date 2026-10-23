@@ -188,7 +188,7 @@ class FloatingText extends PositionComponent {
         ..color = outline,
       outline,
     );
-    priority = 100;
+    priority = 1000; // above everything, including speech bubbles
   }
 
   final double rise;

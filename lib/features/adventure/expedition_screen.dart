@@ -200,14 +200,14 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Retreat from the expedition?'),
+        title: const Text('Retreat from the Expedition?'),
         content: const Text(
             'You keep everything earned so far. There is no penalty for '
             'regrouping.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Keep going')),
+              child: const Text('Keep Going')),
           FilledButton(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Retreat')),
@@ -236,7 +236,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.practice ? 'Practice duel' : 'Expedition'),
+          title: Text(widget.practice ? 'Practice Duel' : 'Expedition'),
         ),
         body: SafeArea(
           child: Column(
@@ -342,12 +342,12 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         const SizedBox(height: 4),
         Text(won
             ? 'Rewards from this battle: +${Expedition.xpForBattle(_run.current!.enemy!)} XP, '
-                '+${Expedition.coinsForBattle(_run.current!.enemy!)} coins.'
+                '+${Expedition.coinsForBattle(_run.current!.enemy!)} Coins.'
             : 'Rewards from battles already won are kept.'),
         const SizedBox(height: 12),
         FilledButton(
           onPressed: _busy ? null : _continueAfterBattle,
-          child: Text(won ? 'Continue' : 'See results'),
+          child: Text(won ? 'Continue' : 'See Results'),
         ),
       ],
     );
@@ -367,9 +367,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         const SizedBox(height: 6),
         Text(
           switch (ev.kind) {
-            EventKind.restock => '+1 potion',
+            EventKind.restock => '+1 Potion',
             EventKind.rest => 'Recover 40% of your max HP',
-            EventKind.treasure => '+8 coins',
+            EventKind.treasure => '+8 Coins',
           },
           style: t.labelLarge,
         ),
@@ -395,8 +395,8 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       children: [
         Text(
           widget.practice
-              ? (victory ? 'Duel won!' : 'Good practice!')
-              : (victory ? 'Expedition complete!' : 'Regrouping for next time'),
+              ? (victory ? 'Duel Won!' : 'Good Practice!')
+              : (victory ? 'Expedition Complete!' : 'Regrouping for Next Time'),
           style: t.titleLarge,
         ),
         const SizedBox(height: 4),
@@ -407,14 +407,14 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         const SizedBox(height: 8),
         if (widget.practice)
           Text(victory
-              ? '+${Expedition.practiceCoins} coins'
+              ? '+${Expedition.practiceCoins} Coins'
               : 'No coins this time. Practice is free, so try again whenever you like.')
         else ...[
-          Text('Battles won: ${_run.battlesWon}   +${_run.xp} XP   +${_run.coins} coins'),
+          Text('Battles Won: ${_run.battlesWon}   +${_run.xp} XP   +${_run.coins} Coins'),
           if (victory && loot != null)
             Text(
               _lootWasNew
-                  ? 'New equipment: ${loot.name} (${loot.bonusLabel})'
+                  ? 'New Equipment: ${loot.name} (${loot.bonusLabel})'
                   : 'You already own ${loot.name}, so it became 10 coins.',
               style: t.titleSmall,
             ),

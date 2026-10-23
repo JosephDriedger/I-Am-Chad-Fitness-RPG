@@ -56,10 +56,10 @@ class CharacterScreen extends ConsumerWidget {
                 _StatRow('Defense', '${player.defense}'),
                 const Divider(height: 24),
                 _StatRow('Total XP', '${player.totalXp}'),
-                _StatRow('  from workouts', '${player.activityXp}'),
-                _StatRow('  from adventures', '${h.adventureXp}'),
+                _StatRow('  From Workouts', '${player.activityXp}'),
+                _StatRow('  From Adventures', '${h.adventureXp}'),
                 _StatRow('Coins', '${h.coins}'),
-                _StatRow('Expeditions won', '${h.victories}'),
+                _StatRow('Expeditions Won', '${h.victories}'),
                 const SizedBox(height: 8),
                 Text(
                   'Stat growth slows as you level, so there is no runaway '
@@ -77,7 +77,7 @@ class CharacterScreen extends ConsumerWidget {
           const Card(
             child: ListTile(
               leading: Icon(Icons.inventory_2_outlined),
-              title: Text('Nothing yet'),
+              title: Text('Nothing Yet'),
               subtitle: Text('Win an expedition to find your first piece.'),
             ),
           )

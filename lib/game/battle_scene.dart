@@ -462,6 +462,7 @@ class BattleScene extends GameScene {
     _enemyBar.hidden = true;
     _enemyLabel.hidden = true;
     _badge.visible = false;
+    _pips.value = 0;
     setBiome(Biome.night);
     _removeProp();
     final prop = _Prop(kind)
@@ -483,7 +484,7 @@ class BattleScene extends GameScene {
       case EventKind.restock:
         sfx(Sfx.heal);
         burst(Burst.stars(at));
-        floatText('+1 potion', at + Vector2(0, -24), color: const Color(0xFF90CAF9), size: 20);
+        floatText('+1 Potion', at + Vector2(0, -24), color: const Color(0xFF90CAF9), size: 20);
       case EventKind.rest:
         sfx(Sfx.heal);
         burst(Burst.heal(at));
@@ -501,7 +502,7 @@ class BattleScene extends GameScene {
           speed: 140,
           life: 0.9,
         ));
-        floatText('+8 coins', at + Vector2(0, -24), color: const Color(0xFFFFE082), size: 22);
+        floatText('+8 Coins', at + Vector2(0, -24), color: const Color(0xFFFFE082), size: 22);
     }
     await pause(0.6);
   }
@@ -518,6 +519,7 @@ class BattleScene extends GameScene {
     _enemyBar.hidden = true;
     _enemyLabel.hidden = true;
     _badge.visible = false;
+    _pips.value = 0;
     setBiome(victory ? Biome.meadow : Biome.forest);
     if (!victory) {
       hero.state.down = 0;
@@ -548,8 +550,9 @@ class BattleScene extends GameScene {
     if (item != null) {
       final at = Vector2(enemyHome.x, groundY - 58);
       burst(Burst.stars(at, count: 24));
-      floatText(item.name, at + Vector2(0, -40), color: const Color(0xFFFFF59D), size: 20, life: 1.6, rise: 24);
-      floatText(isNew ? 'New!' : 'Duplicate: +10 coins', at + Vector2(0, -14),
+      // Text sits well above the item icon so the two never overlap.
+      floatText(item.name, Vector2(enemyHome.x, groundY - 168), color: const Color(0xFFFFF59D), size: 20, life: 1.8, rise: 14);
+      floatText(isNew ? 'New!' : 'Duplicate: +10 Coins', Vector2(enemyHome.x, groundY - 140),
           color: isNew ? const Color(0xFFA5D6A7) : const Color(0xFFFFE082), size: 15, life: 1.6, rise: 18);
       chestBox.item = item;
     }

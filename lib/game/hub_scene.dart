@@ -92,8 +92,8 @@ class HubScene extends GameScene {
 
     final spots = <_Hotspot>[
       _Hotspot(HubTarget.quests, 'Quests', Rect.fromLTWH(14, 170, 100, 130), Vector2(64, 480), _paintBoard),
-      _Hotspot(HubTarget.journal, 'Journal', Rect.fromLTWH(128, 150, 104, 222), Vector2(180, 470), _paintShelf),
-      _Hotspot(HubTarget.adventure, 'Adventure', Rect.fromLTWH(244, 130, 102, 242), Vector2(296, 470), _paintGate),
+      _Hotspot(HubTarget.journal, 'Journal', Rect.fromLTWH(128, 150, 104, 222), Vector2(180, 520), _paintShelf),
+      _Hotspot(HubTarget.adventure, 'Adventure', Rect.fromLTWH(244, 130, 102, 242), Vector2(290, 525), _paintGate),
       _Hotspot(HubTarget.train, 'Train', Rect.fromLTWH(26, 420, 80, 96), Vector2(124, 530), _paintDummy),
       _Hotspot(HubTarget.hero, 'Hero', Rect.fromLTWH(264, 424, 72, 92), Vector2(232, 530), _paintStand),
     ];
@@ -124,7 +124,7 @@ class HubScene extends GameScene {
     world.add(hero);
 
     _bubble = _Bubble(_state.chadLine)
-      ..position = Vector2(96, 432)
+      ..position = Vector2(58, 432)
       ..priority = 500;
     world.add(_bubble);
     _loaded = true;
@@ -279,22 +279,26 @@ class HubScene extends GameScene {
   // -- Celebrations ----------------------------------------------------------
 
   Future<void> showGain({int xp = 0, int energy = 0, int coins = 0}) async {
-    final at = hero.position + Vector2(0, -110);
+    _bubble.hidden = true; // keep the popups readable
+    final at = Vector2(hero.position.x.clamp(100.0, 260.0), hero.position.y - 125);
     final lines = <(String, Color, Sfx?)>[
       if (xp > 0) ('+$xp XP', const Color(0xFFFFE082), null),
-      if (energy > 0) ('+$energy energy', const Color(0xFF80DEEA), null),
-      if (coins > 0) ('+$coins coins', const Color(0xFFFFD54F), Sfx.coin),
+      if (energy > 0) ('+$energy Energy', const Color(0xFF80DEEA), null),
+      if (coins > 0) ('+$coins Coins', const Color(0xFFFFD54F), Sfx.coin),
     ];
     for (var i = 0; i < lines.length; i++) {
       final (text, color, snd) = lines[i];
-      floatText(text, at + Vector2(0, -i * 24.0), color: color, size: 22, life: 1.4, rise: 30);
+      floatText(text, at + Vector2(0, -i * 38.0), color: color, size: 24, life: 1.7, rise: 14);
       burst(Burst.stars(at + Vector2(0, 40), count: 8));
       sfx(snd ?? Sfx.coin);
-      await pause(0.35);
+      await pause(0.4);
     }
+    await pause(1.2);
+    _bubble.hidden = false;
   }
 
   Future<void> celebrateLevelUp(int level) async {
+    _bubble.hidden = true;
     sfx(Sfx.levelUp);
     haptic(Haptic.heavy);
     final top = Vector2(180, 250);
@@ -306,6 +310,8 @@ class HubScene extends GameScene {
       await tween(0.26, (v) => hero.hop = 18 * math.sin(v * math.pi));
     }
     hero.hop = 0;
+    await pause(1.6);
+    _bubble.hidden = false;
   }
 
   // -- Hotspot art -------------------------------------------------------------
@@ -514,7 +520,7 @@ class _Hotspot extends PositionComponent with TapCallbacks {
     final w = _text.width + 18;
     final x = rect.center.dx - w / 2;
     final y = target == HubTarget.journal
-        ? rect.bottom - 60
+        ? rect.bottom - 86
         : rect.bottom + (target == HubTarget.train || target == HubTarget.hero ? 4 : 8);
     rrect(canvas, x, y, w, 20, 6, const Color(0xFF5A3A22));
     rrect(canvas, x + 1.5, y + 1.5, w - 3, 17, 5, const Color(0xFF7A5230));
@@ -564,6 +570,7 @@ class _Bubble extends PositionComponent {
 
   TextPainter? _tp;
   double _age = 0;
+  bool hidden = false;
 
   void setText(String text) {
     _tp = TextPainter(
@@ -575,7 +582,7 @@ class _Bubble extends PositionComponent {
       textAlign: TextAlign.left,
       maxLines: 6,
       ellipsis: '…',
-    )..layout(maxWidth: 178);
+    )..layout(maxWidth: 160);
     _age = 0;
   }
 
@@ -585,7 +592,7 @@ class _Bubble extends PositionComponent {
   @override
   void render(Canvas canvas) {
     final tp = _tp;
-    if (tp == null) return;
+    if (tp == null || hidden) return;
     final pop = _age < 0.25 ? Curves.easeOutBack.transform(_age / 0.25) : 1.0;
     final w = tp.width + 24, h = tp.height + 18;
     canvas.save();
@@ -595,7 +602,7 @@ class _Bubble extends PositionComponent {
     canvas.translate(0, -h);
     rrect(canvas, 2, 3, w, h, 12, const Color(0x40000000));
     rrect(canvas, 0, 0, w, h, 12, const Color(0xFFFFFFFF));
-    fillPath(canvas, poly([w * 0.56, h - 1, w * 0.56 + 14, h - 1, w * 0.56 + 18, h + 12]), const Color(0xFFFFFFFF));
+    fillPath(canvas, poly([w * 0.62, h - 1, w * 0.62 + 14, h - 1, w * 0.62 + 20, h + 12]), const Color(0xFFFFFFFF));
     tp.paint(canvas, const Offset(12, 9));
     canvas.restore();
   }

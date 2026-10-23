@@ -16,7 +16,7 @@ class WorkoutScreen extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        Text('Log a workout', style: t.headlineSmall),
+        Text('Log a Workout', style: t.headlineSmall),
         const SizedBox(height: 4),
         Text(
           'Pick what you did. Any version counts, and you can edit or delete '

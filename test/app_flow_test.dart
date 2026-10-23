@@ -1,18 +1,21 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/game/core.dart';
+import 'package:i_am_chad/game/hub_scene.dart';
 import 'package:i_am_chad/data/database.dart';
 
 import 'helpers.dart';
 
 Future<void> _onboard(WidgetTester tester, String name) async {
-  await tester.tap(find.text('Let\'s go'));
+  await tester.tap(find.text('Let\'s Go'));
   await settle(tester);
   await tester.enterText(find.byType(TextField).first, name);
   await settle(tester);
   await tester.tap(find.text('Next'));
   await settle(tester);
-  await tester.tap(find.text('Getting back into it'));
+  await tester.tap(find.text('Getting Back Into It'));
   await settle(tester);
   await tester.tap(find.text('Enter the Guild'));
   await settle(tester, frames: 20);
@@ -32,7 +35,7 @@ void main() {
     // Welcome + safety messaging.
     expect(find.text('I Am Chad'), findsOneWidget);
     expect(find.textContaining('not medical advice'), findsOneWidget);
-    await tester.tap(find.text('Let\'s go'));
+    await tester.tap(find.text('Let\'s Go'));
     await settle(tester);
 
     // Can't continue without a name.
@@ -41,12 +44,12 @@ void main() {
       isNull,
     );
     // Appearance picker offers skin tones.
-    expect(find.text('Skin tone'), findsOneWidget);
+    expect(find.text('Skin Tone'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'Ada');
     await settle(tester);
     await tester.tap(find.text('Next'));
     await settle(tester);
-    await tester.tap(find.text('Getting back into it'));
+    await tester.tap(find.text('Getting Back Into It'));
     await settle(tester);
     await tester.tap(find.text('Enter the Guild'));
     await settle(tester, frames: 20);
@@ -62,23 +65,28 @@ void main() {
     // Train: the hero walks to the dummy, then the log screen opens.
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    expect(find.text('Log a workout'), findsOneWidget);
+    expect(find.text('Log a Workout'), findsOneWidget);
     await tester.tap(find.text('Walking'));
     await settle(tester);
     await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '10');
-    await tester.ensureVisible(find.text('Save workout'));
-    await tester.tap(find.text('Save workout'));
+    await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Save Workout'));
     await settle(tester);
 
     // The reward is explained.
-    expect(find.text('Workout saved!'), findsOneWidget);
+    expect(find.text('Workout Saved!'), findsOneWidget);
     expect(find.text('40 XP'), findsOneWidget);
-    expect(find.text('2 energy'), findsOneWidget);
+    expect(find.text('2 Energy'), findsOneWidget);
     await tester.tap(find.text('Nice'));
     await settle(tester);
 
     // Back to the hall: the energy is on the HUD and the gate is open.
     await tester.pageBack();
+    await settle(tester, frames: 12);
+    // The hall celebrates what you earned with floating popups.
+    final scene = tester.widget<GameWidget<HubScene>>(find.byType(GameWidget<HubScene>)).game!;
+    final popups = scene.world.children.whereType<FloatingText>().length;
+    expect(popups, greaterThanOrEqualTo(1), reason: 'no +XP popup after logging a workout');
     await settle(tester, frames: 40);
     expect(find.bySemanticsLabel('Adventure energy: 2'), findsOneWidget);
 
@@ -102,8 +110,8 @@ void main() {
     await settle(tester, frames: 30);
     await tester.tap(find.text('Push-ups'));
     await settle(tester);
-    await tester.ensureVisible(find.text('Save workout'));
-    await tester.tap(find.text('Save workout'));
+    await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Save Workout'));
     await settle(tester);
 
     expect(find.textContaining('Add at least'), findsOneWidget);

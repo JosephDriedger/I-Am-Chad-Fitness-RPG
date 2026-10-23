@@ -12,6 +12,8 @@ import '../../domain/chad.dart';
 import '../../domain/quests.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
+import '../../game/look.dart';
+import 'exercise_demo_card.dart';
 
 const _kmPerMile = 1.609344;
 const _lbPerKg = 2.2046226;
@@ -223,6 +225,17 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
 
   // ---- UI -----------------------------------------------------------------
 
+  /// The demo figure wears your hero's look.
+  HeroLook _demoLook() {
+    final hero = ref.read(heroProvider).value;
+    if (hero == null) return const HeroLook();
+    return HeroLook(
+      style: hero.appearanceStyle,
+      color: hero.appearanceColor,
+      skin: hero.appearanceSkin,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final prefs = ref.watch(prefsProvider);
@@ -236,6 +249,12 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            ExerciseDemoCard(
+              activityId: a.id,
+              variant: _variant,
+              look: _demoLook(),
+            ),
+            const SizedBox(height: 12),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -256,7 +275,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
             ),
             const SizedBox(height: 16),
             if (a.variants.isNotEmpty) ...[
-              Text('Version (all earn the same)', style: t.titleSmall),
+              Text('Version (All Earn the Same)', style: t.titleSmall),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -281,7 +300,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                   if (a.metrics.contains(Metric.sets) && a.usesReps)
                     const SizedBox(width: 12),
                   if (a.usesReps)
-                    Expanded(child: _intField(_reps, 'Reps per set', 500)),
+                    Expanded(child: _intField(_reps, 'Reps per Set', 500)),
                 ],
               ),
             if (a.usesDuration) ...[
@@ -300,23 +319,23 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                   onPressed: _toggleTimer,
                   icon: Icon(_ticker != null ? Icons.stop : Icons.timer_outlined),
                   label: Text(_ticker != null
-                      ? 'Stop timer ($_elapsedLabel)'
-                      : 'Use a timer instead'),
+                      ? 'Stop Timer ($_elapsedLabel)'
+                      : 'Use a Timer Instead'),
                 ),
               ),
             ],
             if (a.metrics.contains(Metric.distance)) ...[
               const SizedBox(height: 12),
-              _decimalField(_distance, 'Distance (optional)',
+              _decimalField(_distance, 'Distance (Optional)',
                   prefs.useMetric ? 'km' : 'mi'),
             ],
             if (a.metrics.contains(Metric.load)) ...[
               const SizedBox(height: 12),
               _decimalField(
-                  _load, 'Weight (optional)', prefs.useMetric ? 'kg' : 'lb'),
+                  _load, 'Weight (Optional)', prefs.useMetric ? 'kg' : 'lb'),
             ],
             const SizedBox(height: 20),
-            Text('How did it feel? (optional, just for you)',
+            Text('How Did It Feel? (Optional, Just for You)',
                 style: t.titleSmall),
             const SizedBox(height: 8),
             Wrap(
@@ -324,7 +343,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
               children: [
                 for (var i = 1; i <= 5; i++)
                   ChoiceChip(
-                    label: Text(['Very easy', 'Easy', 'Okay', 'Hard', 'Very hard'][i - 1]),
+                    label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
                     selected: _effort == i,
                     onSelected: (on) => setState(() => _effort = on ? i : null),
                   ),
@@ -336,7 +355,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
             TextField(
               controller: _notes,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Notes (optional)'),
+              decoration: const InputDecoration(labelText: 'Notes (Optional)'),
             ),
             const SizedBox(height: 12),
             ListTile(
@@ -351,7 +370,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
             FilledButton.icon(
               onPressed: _saving ? null : _save,
               icon: const Icon(Icons.check),
-              label: Text(editing ? 'Save changes' : 'Save workout'),
+              label: Text(editing ? 'Save Changes' : 'Save Workout'),
             ),
             const SafetyNote(),
           ],
@@ -411,7 +430,7 @@ class _RewardDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = Theme.of(context).textTheme;
     return AlertDialog(
-      title: const Text('Workout saved!'),
+      title: const Text('Workout Saved!'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -424,7 +443,7 @@ class _RewardDialog extends StatelessWidget {
               spacing: 8,
               children: [
                 StatChip(icon: Icons.star, text: '${reward.xp} XP'),
-                StatChip(icon: Icons.bolt, text: '${reward.energy} energy'),
+                StatChip(icon: Icons.bolt, text: '${reward.energy} Energy'),
               ],
             ),
             const SizedBox(height: 12),

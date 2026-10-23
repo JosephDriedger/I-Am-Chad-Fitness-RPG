@@ -51,7 +51,7 @@ class QuestBoard {
   static const _starting = <QuestSuggestion>[
     QuestSuggestion(
       id: 'q_wall_pushups',
-      title: 'Wall push-ups',
+      title: 'Wall Push-Ups',
       description: 'Two gentle sets of 8. Step back as far as feels right.',
       activityId: 'push_up',
       sets: 2,
@@ -60,23 +60,23 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_chair_squats',
-      title: 'Sit-to-stand',
+      title: 'Sit-to-Stand',
       description: 'Two sets of 8 using a sturdy chair.',
       activityId: 'squat',
       sets: 2,
       reps: 8,
-      variant: 'Sit-to-stand (chair)',
+      variant: 'Sit-to-Stand (Chair)',
     ),
     QuestSuggestion(
       id: 'q_walk_10',
-      title: '10-minute stroll',
+      title: '10-Minute Stroll',
       description: 'Any pace you like. Around the block counts.',
       activityId: 'walking',
       durationSeconds: 600,
     ),
     QuestSuggestion(
       id: 'q_stretch_5',
-      title: '5-minute stretch',
+      title: '5-Minute Stretch',
       description: 'Ease into a few comfortable stretches.',
       activityId: 'stretching',
       durationSeconds: 300,
@@ -86,7 +86,7 @@ class QuestBoard {
   static const _returning = <QuestSuggestion>[
     QuestSuggestion(
       id: 'q_incline_pushups',
-      title: 'Incline push-ups',
+      title: 'Incline Push-Ups',
       description: 'Three sets of 8 with your hands on a bench or counter.',
       activityId: 'push_up',
       sets: 3,
@@ -95,7 +95,7 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_squats',
-      title: 'Bodyweight squats',
+      title: 'Bodyweight Squats',
       description: 'Three sets of 10, nice and controlled.',
       activityId: 'squat',
       sets: 3,
@@ -104,14 +104,14 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_walk_20',
-      title: '20-minute walk',
+      title: '20-Minute Walk',
       description: 'Comfortable pace, fresh air optional.',
       activityId: 'walking',
       durationSeconds: 1200,
     ),
     QuestSuggestion(
       id: 'q_plank',
-      title: 'Plank holds',
+      title: 'Plank Holds',
       description: 'Three holds of 20 seconds. Knees down is welcome.',
       activityId: 'plank',
       sets: 3,
@@ -119,7 +119,7 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_db_row',
-      title: 'Dumbbell rows',
+      title: 'Dumbbell Rows',
       description: 'Two sets of 10 each side with a light weight.',
       activityId: 'dumbbell_row',
       sets: 2,
@@ -131,14 +131,14 @@ class QuestBoard {
   static const _regular = <QuestSuggestion>[
     QuestSuggestion(
       id: 'q_jog_20',
-      title: '20-minute jog',
+      title: '20-Minute Jog',
       description: 'Steady effort. Walk breaks are fair game.',
       activityId: 'running',
       durationSeconds: 1200,
     ),
     QuestSuggestion(
       id: 'q_pushups',
-      title: 'Push-up ladder',
+      title: 'Push-Up Ladder',
       description: 'Four sets of 10, or your best version of that.',
       activityId: 'push_up',
       sets: 4,
@@ -146,7 +146,7 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_db_press',
-      title: 'Shoulder presses',
+      title: 'Shoulder Presses',
       description: 'Three sets of 10 at a weight you can control.',
       activityId: 'dumbbell_press',
       sets: 3,
@@ -155,7 +155,7 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_squats_reg',
-      title: 'Squat set',
+      title: 'Squat Set',
       description: 'Four sets of 12 with good depth.',
       activityId: 'squat',
       sets: 4,
@@ -163,7 +163,7 @@ class QuestBoard {
     ),
     QuestSuggestion(
       id: 'q_cooldown',
-      title: 'Cool-down stretch',
+      title: 'Cool-Down Stretch',
       description: 'Ten minutes of easy mobility to finish the week well.',
       activityId: 'stretching',
       durationSeconds: 600,

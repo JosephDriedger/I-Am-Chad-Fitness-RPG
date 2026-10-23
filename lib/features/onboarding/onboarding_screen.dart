@@ -97,7 +97,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: Text(_step == _steps - 1
                           ? 'Enter the Guild'
                           : _step == 0
-                              ? 'Let\'s go'
+                              ? 'Let\'s Go'
                               : 'Next'),
                     ),
                   ),
@@ -120,7 +120,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const SizedBox(height: 16),
         ChadBubble(text: ChadDialogue.line(ChadContext.welcome)),
         const SizedBox(height: 16),
-        Text('How it works', style: t.titleMedium),
+        Text('How It Works', style: t.titleMedium),
         const SizedBox(height: 8),
         const _Bullet(Icons.edit_note,
             'Log real workouts at your own level. Smaller or easier versions '
@@ -144,7 +144,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Create your adventurer', style: t.headlineSmall),
+        Text('Create Your Adventurer', style: t.headlineSmall),
         const SizedBox(height: 16),
         Center(
           child: HeroAvatar(style: _style, color: _color, skin: _skin, size: 96),
@@ -181,7 +181,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Where are you starting from?', style: t.headlineSmall),
+        Text('Where Are You Starting From?', style: t.headlineSmall),
         const SizedBox(height: 4),
         Text(
           'This only shapes the suggestions you see. You can change anything '
@@ -206,7 +206,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
         const SizedBox(height: 8),
-        Text('What do you enjoy? (optional)', style: t.titleSmall),
+        Text('What Do You Enjoy? (Optional)', style: t.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -225,7 +225,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const SizedBox(height: 8),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('I have dumbbells'),
+          title: const Text('I Have Dumbbells'),
           subtitle: const Text('Unlocks weight-based suggestions'),
           value: _dumbbells,
           onChanged: (v) => setState(() => _dumbbells = v),

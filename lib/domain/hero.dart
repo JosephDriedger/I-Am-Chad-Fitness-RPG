@@ -6,9 +6,9 @@ import 'dart:math' as math;
 import 'activity.dart';
 
 enum ExperienceLevel {
-  starting('Just starting', 'New to exercise. Keep it gentle.'),
-  returning('Getting back into it', 'Some experience, easing back in.'),
-  regular('Already active', 'Exercise is part of my week.');
+  starting('Just Starting', 'New to exercise. Keep it gentle.'),
+  returning('Getting Back Into It', 'Some experience, easing back in.'),
+  regular('Already Active', 'Exercise is part of my week.');
 
   const ExperienceLevel(this.label, this.blurb);
   final String label;

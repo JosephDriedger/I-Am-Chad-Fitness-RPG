@@ -87,7 +87,7 @@ class AppearancePicker extends StatelessWidget {
             ),
         ]),
         const SizedBox(height: 12),
-        Text('Outfit colour', style: t.titleSmall),
+        Text('Outfit Colour', style: t.titleSmall),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (var i = 0; i < HeroLook.colors.length; i++)
@@ -99,7 +99,7 @@ class AppearancePicker extends StatelessWidget {
             ),
         ]),
         const SizedBox(height: 12),
-        Text('Skin tone', style: t.titleSmall),
+        Text('Skin Tone', style: t.titleSmall),
         const SizedBox(height: 8),
         Wrap(spacing: 8, runSpacing: 8, children: [
           for (var i = 0; i < HeroLook.skins.length; i++)

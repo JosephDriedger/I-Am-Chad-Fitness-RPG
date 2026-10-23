@@ -259,13 +259,13 @@ void paintHeroPortrait(Canvas c, double size, HeroLook look, double time) {
   final scale = size / 40;
   c.translate(r, size * 0.98);
   c.scale(scale, scale);
-  // Shoulders.
-  rrect(c, -17, -22, 34, 30, 12, look.tunic);
-  rrect(c, -17, -9, 34, 3.5, 0, const Color(0xFF6D4C41));
-  // Head, scaled up from the full-body proportions.
+  // Shoulders sit below the head.
+  rrect(c, -17, -4, 34, 28, 12, look.tunic);
+  rrect(c, -17, 6, 34, 3.5, 0, const Color(0xFF6D4C41));
+  // Head, scaled up from the full-body proportions and centred in the circle.
   c.save();
-  c.translate(0, -6);
-  c.scale(1.45, 1.45);
+  c.translate(0, -16);
+  c.scale(1.2, 1.2);
   c.translate(0, 49);
   final s = ActorState()..time = time;
   _paintHead(c, look, s);

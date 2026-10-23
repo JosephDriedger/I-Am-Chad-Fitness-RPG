@@ -106,7 +106,14 @@ class _HubScreenState extends ConsumerState<HubScreen> {
 
   /// Plays the "you earned something" moments after returning to the hall.
   Future<void> _celebrate(PlayerStatus before) async {
-    final after = ref.read(playerProvider);
+    // Saved data reaches the screen a beat after the page closes, so give it
+    // a moment to arrive instead of reading a stale status.
+    PlayerStatus? after;
+    for (var i = 0; i < 15 && mounted; i++) {
+      after = ref.read(playerProvider);
+      if (after != null && _changed(before, after)) break;
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+    }
     if (after == null || !mounted) return;
     final xp = after.totalXp - before.totalXp;
     final energy = after.energy - before.energy;
@@ -122,6 +129,11 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       await _scene.celebrateLevelUp(after.level);
     }
   }
+
+  static bool _changed(PlayerStatus a, PlayerStatus b) =>
+      a.totalXp != b.totalXp ||
+      a.energy != b.energy ||
+      a.hero.coins != b.hero.coins;
 
   @override
   Widget build(BuildContext context) {

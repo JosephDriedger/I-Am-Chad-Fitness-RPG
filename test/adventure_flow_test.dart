@@ -32,8 +32,8 @@ Future<void> _playToTheEnd(WidgetTester tester) async {
       await tester.tap(find.text('Onward'));
     } else if (_enabled(tester, 'Continue')) {
       await tester.tap(find.text('Continue'));
-    } else if (_enabled(tester, 'See results')) {
-      await tester.tap(find.text('See results'));
+    } else if (_enabled(tester, 'See Results')) {
+      await tester.tap(find.text('See Results'));
     } else {
       await _smartMove(tester);
     }
@@ -65,9 +65,9 @@ void main() {
     expect(find.bySemanticsLabel('Adventure energy: 0'), findsOneWidget);
     await tester.tap(find.text('Adventure'));
     await settle(tester, frames: 30);
-    expect(find.text('Need 2 energy'), findsOneWidget);
+    expect(find.text('Need 2 Energy'), findsOneWidget);
 
-    await tester.tap(find.text('Practice duel'));
+    await tester.tap(find.text('Practice Duel'));
     await settle(tester, frames: 30);
     expect(find.text('Attack'), findsOneWidget);
     await _playToTheEnd(tester);
@@ -82,9 +82,9 @@ void main() {
           durationSeconds: 600,
         )));
     await settle(tester);
-    expect(find.text('Set out'), findsOneWidget);
+    expect(find.text('Set Out'), findsOneWidget);
 
-    await tester.tap(find.text('Set out'));
+    await tester.tap(find.text('Set Out'));
     await settle(tester, frames: 30);
     expect(find.text('Attack'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('Expedition progress: step 1 of 4')), findsOneWidget);

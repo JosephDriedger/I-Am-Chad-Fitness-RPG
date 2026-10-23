@@ -43,7 +43,7 @@ class QuestsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Today\'s suggestions', style: t.titleMedium),
+            Text('Today\'s Suggestions', style: t.titleMedium),
             const SizedBox(height: 4),
             Text(
               'Totally optional. Do one, do all, or do something else entirely.',
@@ -63,7 +63,7 @@ class QuestsScreen extends ConsumerWidget {
                 ),
               ),
             const SizedBox(height: 16),
-            Text('Weekly goal', style: t.titleMedium),
+            Text('Weekly Goal', style: t.titleMedium),
             const SizedBox(height: 8),
             Card(
               child: Padding(
@@ -72,7 +72,7 @@ class QuestsScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     StatBar(
-                      label: 'Days with some movement',
+                      label: 'Days with Some Movement',
                       value: goal.daysActive.clamp(0, goal.target),
                       max: goal.target,
                       icon: Icons.calendar_month_outlined,
@@ -88,14 +88,14 @@ class QuestsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Self-directed adventures', style: t.titleMedium),
+            Text('Self-Directed Adventures', style: t.titleMedium),
             const SizedBox(height: 8),
             const Card(
               child: ListTile(
                 leading: Icon(Icons.explore_outlined),
-                title: Text('Make your own quest'),
+                title: Text('Make Your Own Quest'),
                 subtitle: Text(
-                  'Log anything from the Workout tab and it counts the same '
+                  'Log anything from Train and it counts the same '
                   'as a suggestion.',
                 ),
               ),

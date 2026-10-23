@@ -31,10 +31,10 @@ class SettingsScreen extends ConsumerWidget {
                   repo.saveSettings(prefs.copyWith(useMetric: s.first)),
             ),
             const SizedBox(height: 16),
-            Text('Accessibility & comfort', style: t.titleMedium),
+            Text('Accessibility & Comfort', style: t.titleMedium),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Reduce motion'),
+              title: const Text('Reduce Motion'),
               subtitle: const Text('Turns off non-essential animation.'),
               value: prefs.reducedMotion,
               onChanged: (v) => repo.saveSettings(prefs.copyWith(reducedMotion: v)),
@@ -43,13 +43,13 @@ class SettingsScreen extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               title: const Text('Quieter Chad'),
               subtitle:
-                  const Text('Fewer unprompted comments on the Guild screen.'),
+                  const Text('Fewer unprompted comments in the guild hall.'),
               value: prefs.quietChad,
               onChanged: (v) => repo.saveSettings(prefs.copyWith(quietChad: v)),
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Sound effects'),
+              title: const Text('Sound Effects'),
               subtitle: const Text('Short, quiet cues for hits, loot and level-ups.'),
               value: prefs.soundOn,
               onChanged: (v) => repo.saveSettings(prefs.copyWith(soundOn: v)),
@@ -68,7 +68,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const Divider(height: 32),
-            Text('Your data', style: t.titleMedium),
+            Text('Your Data', style: t.titleMedium),
             const SizedBox(height: 4),
             const Text(
               'Everything is stored only on this device. There is no account '
@@ -77,7 +77,7 @@ class SettingsScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             OutlinedButton.icon(
               icon: const Icon(Icons.copy_all_outlined),
-              label: const Text('Copy my data (JSON)'),
+              label: const Text('Copy My Data (JSON)'),
               onPressed: () async {
                 final json = await repo.exportJson();
                 await Clipboard.setData(ClipboardData(text: json));
@@ -92,7 +92,7 @@ class SettingsScreen extends ConsumerWidget {
             OutlinedButton.icon(
               icon: Icon(Icons.delete_forever_outlined,
                   color: Theme.of(context).colorScheme.error),
-              label: Text('Delete all my data',
+              label: Text('Delete All My Data',
                   style: TextStyle(color: Theme.of(context).colorScheme.error)),
               onPressed: () => _confirmDelete(context, repo.deleteEverything),
             ),
@@ -118,7 +118,7 @@ class SettingsScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete everything?'),
+        title: const Text('Delete Everything?'),
         content: const Text(
             'This permanently removes your hero, workouts, rewards and '
             'equipment from this device. It cannot be undone.'),
@@ -128,7 +128,7 @@ class SettingsScreen extends ConsumerWidget {
               child: const Text('Cancel')),
           FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete everything')),
+              child: const Text('Delete Everything')),
         ],
       ),
     );
