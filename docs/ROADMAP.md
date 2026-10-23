@@ -23,12 +23,13 @@ Roughly in priority order.
 2. **Playtest the feel and the numbers.** Combat is probably too easy (a scripted player wins about 90% of level-1 expeditions and 98% or more later), and the animation timings were written blind to a real device. Get human feedback before changing anything.
 3. **First-use guidance in the hall.** A pulsing highlight on Train and a "first steps" line from Chad until the first workout is logged.
 4. **Try camera rep counting on real people.** The first version is built (push-ups and squats; see below) and runs on an emulator, but it has never counted a real rep. It needs testing on physical phones with different body types, clothing, light and angles, then the thresholds in `rep_counter.dart` tuned, an iOS build, and a decision on sit-ups and planks.
-5. **More to look at.** More enemies, biomes and hall decoration that reacts to progress (trophies, banners for milestones). A hand-made art pass can replace procedural painters one at a time.
-6. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
-7. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
-8. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
-9. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
-10. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
+5. **More story.** Season One is written and playable. Season Two needs new places, a new problem for the guild and chapters further up the level curve; hand-made portraits and scene art would lift it a lot. Watch whether people read the chapters or skip them, and whether the choices are noticed.
+6. **More to look at.** More enemies, biomes and hall decoration that reacts to progress (trophies, banners for milestones). A hand-made art pass can replace procedural painters one at a time.
+7. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
+8. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
+9. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
+10. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
+11. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
 
 ### Camera rep checking
 

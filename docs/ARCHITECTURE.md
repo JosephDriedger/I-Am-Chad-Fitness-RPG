@@ -25,6 +25,8 @@ This document describes how the code is organised and the rules that keep it tha
 | Game | `lib/game` | domain, Flame | The guild hall and battle scenes plus all character art. Plain data in, callbacks out: scenes never touch providers or the database. See [Game scenes](GAME_SCENES.md). |
 | Features | `lib/features` | everything above | One folder per screen. No SQL, no game maths. `HubScreen` and `ExpeditionScreen` host the Flame scenes. Camera counting is split in two: `domain/pose.dart` and `domain/rep_counter.dart` hold all the maths (pure, unit tested), while `features/workout/pose_camera.dart` is a thin interface over the camera and ML Kit (`ml_kit_pose_camera.dart`) that tests replace with a fake. |
 
+The story follows the same split: the script, the unlock rules and the conditions on remembered choices are pure Dart in `domain/story.dart`; the backdrops and characters are painted in `game/art/story_art.dart`; and `features/story` holds the reading screen and the Chronicle.
+
 If a rule decides how the game plays (rewards, damage, quests, level curves), it lives in `domain/`. If you find yourself writing it in a widget, move it.
 
 ## Source of truth

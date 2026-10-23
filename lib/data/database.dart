@@ -105,6 +105,27 @@ class StreakRewards extends Table {
   Set<Column> get primaryKey => {days};
 }
 
+/// A story chapter the player has read. Once read it stays read.
+@DataClassName('StoryProgressRow')
+class StoryProgress extends Table {
+  IntColumn get chapter => integer()();
+  DateTimeColumn get readAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {chapter};
+}
+
+/// A choice the player made in the story, remembered so later chapters can
+/// answer it. `key` names the choice and `option` is the number picked.
+@DataClassName('StoryChoiceRow')
+class StoryChoices extends Table {
+  TextColumn get key => text()();
+  IntColumn get option => integer()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 /// The expedition the player is in the middle of, if any (id is always 1).
 /// Written at the start of every step so closing the app never loses it.
 @DataClassName('ActiveExpeditionRow')
@@ -146,6 +167,8 @@ class AppSettings extends Table {
     ExpeditionRuns,
     ActiveExpeditions,
     StreakRewards,
+    StoryProgress,
+    StoryChoices,
     AppSettings,
   ],
 )
@@ -164,7 +187,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -189,6 +212,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 6) {
             await m.addColumn(workouts, workouts.loggedAt);
             await m.addColumn(heroes, heroes.potionStock);
+          }
+          if (from < 7) {
+            await m.createTable(storyProgress);
+            await m.createTable(storyChoices);
           }
         },
         beforeOpen: (details) async {

@@ -18,6 +18,7 @@ import '../character/character_screen.dart';
 import '../guild/quests_screen.dart';
 import '../history/history_screen.dart';
 import '../settings/settings_screen.dart';
+import '../story/chronicle_screen.dart';
 import '../workout/workout_screen.dart';
 
 /// The home screen: a living guild hall you tap around in, with a HUD that
@@ -33,6 +34,9 @@ class _HubScreenState extends ConsumerState<HubScreen> {
   late final HubScene _scene;
   int _chadNudge = 0;
   bool _navigating = false;
+
+  /// Chapters already offered this session, so "Later" is respected.
+  final _offered = <int>{};
 
   @override
   void initState() {
@@ -65,8 +69,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
         ? ChadContext.welcome
         : today.isNotEmpty
             ? ChadContext.afterWorkout
-            : goal.met
-                ? ChadContext.restDay
+            : (ref.read(storyStatusProvider)?.unread.isNotEmpty ?? false)
+                ? ChadContext.newChapter
+                : goal.met
+                    ? ChadContext.restDay
                 : ChadContext.idle;
     final seed = now.difference(DateTime(now.year)).inDays + _chadNudge;
     final quiet = prefs.quietChad && workouts.isNotEmpty;
@@ -103,6 +109,51 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     _navigating = false;
     await _scene.resume();
     await _celebrate(before);
+    await _maybeOfferStory();
+  }
+
+  /// Offers the next unread chapter, once per session, only while the hall is
+  /// what the player is looking at. "Later" is always fine.
+  Future<void> _maybeOfferStory() async {
+    if (!mounted || _navigating || !ref.read(storyAutoOfferProvider)) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    final status = ref.read(storyStatusProvider);
+    if (status == null) return;
+    final chapter = status.unread.where((c) => !_offered.contains(c.number)).firstOrNull;
+    if (chapter == null) return;
+    _offered.add(chapter.number);
+    _navigating = true;
+    final readNow = await showGameDialog<bool>(
+      context: context,
+      title: 'A New Chapter!',
+      content: Text('${chapter.label}: ${chapter.title}\n\n${chapter.summary}'),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Read Now',
+            icon: Icons.auto_stories_rounded,
+            kind: GameButtonKind.positive,
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ),
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Later',
+            kind: GameButtonKind.secondary,
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+        ),
+      ],
+    );
+    if (!mounted) return;
+    if (readNow == true) {
+      await openChapter(context, chapter);
+    }
+    if (!mounted) return;
+    _navigating = false;
+    await _scene.resume();
+    // A read chapter can lead straight on to the next that has opened.
+    if (readNow == true) await _maybeOfferStory();
   }
 
   /// Plays the "you earned something" moments after returning to the hall.
@@ -139,6 +190,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
   @override
   Widget build(BuildContext context) {
     final player = ref.watch(playerProvider);
+    // The story status arrives a beat after launch; offer once it has.
+    ref.listen(storyStatusProvider, (prev, next) {
+      if (prev == null && next != null) _maybeOfferStory();
+    });
     // Rebuild whenever anything the hall shows changes.
     ref.watch(workoutsProvider);
     ref.watch(itemsProvider);

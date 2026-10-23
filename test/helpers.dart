@@ -22,6 +22,7 @@ Future<void> bootApp(
   AppDatabase db, {
   DateTime? now,
   List<Override> overrides = const [],
+  bool storyOffers = false,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -31,6 +32,8 @@ Future<void> bootApp(
       feedbackProvider.overrideWithValue(GameFeedback.silent()),
       prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
       showTitleOnLaunchProvider.overrideWithValue(false),
+      // The hall would otherwise offer story chapters over every test.
+      storyAutoOfferProvider.overrideWithValue(storyOffers),
       ...overrides,
     ],
     child: const IAmChadApp(),
