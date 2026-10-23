@@ -17,6 +17,9 @@ class Workouts extends Table {
   RealColumn get loadKg => real().nullable()();
   IntColumn get perceivedEffort => integer().nullable()();
   TextColumn get notes => text().nullable()();
+
+  /// The reps were counted by the camera rather than typed in.
+  BoolColumn get cameraCounted => boolean().withDefault(const Constant(false))();
 }
 
 /// One derived reward per local day, stamped with the rules version used.
@@ -80,6 +83,24 @@ class ExpeditionRuns extends Table {
   TextColumn get lootItemId => text().nullable()();
 }
 
+/// The expedition the player is in the middle of, if any (id is always 1).
+/// Written at the start of every step so closing the app never loses it.
+@DataClassName('ActiveExpeditionRow')
+class ActiveExpeditions extends Table {
+  IntColumn get id => integer()();
+  IntColumn get seed => integer()();
+  IntColumn get heroLevel => integer()();
+  IntColumn get stepIndex => integer()();
+  IntColumn get heroHp => integer()();
+  IntColumn get potions => integer()();
+  IntColumn get battlesWon => integer()();
+  IntColumn get xp => integer()();
+  IntColumn get coins => integer()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DataClassName('SettingsRow')
 class AppSettings extends Table {
   IntColumn get id => integer()();
@@ -95,7 +116,15 @@ class AppSettings extends Table {
 }
 
 @DriftDatabase(
-  tables: [Workouts, RewardGrants, Heroes, OwnedItems, ExpeditionRuns, AppSettings],
+  tables: [
+    Workouts,
+    RewardGrants,
+    Heroes,
+    OwnedItems,
+    ExpeditionRuns,
+    ActiveExpeditions,
+    AppSettings,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase()
@@ -112,7 +141,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -123,6 +152,12 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(heroes, heroes.appearanceSkin);
             await m.addColumn(appSettings, appSettings.soundOn);
             await m.addColumn(appSettings, appSettings.hapticsOn);
+          }
+          if (from < 3) {
+            await m.createTable(activeExpeditions);
+          }
+          if (from < 4) {
+            await m.addColumn(workouts, workouts.cameraCounted);
           }
         },
         beforeOpen: (details) async {

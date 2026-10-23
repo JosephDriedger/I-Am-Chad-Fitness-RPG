@@ -21,9 +21,9 @@ This document describes how the code is organised and the rules that keep it tha
 | --- | --- | --- | --- |
 | Domain | `lib/domain` | Dart core only | No Flutter, no Drift. Everything here is deterministic and unit tested. |
 | Data | `lib/data` | domain, Drift | The only place that touches SQLite. Maps rows to domain types. |
-| App | `lib/app` | domain, data, Flutter, Riverpod | Providers combine repository streams into UI-ready state. `feedback.dart` wires sound and haptics to settings. |
+| App | `lib/app` | domain, data, Flutter, Riverpod | Providers combine repository streams into UI-ready state. `feedback.dart` wires sound and haptics to settings. `game_ui.dart` is the shared kit (panels, buttons, dialogs, route transitions) behind every non-scene screen, and `theme.dart` holds the single game theme. |
 | Game | `lib/game` | domain, Flame | The guild hall and battle scenes plus all character art. Plain data in, callbacks out: scenes never touch providers or the database. See [Game scenes](GAME_SCENES.md). |
-| Features | `lib/features` | everything above | One folder per screen. No SQL, no game maths. `HubScreen` and `ExpeditionScreen` host the Flame scenes. |
+| Features | `lib/features` | everything above | One folder per screen. No SQL, no game maths. `HubScreen` and `ExpeditionScreen` host the Flame scenes. Camera counting is split in two: `domain/pose.dart` and `domain/rep_counter.dart` hold all the maths (pure, unit tested), while `features/workout/pose_camera.dart` is a thin interface over the camera and ML Kit (`ml_kit_pose_camera.dart`) that tests replace with a fake. |
 
 If a rule decides how the game plays (rewards, damage, quests, level curves), it lives in `domain/`. If you find yourself writing it in a widget, move it.
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/feedback.dart';
+import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/chad.dart';
@@ -97,7 +98,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       HubTarget.hero => const GamePage(title: 'Hero', child: CharacterScreen()),
       HubTarget.journal => const GamePage(title: 'Journal', child: HistoryScreen()),
     };
-    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+    await Navigator.of(context).push(gameRoute<void>(page));
     if (!mounted) return;
     _navigating = false;
     await _scene.resume();
@@ -157,7 +158,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
             children: [
               _Hud(player: player, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, onSettings: () {
                 Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const SettingsScreen()));
+                    gameRoute<void>(const SettingsScreen()));
               }),
               const Spacer(),
               _MenuBar(
@@ -181,10 +182,7 @@ class GamePage extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
-        body: SafeArea(child: child),
-      );
+  Widget build(BuildContext context) => GameScaffold(title: title, child: child);
 }
 
 const _wood = Color(0xFF4A2F1A);

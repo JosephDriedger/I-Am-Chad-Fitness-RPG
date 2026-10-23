@@ -120,3 +120,24 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 
 **Decision:** When you return to the guild hall, it polls briefly (up to 1.5 s) for the new XP, energy or coins before playing the celebration, and the popups draw above everything.
 **Why:** The first version read the player's status the instant the page closed, before the database stream had delivered the new values, so the celebration never ran. A widget test now fails if no popup appears after logging a workout.
+
+## 23. An in-progress expedition is saved at the start of every step
+
+**Decision:** A single `active_expeditions` row (schema version 3) holds the seed, hero level, step, HP, potions, battles won, XP and coins. Starting an expedition spends the energy and writes the row in one transaction. The expedition itself is regenerated from the seed, and the run's random numbers are re-seeded from the seed and step, so a restored run matches an uninterrupted one. Finishing or abandoning clears the row. Leaving mid-run offers Keep Going, Leave and Come Back Later, or Retreat, and Adventure shows a Resume card.
+**Why:** Closing the app used to lose the run after its 2 energy was spent, which punishes real life interrupting a workout day. Saving only at step boundaries keeps the data tiny and a mid-battle restart simply replays that fight, so nothing can be exploited by killing the app.
+
+## 24. Every screen is a game screen
+
+**Decision:** Non-scene screens use a shared kit in `lib/app/game_ui.dart` (parchment, wood and gold; panels, chips, buttons, dialogs and route transitions) and one bundled display font, Lilita One (SIL Open Font Licence, licence file in `assets/fonts`). The app has a single light "game" theme, ignores the system dark mode, and opens on a title screen that greets a returning hero.
+**Why:** The request was for more of a game and less of an app. Stock Material lists and dialogs undermined the guild hall and battle scenes. A kit keeps the look consistent and cheap to change. `GamePanel` wraps its content in a transparent `Material` so list tiles inside it do not trip Flutter's ink assertions.
+
+## 25. An honesty check, never a lock
+
+**Decision:** Entries whose numbers look unlikely (an impossible pace, an impossible rep count, far less than the paid minimum, a pile of tiny entries) trigger a friendly warning, live and again at save. The player can fix the entry or confirm it, and rewards are never reduced. Details in [Reward rules](REWARD_RULES.md#honesty-check).
+**Why:** The game cannot verify exercise, and a lock would punish typos and anyone doing something unusual. Reminding the player that only they know, and that the log is for them, fits the promise that the game never shames. Generous limits keep false alarms rare.
+
+## 26. Camera rep counting is on-device, optional, forgiving and counts only
+
+**Decision:** Push-ups and squats can be counted with the phone camera. Pose detection runs on the device (ML Kit), frames are dropped after use and nothing is stored or sent. Counting is a pure-Dart state machine over joint angles (elbow or knee) with hysteresis, smoothing and a minimum time between reps. How much range of motion counts depends on the hero's experience level (beginner, gentle, standard), and easier variants (wall and incline push-ups) need less. The camera only counts and gives generic cues such as "a little lower and it counts"; it never grades form. Camera-counted reps earn exactly what typed reps earn, are marked in the journal, and skip the honesty check. The player is assumed to own a phone stand, and the screen teaches the set-up.
+**Why:** It makes the log more authentic without a lock, and the leniency keeps beginners from being told they did it wrong. Keeping it optional and equal in rewards protects people without a stand, a quiet space or comfort on camera. Judging form from one camera is unreliable and could discourage or mislead, so it is left out until a professional can advise.
+**Trade-off:** The camera layer is thin and can only be verified on real phones, so tuning will need real-world testing. The geometry and counting are fully unit tested instead, using synthetic poses.

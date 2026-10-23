@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import 'title_lockup.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
 import '../../domain/chad.dart';
@@ -56,56 +58,54 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       1 => _create(context),
       _ => _preferences(context),
     };
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Step ${_step + 1} of $_steps'),
-        automaticallyImplyLeading: false,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [body],
-              ),
+    return GameScaffold(
+      title: 'Step ${_step + 1} of $_steps',
+      showBack: false,
+      child: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [body],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-              child: Row(
-                children: [
-                  if (_step > 0)
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _saving ? null : () => setState(() => _step--),
-                        child: const Text('Back'),
-                      ),
-                    ),
-                  if (_step > 0) const SizedBox(width: 12),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Row(
+              children: [
+                if (_step > 0)
                   Expanded(
-                    flex: 2,
-                    child: FilledButton(
-                      onPressed: !_canContinue || _saving
-                          ? null
-                          : () {
-                              if (_step < _steps - 1) {
-                                setState(() => _step++);
-                              } else {
-                                _finish();
-                              }
-                            },
-                      child: Text(_step == _steps - 1
-                          ? 'Enter the Guild'
-                          : _step == 0
-                              ? 'Let\'s Go'
-                              : 'Next'),
+                    child: GameButton(
+                      label: 'Back',
+                      kind: GameButtonKind.secondary,
+                      onPressed: _saving ? null : () => setState(() => _step--),
                     ),
                   ),
-                ],
-              ),
+                if (_step > 0) const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: GameButton(
+                    label: _step == _steps - 1
+                        ? 'Enter the Guild'
+                        : _step == 0
+                            ? 'Let\'s Go'
+                            : 'Next',
+                    icon: _step == _steps - 1 ? Icons.castle_rounded : Icons.arrow_forward_rounded,
+                    onPressed: !_canContinue || _saving
+                        ? null
+                        : () {
+                            if (_step < _steps - 1) {
+                              setState(() => _step++);
+                            } else {
+                              _finish();
+                            }
+                          },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -115,8 +115,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('I Am Chad', style: t.displaySmall),
-        Text('Fitness RPG', style: t.titleLarge),
+        const TitleLockup(height: 300),
         const SizedBox(height: 16),
         ChadBubble(text: ChadDialogue.line(ChadContext.welcome)),
         const SizedBox(height: 16),

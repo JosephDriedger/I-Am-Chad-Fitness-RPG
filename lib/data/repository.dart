@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../domain/activity.dart';
+import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/items.dart';
 import '../domain/player_state.dart';
@@ -161,7 +162,57 @@ class GameRepository {
     );
   }
 
-  /// Persists the result of an expedition. Returns true if the loot was new.
+  // ---- Expedition in progress ---------------------------------------------
+
+  Stream<ExpeditionProgress?> watchActiveExpedition() =>
+      (_db.select(_db.activeExpeditions)..where((e) => e.id.equals(1)))
+          .watchSingleOrNull()
+          .map((r) => r == null ? null : _toProgress(r));
+
+  Future<ExpeditionProgress?> activeExpedition() async {
+    final r = await (_db.select(_db.activeExpeditions)..where((e) => e.id.equals(1)))
+        .getSingleOrNull();
+    return r == null ? null : _toProgress(r);
+  }
+
+  /// Spends the energy and saves the starting point in one step, so closing
+  /// the app at any moment can never lose the energy without the expedition.
+  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost}) {
+    return _db.transaction(() async {
+      await spendEnergy(energyCost);
+      await saveExpeditionProgress(p);
+    });
+  }
+
+  Future<void> saveExpeditionProgress(ExpeditionProgress p) async {
+    await _db.into(_db.activeExpeditions).insertOnConflictUpdate(
+          ActiveExpeditionsCompanion.insert(
+            id: const Value(1),
+            seed: p.seed,
+            heroLevel: p.heroLevel,
+            stepIndex: p.stepIndex,
+            heroHp: p.heroHp,
+            potions: p.potions,
+            battlesWon: p.battlesWon,
+            xp: p.xp,
+            coins: p.coins,
+          ),
+        );
+  }
+
+  static ExpeditionProgress _toProgress(ActiveExpeditionRow r) => ExpeditionProgress(
+        seed: r.seed,
+        heroLevel: r.heroLevel,
+        stepIndex: r.stepIndex,
+        heroHp: r.heroHp,
+        potions: r.potions,
+        battlesWon: r.battlesWon,
+        xp: r.xp,
+        coins: r.coins,
+      );
+
+  /// Persists the result of an expedition, which also ends it (the saved
+  /// in-progress state is cleared). Returns true if the loot was new.
   Future<bool> recordExpedition({
     required int seed,
     required bool victory,
@@ -196,6 +247,7 @@ class GameRepository {
             coins: coins + bonusCoins,
             lootItemId: Value(victory ? lootItemId : null),
           ));
+      await _db.delete(_db.activeExpeditions).go();
       await _db.customUpdate(
         'UPDATE heroes SET adventure_xp = adventure_xp + ?, '
         'coins = coins + ?, victories = victories + ? WHERE id = 1',
@@ -336,6 +388,7 @@ class GameRepository {
         loadKg: r.loadKg,
         perceivedEffort: r.perceivedEffort,
         notes: r.notes,
+        cameraCounted: r.cameraCounted,
       );
 
   static WorkoutsCompanion _toCompanion(WorkoutEntry e) => WorkoutsCompanion(
@@ -349,6 +402,7 @@ class GameRepository {
         loadKg: Value(e.loadKg),
         perceivedEffort: Value(e.perceivedEffort),
         notes: Value(e.notes),
+        cameraCounted: Value(e.cameraCounted),
       );
 
   static HeroProfile _toHero(HeroRow r) => HeroProfile(

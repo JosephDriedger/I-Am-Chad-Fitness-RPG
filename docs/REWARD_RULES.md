@@ -78,6 +78,24 @@ After each save the player sees the day's XP and energy plus `RewardRules.explai
 
 When the cap is reached the message says so, and Chad reminds the player that resting is part of training.
 
+## Honesty check
+
+The game cannot verify a workout, so it asks the player to be honest instead. `lib/domain/honesty.dart` looks at each entry and raises a gentle note when the numbers are unlikely to be real:
+
+| Concern | Trigger |
+| --- | --- |
+| Pace | Distance and time (at least 30 s) imply a speed above the activity's limit: 10 km/h walking, 25 km/h running |
+| Reps | More reps in one set than almost anyone can do, for example over 80 push-ups, 120 squats or sit-ups, 40 dumbbell reps or 30 barbell squats |
+| Very quick | Under 20 seconds of real effort, before the 3-minute floor lifts it |
+| Tiny entries | The fourth or later entry in one day that is under a minute of effort |
+
+The note appears live under the effort fields while the player types, and again in a "Quick Honesty Check" dialog when they save, with "Let Me Fix It" and "It's Accurate" buttons. Rules for the check:
+
+- **It never blocks and never changes a reward.** Choosing "It's Accurate" saves exactly what was entered with the normal rewards. A typo should never cost anything, and the game does not punish.
+- **It never accuses.** The wording says the numbers look unusual and that only the player knows. Limits are deliberately generous, so honest players, including beginners and people doing very gentle activity, are not flagged.
+- Reps counted by the phone camera need no second opinion, so those entries skip the check. They earn exactly the same rewards as typed entries.
+- Thresholds live on `ActivityType` (`plausibleRepsPerSet`, `plausibleKmh`) and in `HonestyCheck`, and `test/domain/honesty_test.dart` covers them.
+
 ## Versioning and history
 
 - `RewardRules.version` is stored on each day's row in `reward_grants`.
@@ -97,5 +115,6 @@ When the cap is reached the message says so, and Chad reminds the player that re
 
 ## Known gaps and ideas
 
-- The 3-minute floor lets someone log many tiny entries to reach the cap quickly. The cap bounds the damage and the game is single-player, but a per-day limit on floored entries is a possible tightening.
+- The 3-minute floor lets someone log many tiny entries to reach the cap quickly. The cap bounds the damage and the game is single-player, and the [honesty check](#honesty-check) now flags the pattern, but a per-day limit on floored entries is a possible tightening.
+- Camera-based rep recognition could verify reps, but it has real privacy, accessibility and accuracy costs. See the [roadmap](ROADMAP.md).
 - Weekly or personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is not implemented yet. See the [roadmap](ROADMAP.md).

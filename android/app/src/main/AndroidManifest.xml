@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Only used by the optional "Count My Reps With the Camera" feature. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
     <application
-        android:label="i_am_chad"
+        android:label="I Am Chad"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

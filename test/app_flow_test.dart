@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/game/core.dart';
 import 'package:i_am_chad/game/hub_scene.dart';
+import 'package:i_am_chad/app/game_ui.dart';
 import 'package:i_am_chad/data/database.dart';
 
 import 'helpers.dart';
@@ -33,14 +34,14 @@ void main() {
     await bootApp(tester, db);
 
     // Welcome + safety messaging.
-    expect(find.text('I Am Chad'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('I Am Chad')), findsOneWidget);
     expect(find.textContaining('not medical advice'), findsOneWidget);
     await tester.tap(find.text('Let\'s Go'));
     await settle(tester);
 
     // Can't continue without a name.
     expect(
-      tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Next')).onPressed,
+      tester.widget<GameButton>(find.widgetWithText(GameButton, 'Next')).onPressed,
       isNull,
     );
     // Appearance picker offers skin tones.
@@ -65,7 +66,7 @@ void main() {
     // Train: the hero walks to the dummy, then the log screen opens.
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    expect(find.text('Log a Workout'), findsOneWidget);
+    expect(find.text('Walking'), findsOneWidget);
     await tester.tap(find.text('Walking'));
     await settle(tester);
     await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '10');

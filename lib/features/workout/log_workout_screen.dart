@@ -5,15 +5,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
 import '../../domain/chad.dart';
+import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
+import '../../domain/rep_counter.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
 import '../../game/look.dart';
+import 'camera_reps_screen.dart';
 import 'exercise_demo_card.dart';
+import 'pose_camera.dart';
 
 const _kmPerMile = 1.609344;
 const _lbPerKg = 2.2046226;
@@ -49,6 +54,11 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
   late DateTime _when;
   bool _saving = false;
   bool _prefilledUnits = false;
+
+  /// What the camera counted, if it did. The entry only counts as
+  /// camera-counted while the fields still match it.
+  int? _camSets;
+  int? _camReps;
 
   Timer? _ticker;
   DateTime? _timerStart;
@@ -87,6 +97,32 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     _variant = e.variant;
     _effort = e.perceivedEffort;
     _notes.text = e.notes ?? '';
+    if (e.cameraCounted) {
+      _camSets = e.sets;
+      _camReps = e.reps;
+    }
+  }
+
+  bool get _cameraCounted =>
+      _camSets != null && _camReps != null && _int(_sets) == _camSets && _int(_reps) == _camReps;
+
+  Future<void> _countWithCamera() async {
+    final result = await Navigator.of(context).push<CameraRepResult>(
+      gameRoute(CameraRepsScreen(activity: a, variant: _variant)),
+    );
+    if (result == null || !mounted) return;
+    final sets = result.sets;
+    final reps = (result.total / sets.length).round();
+    setState(() {
+      _sets.text = '${sets.length}';
+      _reps.text = '$reps';
+      _camSets = sets.length;
+      _camReps = reps;
+      // Uneven sets are averaged, so keep what was really counted.
+      if (_notes.text.trim().isEmpty && sets.toSet().length > 1) {
+        _notes.text = 'Camera counted: ${sets.join(', ')}';
+      }
+    });
   }
 
   static String _fmt(double v) =>
@@ -164,12 +200,12 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
         DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
-  Future<void> _save() async {
-    final metric = ref.read(prefsProvider).useMetric;
+  /// The entry as the fields currently describe it.
+  WorkoutEntry _buildEntry(bool metric) {
     final secs = (_int(_minutes) ?? 0) * 60 + (_int(_seconds) ?? 0);
     final dist = _dbl(_distance);
     final load = _dbl(_load);
-    final entry = WorkoutEntry(
+    return WorkoutEntry(
       id: widget.editing?.id,
       activityId: a.id,
       performedAt: _when,
@@ -185,13 +221,57 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
           : null,
       perceivedEffort: _effort,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
+      cameraCounted: _cameraCounted,
     );
+  }
+
+  /// Anything about [entry] that looks unlikely to be real. Never blocks.
+  /// Reps the camera counted need no second opinion.
+  List<HonestyNote> _honestyNotes(WorkoutEntry entry, bool metric) {
+    if (!entry.hasMeasurement || entry.cameraCounted) return const [];
+    final day = dayKey(entry.performedAt);
+    final sameDay = (ref.read(workoutsProvider).value ?? const <WorkoutEntry>[])
+        .where((w) => dayKey(w.performedAt) == day);
+    return const HonestyCheck().review(entry, sameDay: sameDay, metric: metric);
+  }
+
+  Future<void> _save() async {
+    final metric = ref.read(prefsProvider).useMetric;
+    final entry = _buildEntry(metric);
 
     if (!entry.hasMeasurement) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Add at least a time, some reps, or a distance.'),
       ));
       return;
+    }
+
+    final concerns = _honestyNotes(entry, metric);
+    if (concerns.isNotEmpty) {
+      final accurate = await showGameDialog<bool>(
+        context: context,
+        title: 'Quick Honesty Check',
+        content: _HonestyContent(notes: concerns),
+        actions: [
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'Let Me Fix It',
+              icon: Icons.edit_rounded,
+              kind: GameButtonKind.secondary,
+              onPressed: () => Navigator.of(ctx).pop(false),
+            ),
+          ),
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'It\'s Accurate',
+              icon: Icons.check_circle,
+              kind: GameButtonKind.positive,
+              onPressed: () => Navigator.of(ctx).pop(true),
+            ),
+          ),
+        ],
+      );
+      if (accurate != true || !mounted) return;
     }
 
     setState(() => _saving = true);
@@ -204,9 +284,10 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     }
     final reward = await repo.rewardForDay(entry.performedAt);
     if (!mounted) return;
-    await showDialog<void>(
+    await showGameDialog<void>(
       context: context,
-      builder: (_) => _RewardDialog(
+      title: 'Workout Saved!',
+      content: _RewardContent(
         reward: reward,
         rules: repo.rules,
         forToday: dayKey(entry.performedAt) == dayKey(ref.read(clockProvider)()),
@@ -219,6 +300,15 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
           seed: entry.performedAt.day,
         ),
       ),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Nice',
+            icon: Icons.thumb_up_rounded,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+        ),
+      ],
     );
     if (mounted) Navigator.of(context).pop();
   }
@@ -243,138 +333,189 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     final t = Theme.of(context).textTheme;
     final editing = widget.editing != null;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(editing ? 'Edit ${a.name}' : a.name)),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ExerciseDemoCard(
-              activityId: a.id,
-              variant: _variant,
-              look: _demoLook(),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.tips_and_updates_outlined),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        [a.formCue, if (a.easierAlternative != null) a.easierAlternative]
-                            .join(' '),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (a.variants.isNotEmpty) ...[
-              Text('Version (All Earn the Same)', style: t.titleSmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final v in a.variants)
-                    ChoiceChip(
-                      label: Text(v),
-                      selected: _variant == v,
-                      onSelected: (on) =>
-                          setState(() => _variant = on ? v : null),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-            if (a.metrics.contains(Metric.sets) || a.usesReps)
-              Row(
-                children: [
-                  if (a.metrics.contains(Metric.sets))
-                    Expanded(child: _intField(_sets, 'Sets', 20)),
-                  if (a.metrics.contains(Metric.sets) && a.usesReps)
-                    const SizedBox(width: 12),
-                  if (a.usesReps)
-                    Expanded(child: _intField(_reps, 'Reps per Set', 500)),
-                ],
-              ),
-            if (a.usesDuration) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: _intField(_minutes, 'Minutes', 600)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _intField(_seconds, 'Seconds', 59)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _toggleTimer,
-                  icon: Icon(_ticker != null ? Icons.stop : Icons.timer_outlined),
-                  label: Text(_ticker != null
-                      ? 'Stop Timer ($_elapsedLabel)'
-                      : 'Use a Timer Instead'),
-                ),
-              ),
-            ],
-            if (a.metrics.contains(Metric.distance)) ...[
-              const SizedBox(height: 12),
-              _decimalField(_distance, 'Distance (Optional)',
-                  prefs.useMetric ? 'km' : 'mi'),
-            ],
-            if (a.metrics.contains(Metric.load)) ...[
-              const SizedBox(height: 12),
-              _decimalField(
-                  _load, 'Weight (Optional)', prefs.useMetric ? 'kg' : 'lb'),
-            ],
-            const SizedBox(height: 20),
-            Text('How Did It Feel? (Optional, Just for You)',
-                style: t.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
+    return GameScaffold(
+      title: editing ? 'Edit ${a.name}' : a.name,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+        children: [
+          ExerciseDemoCard(
+            activityId: a.id,
+            variant: _variant,
+            look: _demoLook(),
+          ),
+          const SizedBox(height: 12),
+          GamePanel(
+            color: const Color(0xFFFFF1CC),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (var i = 1; i <= 5; i++)
-                  ChoiceChip(
-                    label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
-                    selected: _effort == i,
-                    onSelected: (on) => setState(() => _effort = on ? i : null),
+                const Icon(Icons.tips_and_updates, color: GameColors.goldDark),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    [a.formCue, if (a.easierAlternative != null) a.easierAlternative].join(' '),
+                    style: const TextStyle(color: GameColors.ink, fontWeight: FontWeight.w600),
                   ),
+                ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text('This never changes your rewards.', style: t.bodySmall),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _notes,
-              maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Notes (Optional)'),
+          ),
+          const SizedBox(height: 16),
+          GamePanel(
+            title: 'Your Effort',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (a.variants.isNotEmpty) ...[
+                  Text('Version (All Earn the Same)', style: t.titleSmall),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final v in a.variants)
+                        ChoiceChip(
+                          label: Text(v),
+                          selected: _variant == v,
+                          onSelected: (on) => setState(() => _variant = on ? v : null),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (a.metrics.contains(Metric.sets) || a.usesReps)
+                  Row(
+                    children: [
+                      if (a.metrics.contains(Metric.sets))
+                        Expanded(child: _intField(_sets, 'Sets', 20)),
+                      if (a.metrics.contains(Metric.sets) && a.usesReps) const SizedBox(width: 12),
+                      if (a.usesReps) Expanded(child: _intField(_reps, 'Reps per Set', 500)),
+                    ],
+                  ),
+                if (RepProfile.supports(a.id) && ref.watch(poseCameraFactoryProvider) != null) ...[
+                  const SizedBox(height: 12),
+                  GameButton(
+                    label: 'Count My Reps With the Camera',
+                    icon: Icons.videocam_rounded,
+                    kind: GameButtonKind.secondary,
+                    onPressed: _countWithCamera,
+                  ),
+                  ListenableBuilder(
+                    listenable: Listenable.merge([_sets, _reps]),
+                    builder: (context, _) => !_cameraCounted
+                        ? const SizedBox.shrink()
+                        : const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.videocam_rounded, size: 18, color: GameColors.goldDark),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Counted by the camera. Change the numbers any time.',
+                                    style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w700),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                ],
+                if (a.usesDuration) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _intField(_minutes, 'Minutes', 600)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _intField(_seconds, 'Seconds', 59)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GameButton(
+                      label: _ticker != null ? 'Stop Timer ($_elapsedLabel)' : 'Use a Timer Instead',
+                      icon: _ticker != null ? Icons.stop : Icons.timer_outlined,
+                      kind: GameButtonKind.secondary,
+                      expanded: false,
+                      small: true,
+                      onPressed: _toggleTimer,
+                    ),
+                  ),
+                ],
+                if (a.metrics.contains(Metric.distance)) ...[
+                  const SizedBox(height: 12),
+                  _decimalField(_distance, 'Distance (Optional)', prefs.useMetric ? 'km' : 'mi'),
+                ],
+                if (a.metrics.contains(Metric.load)) ...[
+                  const SizedBox(height: 12),
+                  _decimalField(_load, 'Weight (Optional)', prefs.useMetric ? 'kg' : 'lb'),
+                ],
+              ],
             ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.event),
-              title: const Text('When'),
-              subtitle: Text(DateFormat('EEE, MMM d · h:mm a').format(_when)),
-              trailing: const Icon(Icons.edit_calendar_outlined),
-              onTap: _pickWhen,
+          ),
+          ListenableBuilder(
+            listenable: Listenable.merge([_sets, _reps, _minutes, _seconds, _distance]),
+            builder: (context, _) {
+              final notes = _honestyNotes(_buildEntry(prefs.useMetric), prefs.useMetric);
+              if (notes.isEmpty) return const SizedBox(height: 16);
+              return Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                child: GamePanel(
+                  color: const Color(0xFFFFE3B8),
+                  child: _HonestyContent(notes: notes, compact: true),
+                ),
+              );
+            },
+          ),
+          GamePanel(
+            title: 'Journal Entry',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('How Did It Feel? (Optional, Just for You)', style: t.titleSmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (var i = 1; i <= 5; i++)
+                      ChoiceChip(
+                        label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
+                        selected: _effort == i,
+                        onSelected: (on) => setState(() => _effort = on ? i : null),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text('This never changes your rewards.', style: t.bodySmall),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _notes,
+                  maxLines: 2,
+                  decoration: const InputDecoration(labelText: 'Notes (Optional)'),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event),
+                  title: const Text('When'),
+                  subtitle: Text(DateFormat('EEE, MMM d · h:mm a').format(_when)),
+                  trailing: const Icon(Icons.edit_calendar_outlined),
+                  onTap: _pickWhen,
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: _saving ? null : _save,
-              icon: const Icon(Icons.check),
-              label: Text(editing ? 'Save Changes' : 'Save Workout'),
-            ),
-            const SafetyNote(),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          GameButton(
+            label: editing ? 'Save Changes' : 'Save Workout',
+            icon: Icons.check_circle,
+            kind: GameButtonKind.positive,
+            onPressed: _saving ? null : _save,
+          ),
+          const SafetyNote(),
+        ],
       ),
     );
   }
@@ -413,8 +554,52 @@ class _MaxValueFormatter extends TextInputFormatter {
   }
 }
 
-class _RewardDialog extends StatelessWidget {
-  const _RewardDialog({
+/// What looks off about an entry, and a reminder that only the player knows.
+/// Shown live under the fields ([compact]) and again when saving.
+class _HonestyContent extends StatelessWidget {
+  const _HonestyContent({required this.notes, this.compact = false});
+
+  final List<HonestyNote> notes;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(color: GameColors.ink, fontWeight: FontWeight.w600);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.visibility_rounded, color: GameColors.goldDark),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                compact ? 'Does This Look Right?' : 'This Looks Unusual',
+                style: gameTitle(18, color: GameColors.ink),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final n in notes) ...[
+          Text(n.text, style: style),
+          const SizedBox(height: 8),
+        ],
+        Text(
+          'Nobody checks but you. The game only works if your log is true, '
+          'and your real progress is the whole point. A typo is fine; nothing '
+          'bad happens either way.',
+          style: TextStyle(color: GameColors.inkSoft, fontSize: compact ? 13 : 14),
+        ),
+      ],
+    );
+  }
+}
+
+/// The reward summary shown in the "Workout Saved!" dialog.
+class _RewardContent extends StatelessWidget {
+  const _RewardContent({
     required this.reward,
     required this.rules,
     required this.forToday,
@@ -428,37 +613,65 @@ class _RewardDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
-    return AlertDialog(
-      title: const Text('Workout Saved!'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(forToday ? 'Rewards for today' : 'Rewards for that day',
+            style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.inkSoft)),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(forToday ? 'Rewards for today' : 'Rewards for that day',
-                style: t.labelLarge),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                StatChip(icon: Icons.star, text: '${reward.xp} XP'),
-                StatChip(icon: Icons.bolt, text: '${reward.energy} Energy'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(rules.explain(reward), style: t.bodyMedium),
-            const SizedBox(height: 16),
-            ChadBubble(text: chadLine),
+            _RewardBadge(icon: Icons.star_rounded, text: '${reward.xp} XP', color: GameColors.gold, delay: 0),
+            const SizedBox(width: 14),
+            _RewardBadge(icon: Icons.bolt_rounded, text: '${reward.energy} Energy', color: GameColors.teal, delay: 160),
           ],
         ),
-      ),
-      actions: [
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Nice'),
-        ),
+        const SizedBox(height: 14),
+        Text(rules.explain(reward)),
+        const SizedBox(height: 14),
+        ChadBubble(text: chadLine),
       ],
+    );
+  }
+}
+
+/// A reward tile that pops in with a bounce.
+class _RewardBadge extends StatelessWidget {
+  const _RewardBadge({required this.icon, required this.text, required this.color, required this.delay});
+
+  final IconData icon;
+  final String text;
+  final Color color;
+  final int delay;
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.of(context).disableAnimations;
+    final tile = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: GameColors.woodDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color, width: 2.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 34),
+          const SizedBox(height: 2),
+          Text(text, style: gameTitle(20, color: GameColors.cream)),
+        ],
+      ),
+    );
+    if (still) return tile;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 700 + delay),
+      curve: Interval(delay / (700 + delay), 1, curve: Curves.elasticOut),
+      builder: (context, v, child) => Transform.scale(scale: v.clamp(0.0, 1.4), child: child),
+      child: tile,
     );
   }
 }

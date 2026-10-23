@@ -24,6 +24,8 @@ class ActivityType {
     this.secondsPerRep = 6,
     this.effortFactor = 1.0,
     this.minutesPerKm,
+    this.plausibleRepsPerSet,
+    this.plausibleKmh,
     this.variants = const [],
     this.easierAlternative,
   });
@@ -46,6 +48,11 @@ class ActivityType {
   /// Used only when distance is the sole metric entered.
   final double? minutesPerKm;
 
+  /// Honesty check limits (see honesty.dart): more reps in one set, or a faster
+  /// sustained pace, than almost anyone can manage. Null means "don't check".
+  final int? plausibleRepsPerSet;
+  final double? plausibleKmh;
+
   /// Easier/harder ways to do the same activity; all earn identical rewards.
   final List<String> variants;
   final String? easierAlternative;
@@ -62,6 +69,7 @@ class ActivityCatalog {
     name: 'Push-ups',
     category: ActivityCategory.bodyweight,
     metrics: {Metric.sets, Metric.reps},
+    plausibleRepsPerSet: 80,
     formCue: 'Keep your body in a straight line and move only as low as feels '
         'comfortable.',
     variants: ['Wall', 'Incline', 'Knee', 'Standard'],
@@ -72,6 +80,7 @@ class ActivityCatalog {
     name: 'Squats',
     category: ActivityCategory.bodyweight,
     metrics: {Metric.sets, Metric.reps},
+    plausibleRepsPerSet: 120,
     formCue: 'Feet about shoulder-width apart, chest up, knees tracking over '
         'your toes.',
     variants: ['Sit-to-Stand (Chair)', 'Bodyweight'],
@@ -82,6 +91,7 @@ class ActivityCatalog {
     name: 'Sit-Ups / Crunches',
     category: ActivityCategory.bodyweight,
     metrics: {Metric.sets, Metric.reps},
+    plausibleRepsPerSet: 120,
     formCue: 'Move slowly and keep your neck relaxed.',
     variants: ['Small Crunch', 'Sit-Up'],
   );
@@ -99,6 +109,7 @@ class ActivityCatalog {
     name: 'Walking',
     category: ActivityCategory.cardio,
     metrics: {Metric.duration, Metric.distance},
+    plausibleKmh: 10,
     formCue: 'Pick a pace where you could still hold a conversation.',
     minutesPerKm: 12,
   );
@@ -107,6 +118,7 @@ class ActivityCatalog {
     name: 'Running / Jogging',
     category: ActivityCategory.cardio,
     metrics: {Metric.duration, Metric.distance},
+    plausibleKmh: 25,
     formCue: 'Start slow, and walk whenever you need to.',
     effortFactor: 1.25,
     minutesPerKm: 6.5,
@@ -117,6 +129,7 @@ class ActivityCatalog {
     name: 'Dumbbell Row',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
+    plausibleRepsPerSet: 40,
     formCue: 'Brace with your free hand, pull towards your hip, lower slowly.',
   );
   static const dumbbellPress = ActivityType(
@@ -124,6 +137,7 @@ class ActivityCatalog {
     name: 'Dumbbell Shoulder Press',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
+    plausibleRepsPerSet: 40,
     formCue: 'Choose a light weight first; press up without arching your back.',
   );
   static const barbellSquat = ActivityType(
@@ -131,6 +145,7 @@ class ActivityCatalog {
     name: 'Barbell Squat',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
+    plausibleRepsPerSet: 30,
     formCue: 'Use a spotter or safety rack, and learn the movement unloaded '
         'first.',
   );

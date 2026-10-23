@@ -17,6 +17,7 @@ class WorkoutEntry {
     this.loadKg,
     this.perceivedEffort,
     this.notes,
+    this.cameraCounted = false,
   });
 
   final int? id;
@@ -35,6 +36,10 @@ class WorkoutEntry {
   /// changes rewards (see docs/REWARD_RULES.md).
   final int? perceivedEffort;
   final String? notes;
+
+  /// The reps were counted by the phone camera (see rep_counter.dart). Rewards
+  /// are the same either way; this only marks the entry in the journal.
+  final bool cameraCounted;
 
   ActivityType? get activity => ActivityCatalog.byId(activityId);
 
@@ -56,6 +61,7 @@ class WorkoutEntry {
     double? loadKg,
     int? perceivedEffort,
     String? notes,
+    bool? cameraCounted,
   }) =>
       WorkoutEntry(
         id: id ?? this.id,
@@ -69,6 +75,7 @@ class WorkoutEntry {
         loadKg: loadKg ?? this.loadKg,
         perceivedEffort: perceivedEffort ?? this.perceivedEffort,
         notes: notes ?? this.notes,
+        cameraCounted: cameraCounted ?? this.cameraCounted,
       );
 
   Map<String, Object?> toJson() => {
@@ -83,6 +90,7 @@ class WorkoutEntry {
         'loadKg': loadKg,
         'perceivedEffort': perceivedEffort,
         'notes': notes,
+        'cameraCounted': cameraCounted,
       };
 
   /// Short human summary, e.g. "2 × 8 · Wall" or "10 min · 1.2 km".

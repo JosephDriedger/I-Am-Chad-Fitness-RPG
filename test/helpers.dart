@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/app/app.dart';
 import 'package:i_am_chad/app/feedback.dart';
@@ -20,6 +21,7 @@ Future<void> bootApp(
   WidgetTester tester,
   AppDatabase db, {
   DateTime? now,
+  List<Override> overrides = const [],
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -28,6 +30,8 @@ Future<void> bootApp(
       clockProvider.overrideWithValue(() => clock),
       feedbackProvider.overrideWithValue(GameFeedback.silent()),
       prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
+      showTitleOnLaunchProvider.overrideWithValue(false),
+      ...overrides,
     ],
     child: const IAmChadApp(),
   ));

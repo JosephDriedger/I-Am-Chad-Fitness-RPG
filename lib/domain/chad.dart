@@ -9,6 +9,7 @@ enum ChadContext {
   afterWorkout,
   restDay,
   adventureStart,
+  resume,
   victory,
   defeat,
   lowEnergy,
@@ -52,6 +53,10 @@ class ChadDialogue {
           'once. Twice.',
       'Keep an eye on what the enemy is up to. Cleverness beats cardio, in '
           'here.',
+    ],
+    ChadContext.resume: [
+      'Back already? Good. The enemy waited, like a gentleman.',
+      'Your expedition kept your place. Shall we?',
     ],
     ChadContext.victory: [
       'Victory! I would say I taught you everything, but we both know you did '

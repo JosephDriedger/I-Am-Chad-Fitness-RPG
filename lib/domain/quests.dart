@@ -216,4 +216,20 @@ class QuestBoard {
     };
     return WeeklyGoal(target: level.weeklyDaysGoal, daysActive: days.length);
   }
+
+  /// Weekday numbers (1 = Monday ... 7 = Sunday) with any logged movement in
+  /// the week containing [now]. Used to show the week as a row of tokens.
+  static Set<int> activeWeekdays({
+    required DateTime now,
+    required Iterable<WorkoutEntry> entries,
+  }) {
+    final today = startOfDay(now);
+    final monday = today.subtract(Duration(days: today.weekday - 1));
+    final nextMonday = monday.add(const Duration(days: 7));
+    return {
+      for (final e in entries)
+        if (!e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
+          e.performedAt.toLocal().weekday,
+    };
+  }
 }
