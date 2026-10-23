@@ -12,12 +12,14 @@ import '../domain/activity.dart';
 import '../domain/hero.dart';
 import '../features/adventure/expedition_screen.dart';
 import '../features/home/home_shell.dart';
+import '../game/demo/exercise_demo.dart';
 import 'cast_scene.dart';
 
 /// Developer shortcuts, enabled with `--dart-define=PREVIEW=<mode>`.
 ///
 /// Modes: `cast` (art sheet), `duel` (practice duel), `expedition`, `hub`,
-/// and the still scene states `boss`, `event`, `chest`.
+/// the still scene states `boss`, `event`, `chest`, and `demos` (every
+/// exercise demonstration at its key poses).
 /// The hero is created on demand so a scene can be opened in one step.
 Widget? previewHome(String mode) {
   switch (mode) {
@@ -27,6 +29,8 @@ Widget? previewHome(String mode) {
       return const _Seeded(child: ExpeditionScreen(seed: 7, practice: true));
     case 'expedition':
       return const _Seeded(child: ExpeditionScreen(seed: 11, practice: false));
+    case 'demos':
+      return const _DemoGallery();
     case 'boss':
     case 'event':
     case 'chest':
@@ -132,4 +136,88 @@ class _ScenePreviewState extends State<_ScenePreview> {
   @override
   Widget build(BuildContext context) =>
       Scaffold(body: GameWidget(game: _scene));
+}
+
+/// Every exercise demonstration at its key poses, for checking the figures.
+class _DemoGallery extends StatelessWidget {
+  const _DemoGallery();
+
+  static const _all = <(String, String?)>[
+    ('push_up', null),
+    ('push_up', 'Wall'),
+    ('push_up', 'Incline'),
+    ('push_up', 'Knee'),
+    ('squat', null),
+    ('squat', 'Sit-to-Stand (Chair)'),
+    ('sit_up', 'Sit-Up'),
+    ('sit_up', 'Small Crunch'),
+    ('plank', null),
+    ('plank', 'Forearm'),
+    ('plank', 'Knee'),
+    ('plank', 'Wall'),
+    ('walking', null),
+    ('running', null),
+    ('dumbbell_row', null),
+    ('dumbbell_press', null),
+    ('barbell_squat', null),
+    ('stretching', null),
+    ('light_mobility', null),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    const look = HeroLook(style: 2, color: 1, skin: 2);
+    return Scaffold(
+      body: ListView(
+        padding: const EdgeInsets.all(8),
+        children: [
+          for (final (id, variant) in _all)
+            if (demoFor(id, variant) case final cfg?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(cfg.title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Row(
+                      children: [
+                        for (final t in cfg.keyTimes)
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: AspectRatio(
+                                aspectRatio: demoW / demoH,
+                                child: CustomPaint(painter: _StillDemo(cfg, t, look)),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StillDemo extends CustomPainter {
+  _StillDemo(this.config, this.t, this.look);
+
+  final DemoConfig config;
+  final double t;
+  final HeroLook look;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.save();
+    canvas.scale(size.width / demoW, size.height / demoH);
+    canvas.clipRect(const Rect.fromLTWH(0, 0, demoW, demoH));
+    paintDemo(canvas, config, t, look);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_StillDemo old) => false;
 }
