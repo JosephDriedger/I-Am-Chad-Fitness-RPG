@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/feedback.dart';
+import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/chad.dart';
 import '../../domain/combat.dart';
@@ -17,10 +18,19 @@ enum _View { battle, battleOver, event, result }
 
 /// Plays one expedition (or practice duel) from start to finish.
 class ExpeditionScreen extends ConsumerStatefulWidget {
-  const ExpeditionScreen({super.key, required this.seed, required this.practice});
+  const ExpeditionScreen({
+    super.key,
+    required this.seed,
+    required this.practice,
+    this.progress,
+  });
 
   final int seed;
   final bool practice;
+
+  /// The saved state to start from: the very start of a new expedition, or a
+  /// step reached before the app was closed. Null for practice duels.
+  final ExpeditionProgress? progress;
 
   @override
   ConsumerState<ExpeditionScreen> createState() => _ExpeditionScreenState();
@@ -38,7 +48,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   bool _showChad = true;
   List<String> _log = const [];
   late final String _chadStart;
-  int _battlesStarted = 0;
+  bool _leaveLater = false;
 
   @override
   void initState() {
@@ -46,20 +56,30 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
     final player = ref.read(playerProvider)!;
     final prefs = ref.read(prefsProvider);
     final fx = ref.read(feedbackProvider);
-    final expedition = widget.practice
-        ? Expedition.practice(seed: widget.seed, heroLevel: player.level)
-        : Expedition.generate(seed: widget.seed, heroLevel: player.level);
-    _run = ExpeditionRun(
-      expedition: expedition,
-      hero: Combatant.fresh(
-        name: player.hero.name,
-        maxHp: player.maxHp,
-        attack: player.attack,
-        defense: player.defense,
-      ),
-      rng: GameRng(widget.seed ^ 0x5bd1e995),
+    final freshHero = Combatant.fresh(
+      name: player.hero.name,
+      maxHp: player.maxHp,
+      attack: player.attack,
+      defense: player.defense,
     );
-    _chadStart = ChadDialogue.line(ChadContext.adventureStart, seed: widget.seed);
+    final saved = widget.progress;
+    if (!widget.practice && saved != null) {
+      _run = ExpeditionRun.restore(progress: saved, hero: freshHero);
+    } else {
+      final expedition = widget.practice
+          ? Expedition.practice(seed: widget.seed, heroLevel: player.level)
+          : Expedition.generate(seed: widget.seed, heroLevel: player.level);
+      _run = ExpeditionRun(
+        expedition: expedition,
+        hero: freshHero,
+        rng: GameRng(widget.seed ^ 0x5bd1e995),
+      );
+    }
+    final resumed = saved != null && saved.stepIndex > 0;
+    _chadStart = ChadDialogue.line(
+      resumed ? ChadContext.resume : ChadContext.adventureStart,
+      seed: widget.seed,
+    );
 
     _scene = BattleScene(
       look: HeroLook(
@@ -85,7 +105,8 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   Biome _biomeFor(EnemyTemplate e) {
     if (widget.practice) return Biome.meadow;
     if (e.boss) return Biome.arena;
-    return _battlesStarted <= 1 ? Biome.meadow : Biome.forest;
+    // Steps are battle, camp, battle, boss: the second battle is in the forest.
+    return _run.stepIndex == 0 ? Biome.meadow : Biome.forest;
   }
 
   /// Starts whatever comes next in the run.
@@ -95,6 +116,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       return;
     }
     final step = _run.current!;
+    // Save the start of every step so closing the app never loses progress.
+    if (!widget.practice) {
+      await ref.read(repositoryProvider).saveExpeditionProgress(_run.progress);
+      if (!mounted) return;
+    }
     if (step.kind == StepKind.event) {
       setState(() {
         _view = _View.event;
@@ -105,7 +131,6 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       return;
     }
     final b = _run.startBattle();
-    _battlesStarted++;
     setState(() {
       _battle = b;
       _view = _View.battle;
@@ -197,24 +222,43 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   }
 
   Future<bool> _confirmLeave() async {
-    final ok = await showDialog<bool>(
+    final choice = await showGameDialog<String>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Retreat from the Expedition?'),
-        content: const Text(
-            'You keep everything earned so far. There is no penalty for '
-            'regrouping.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Keep Going')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Retreat')),
-        ],
-      ),
+      title: 'Retreat from the Expedition?',
+      content: Text(widget.practice
+          ? 'It is only practice, so nothing is lost.'
+          : 'You keep everything earned so far, and you can also leave and '
+              'come back: your expedition is saved at the start of each step.'),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Keep Going',
+            kind: GameButtonKind.positive,
+            onPressed: () => Navigator.pop(ctx, 'keep'),
+          ),
+        ),
+        if (!widget.practice)
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'Leave and Come Back Later',
+              kind: GameButtonKind.secondary,
+              small: true,
+              onPressed: () => Navigator.pop(ctx, 'later'),
+            ),
+          ),
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Retreat',
+            kind: GameButtonKind.danger,
+            small: true,
+            onPressed: () => Navigator.pop(ctx, 'retreat'),
+          ),
+        ),
+      ],
     );
-    return ok == true;
+    // Dismissing the dialog (tapping outside) means keep going.
+    _leaveLater = choice == 'later';
+    return choice == 'retreat' || _leaveLater;
   }
 
   @override
@@ -229,40 +273,39 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         if (didPop) return;
         final nav = Navigator.of(context);
         if (await _confirmLeave()) {
-          _run.defeated = true; // retreat: keeps winnings, no loot
-          await _save();
+          // "Leave and come back later" keeps the saved expedition; a retreat
+          // ends it, keeping winnings but no loot.
+          if (!_leaveLater) {
+            _run.defeated = true;
+            await _save();
+          }
           if (mounted) nav.pop();
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.practice ? 'Practice Duel' : 'Expedition'),
-        ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              if (!widget.practice) _PathBar(run: _run, view: _view),
-              Expanded(
-                child: ClipRect(
-                  child: GameWidget(game: _scene),
-                ),
+      child: GameScaffold(
+        title: widget.practice ? 'Practice Duel' : 'Expedition',
+        child: Column(
+          children: [
+            if (!widget.practice) _PathBar(run: _run, view: _view),
+            Expanded(
+              child: ClipRect(
+                child: GameWidget(game: _scene),
               ),
-              _panel(context),
-            ],
-          ),
+            ),
+            _panel(context),
+          ],
         ),
       ),
     );
   }
 
   Widget _panel(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHigh,
-        border: Border(top: BorderSide(color: scheme.outlineVariant)),
+      decoration: const BoxDecoration(
+        color: GameColors.parchment,
+        border: Border(top: BorderSide(color: GameColors.wood, width: 4)),
       ),
       child: switch (_view) {
         _View.battle => _battlePanel(context),
@@ -345,9 +388,10 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
                 '+${Expedition.coinsForBattle(_run.current!.enemy!)} Coins.'
             : 'Rewards from battles already won are kept.'),
         const SizedBox(height: 12),
-        FilledButton(
+        GameButton(
+          label: won ? 'Continue' : 'See Results',
+          icon: Icons.arrow_forward_rounded,
           onPressed: _busy ? null : _continueAfterBattle,
-          child: Text(won ? 'Continue' : 'See Results'),
         ),
       ],
     );
@@ -374,12 +418,10 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
           style: t.labelLarge,
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: _busy ? null : _onward,
-            child: const Text('Onward'),
-          ),
+        GameButton(
+          label: 'Onward',
+          icon: Icons.directions_walk_rounded,
+          onPressed: _busy ? null : _onward,
         ),
       ],
     );
@@ -420,12 +462,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
             ),
         ],
         const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: FilledButton(
-            onPressed: _saved ? () => Navigator.of(context).pop() : null,
-            child: const Text('Back to the Guild'),
-          ),
+        GameButton(
+          label: 'Back to the Guild',
+          icon: Icons.home_rounded,
+          kind: GameButtonKind.positive,
+          onPressed: _saved ? () => Navigator.of(context).pop() : null,
         ),
       ],
     );
@@ -516,35 +557,56 @@ class _ActionButton extends StatelessWidget {
 
   static const _icons = {
     BattleAction.attack: Icons.bolt,
-    BattleAction.guard: Icons.shield_outlined,
+    BattleAction.guard: Icons.shield,
     BattleAction.skill: Icons.auto_awesome,
-    BattleAction.item: Icons.local_drink_outlined,
+    BattleAction.item: Icons.local_drink,
+  };
+
+  static const _colors = {
+    BattleAction.attack: GameColors.red,
+    BattleAction.guard: GameColors.blue,
+    BattleAction.skill: GameColors.purple,
+    BattleAction.item: GameColors.green,
   };
 
   @override
   Widget build(BuildContext context) {
+    final color = _colors[action]!;
     return Semantics(
       button: true,
       enabled: enabled,
       label: '${action.label}. ${action.help}${badge != null ? ' ($badge)' : ''}',
       child: ExcludeSemantics(
-        child: FilledButton.tonal(
+        child: FilledButton(
           onPressed: enabled ? onTap : null,
           style: FilledButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: const Color(0xFFCDBFA3),
+            disabledForegroundColor: const Color(0xFF8A7F6C),
             padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-            minimumSize: const Size(48, 56),
+            minimumSize: const Size(48, 64),
+            elevation: enabled ? 4 : 0,
+            shadowColor: Colors.black,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: BorderSide(
+                color: enabled ? Color.lerp(color, Colors.black, 0.45)! : const Color(0xFFA89C86),
+                width: 2.5,
+              ),
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(_icons[action], size: 22),
+              Icon(_icons[action], size: 24),
               const SizedBox(height: 2),
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(action.label, style: const TextStyle(fontSize: 12)),
+                child: Text(action.label, style: gameTitle(13, color: enabled ? Colors.white : const Color(0xFF8A7F6C))),
               ),
               if (badge != null)
-                Text(badge!, style: const TextStyle(fontSize: 11)),
+                Text(badge!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
             ],
           ),
         ),

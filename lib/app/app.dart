@@ -3,8 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/home/home_shell.dart';
 import '../features/onboarding/onboarding_screen.dart';
+import '../features/onboarding/title_screen.dart';
+import 'game_ui.dart';
 import 'providers.dart';
 import 'theme.dart';
+
+/// Whether returning players see the title screen on launch. Tests turn it
+/// off so they can go straight to the guild hall.
+final showTitleOnLaunchProvider = Provider<bool>((_) => true);
 
 class IAmChadApp extends ConsumerWidget {
   const IAmChadApp({super.key, this.homeOverride});
@@ -18,8 +24,9 @@ class IAmChadApp extends ConsumerWidget {
     return MaterialApp(
       title: 'I Am Chad',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
+      theme: AppTheme.game(),
+      darkTheme: AppTheme.game(),
+      themeMode: ThemeMode.light,
       // Honour the in-app "reduce motion" switch on top of the OS setting.
       builder: (context, child) {
         final mq = MediaQuery.of(context);
@@ -35,15 +42,24 @@ class IAmChadApp extends ConsumerWidget {
   }
 }
 
-/// Shows onboarding until a hero exists, then the main app.
-class _Gate extends ConsumerWidget {
+/// Shows onboarding until a hero exists, then a title screen, then the hall.
+class _Gate extends ConsumerStatefulWidget {
   const _Gate();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Gate> createState() => _GateState();
+}
+
+class _GateState extends ConsumerState<_Gate> {
+  bool _titleDone = false;
+
+  @override
+  Widget build(BuildContext context) {
     final hero = ref.watch(heroProvider);
+    final showTitle = ref.watch(showTitleOnLaunchProvider);
     return hero.when(
       loading: () => const Scaffold(
+        backgroundColor: GameColors.woodDark,
         body: Center(child: CircularProgressIndicator()),
       ),
       error: (e, _) => Scaffold(
@@ -55,7 +71,17 @@ class _Gate extends ConsumerWidget {
           ),
         ),
       ),
-      data: (h) => h == null ? const OnboardingScreen() : const HomeShell(),
+      data: (h) {
+        if (h == null) return const OnboardingScreen();
+        if (showTitle && !_titleDone) {
+          return TitleScreen(
+            heroName: h.name,
+            level: ref.watch(playerProvider)?.level ?? 1,
+            onContinue: () => setState(() => _titleDone = true),
+          );
+        }
+        return const HomeShell();
+      },
     );
   }
 }

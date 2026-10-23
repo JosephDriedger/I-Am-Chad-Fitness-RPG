@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
@@ -204,9 +205,10 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     }
     final reward = await repo.rewardForDay(entry.performedAt);
     if (!mounted) return;
-    await showDialog<void>(
+    await showGameDialog<void>(
       context: context,
-      builder: (_) => _RewardDialog(
+      title: 'Workout Saved!',
+      content: _RewardContent(
         reward: reward,
         rules: repo.rules,
         forToday: dayKey(entry.performedAt) == dayKey(ref.read(clockProvider)()),
@@ -219,6 +221,15 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
           seed: entry.performedAt.day,
         ),
       ),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            label: 'Nice',
+            icon: Icons.thumb_up_rounded,
+            onPressed: () => Navigator.of(ctx).pop(),
+          ),
+        ),
+      ],
     );
     if (mounted) Navigator.of(context).pop();
   }
@@ -243,138 +254,147 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     final t = Theme.of(context).textTheme;
     final editing = widget.editing != null;
 
-    return Scaffold(
-      appBar: AppBar(title: Text(editing ? 'Edit ${a.name}' : a.name)),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            ExerciseDemoCard(
-              activityId: a.id,
-              variant: _variant,
-              look: _demoLook(),
-            ),
-            const SizedBox(height: 12),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.tips_and_updates_outlined),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        [a.formCue, if (a.easierAlternative != null) a.easierAlternative]
-                            .join(' '),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (a.variants.isNotEmpty) ...[
-              Text('Version (All Earn the Same)', style: t.titleSmall),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final v in a.variants)
-                    ChoiceChip(
-                      label: Text(v),
-                      selected: _variant == v,
-                      onSelected: (on) =>
-                          setState(() => _variant = on ? v : null),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-            if (a.metrics.contains(Metric.sets) || a.usesReps)
-              Row(
-                children: [
-                  if (a.metrics.contains(Metric.sets))
-                    Expanded(child: _intField(_sets, 'Sets', 20)),
-                  if (a.metrics.contains(Metric.sets) && a.usesReps)
-                    const SizedBox(width: 12),
-                  if (a.usesReps)
-                    Expanded(child: _intField(_reps, 'Reps per Set', 500)),
-                ],
-              ),
-            if (a.usesDuration) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(child: _intField(_minutes, 'Minutes', 600)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _intField(_seconds, 'Seconds', 59)),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: _toggleTimer,
-                  icon: Icon(_ticker != null ? Icons.stop : Icons.timer_outlined),
-                  label: Text(_ticker != null
-                      ? 'Stop Timer ($_elapsedLabel)'
-                      : 'Use a Timer Instead'),
-                ),
-              ),
-            ],
-            if (a.metrics.contains(Metric.distance)) ...[
-              const SizedBox(height: 12),
-              _decimalField(_distance, 'Distance (Optional)',
-                  prefs.useMetric ? 'km' : 'mi'),
-            ],
-            if (a.metrics.contains(Metric.load)) ...[
-              const SizedBox(height: 12),
-              _decimalField(
-                  _load, 'Weight (Optional)', prefs.useMetric ? 'kg' : 'lb'),
-            ],
-            const SizedBox(height: 20),
-            Text('How Did It Feel? (Optional, Just for You)',
-                style: t.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
+    return GameScaffold(
+      title: editing ? 'Edit ${a.name}' : a.name,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
+        children: [
+          ExerciseDemoCard(
+            activityId: a.id,
+            variant: _variant,
+            look: _demoLook(),
+          ),
+          const SizedBox(height: 12),
+          GamePanel(
+            color: const Color(0xFFFFF1CC),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (var i = 1; i <= 5; i++)
-                  ChoiceChip(
-                    label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
-                    selected: _effort == i,
-                    onSelected: (on) => setState(() => _effort = on ? i : null),
+                const Icon(Icons.tips_and_updates, color: GameColors.goldDark),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    [a.formCue, if (a.easierAlternative != null) a.easierAlternative].join(' '),
+                    style: const TextStyle(color: GameColors.ink, fontWeight: FontWeight.w600),
                   ),
+                ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text('This never changes your rewards.', style: t.bodySmall),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _notes,
-              maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Notes (Optional)'),
+          ),
+          const SizedBox(height: 16),
+          GamePanel(
+            title: 'Your Effort',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (a.variants.isNotEmpty) ...[
+                  Text('Version (All Earn the Same)', style: t.titleSmall),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final v in a.variants)
+                        ChoiceChip(
+                          label: Text(v),
+                          selected: _variant == v,
+                          onSelected: (on) => setState(() => _variant = on ? v : null),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                if (a.metrics.contains(Metric.sets) || a.usesReps)
+                  Row(
+                    children: [
+                      if (a.metrics.contains(Metric.sets))
+                        Expanded(child: _intField(_sets, 'Sets', 20)),
+                      if (a.metrics.contains(Metric.sets) && a.usesReps) const SizedBox(width: 12),
+                      if (a.usesReps) Expanded(child: _intField(_reps, 'Reps per Set', 500)),
+                    ],
+                  ),
+                if (a.usesDuration) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _intField(_minutes, 'Minutes', 600)),
+                      const SizedBox(width: 12),
+                      Expanded(child: _intField(_seconds, 'Seconds', 59)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GameButton(
+                      label: _ticker != null ? 'Stop Timer ($_elapsedLabel)' : 'Use a Timer Instead',
+                      icon: _ticker != null ? Icons.stop : Icons.timer_outlined,
+                      kind: GameButtonKind.secondary,
+                      expanded: false,
+                      small: true,
+                      onPressed: _toggleTimer,
+                    ),
+                  ),
+                ],
+                if (a.metrics.contains(Metric.distance)) ...[
+                  const SizedBox(height: 12),
+                  _decimalField(_distance, 'Distance (Optional)', prefs.useMetric ? 'km' : 'mi'),
+                ],
+                if (a.metrics.contains(Metric.load)) ...[
+                  const SizedBox(height: 12),
+                  _decimalField(_load, 'Weight (Optional)', prefs.useMetric ? 'kg' : 'lb'),
+                ],
+              ],
             ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.event),
-              title: const Text('When'),
-              subtitle: Text(DateFormat('EEE, MMM d · h:mm a').format(_when)),
-              trailing: const Icon(Icons.edit_calendar_outlined),
-              onTap: _pickWhen,
+          ),
+          const SizedBox(height: 16),
+          GamePanel(
+            title: 'Journal Entry',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('How Did It Feel? (Optional, Just for You)', style: t.titleSmall),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (var i = 1; i <= 5; i++)
+                      ChoiceChip(
+                        label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
+                        selected: _effort == i,
+                        onSelected: (on) => setState(() => _effort = on ? i : null),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text('This never changes your rewards.', style: t.bodySmall),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _notes,
+                  maxLines: 2,
+                  decoration: const InputDecoration(labelText: 'Notes (Optional)'),
+                ),
+                const SizedBox(height: 8),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event),
+                  title: const Text('When'),
+                  subtitle: Text(DateFormat('EEE, MMM d · h:mm a').format(_when)),
+                  trailing: const Icon(Icons.edit_calendar_outlined),
+                  onTap: _pickWhen,
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: _saving ? null : _save,
-              icon: const Icon(Icons.check),
-              label: Text(editing ? 'Save Changes' : 'Save Workout'),
-            ),
-            const SafetyNote(),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          GameButton(
+            label: editing ? 'Save Changes' : 'Save Workout',
+            icon: Icons.check_circle,
+            kind: GameButtonKind.positive,
+            onPressed: _saving ? null : _save,
+          ),
+          const SafetyNote(),
+        ],
       ),
     );
   }
@@ -413,8 +433,9 @@ class _MaxValueFormatter extends TextInputFormatter {
   }
 }
 
-class _RewardDialog extends StatelessWidget {
-  const _RewardDialog({
+/// The reward summary shown in the "Workout Saved!" dialog.
+class _RewardContent extends StatelessWidget {
+  const _RewardContent({
     required this.reward,
     required this.rules,
     required this.forToday,
@@ -428,37 +449,65 @@ class _RewardDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context).textTheme;
-    return AlertDialog(
-      title: const Text('Workout Saved!'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(forToday ? 'Rewards for today' : 'Rewards for that day',
+            style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.inkSoft)),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(forToday ? 'Rewards for today' : 'Rewards for that day',
-                style: t.labelLarge),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                StatChip(icon: Icons.star, text: '${reward.xp} XP'),
-                StatChip(icon: Icons.bolt, text: '${reward.energy} Energy'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(rules.explain(reward), style: t.bodyMedium),
-            const SizedBox(height: 16),
-            ChadBubble(text: chadLine),
+            _RewardBadge(icon: Icons.star_rounded, text: '${reward.xp} XP', color: GameColors.gold, delay: 0),
+            const SizedBox(width: 14),
+            _RewardBadge(icon: Icons.bolt_rounded, text: '${reward.energy} Energy', color: GameColors.teal, delay: 160),
           ],
         ),
-      ),
-      actions: [
-        FilledButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Nice'),
-        ),
+        const SizedBox(height: 14),
+        Text(rules.explain(reward)),
+        const SizedBox(height: 14),
+        ChadBubble(text: chadLine),
       ],
+    );
+  }
+}
+
+/// A reward tile that pops in with a bounce.
+class _RewardBadge extends StatelessWidget {
+  const _RewardBadge({required this.icon, required this.text, required this.color, required this.delay});
+
+  final IconData icon;
+  final String text;
+  final Color color;
+  final int delay;
+
+  @override
+  Widget build(BuildContext context) {
+    final still = MediaQuery.of(context).disableAnimations;
+    final tile = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: GameColors.woodDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color, width: 2.5),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 34),
+          const SizedBox(height: 2),
+          Text(text, style: gameTitle(20, color: GameColors.cream)),
+        ],
+      ),
+    );
+    if (still) return tile;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 700 + delay),
+      curve: Interval(delay / (700 + delay), 1, curve: Curves.elasticOut),
+      builder: (context, v, child) => Transform.scale(scale: v.clamp(0.0, 1.4), child: child),
+      child: tile,
     );
   }
 }

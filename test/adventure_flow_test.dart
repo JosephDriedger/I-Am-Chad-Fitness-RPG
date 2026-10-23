@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/app/game_ui.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/data/repository.dart';
 import 'package:i_am_chad/domain/activity.dart';
@@ -11,7 +12,9 @@ import 'helpers.dart';
 
 bool _enabled(WidgetTester tester, String label) {
   final f = find.widgetWithText(FilledButton, label);
-  return f.evaluate().isNotEmpty && tester.widget<FilledButton>(f).onPressed != null;
+  if (f.evaluate().isNotEmpty) return tester.widget<FilledButton>(f).onPressed != null;
+  final g = find.widgetWithText(GameButton, label);
+  return g.evaluate().isNotEmpty && tester.widget<GameButton>(g).onPressed != null;
 }
 
 Future<void> _smartMove(WidgetTester tester) async {
@@ -67,6 +70,9 @@ void main() {
     await settle(tester, frames: 30);
     expect(find.text('Need 2 Energy'), findsOneWidget);
 
+    await tester.scrollUntilVisible(find.text('Practice Duel'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(find.text('Practice Duel'));
+    await tester.pump(const Duration(milliseconds: 100));
     await tester.tap(find.text('Practice Duel'));
     await settle(tester, frames: 30);
     expect(find.text('Attack'), findsOneWidget);

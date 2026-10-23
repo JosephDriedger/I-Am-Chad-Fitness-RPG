@@ -28,6 +28,7 @@ Future<void> bootApp(
       clockProvider.overrideWithValue(() => clock),
       feedbackProvider.overrideWithValue(GameFeedback.silent()),
       prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
+      showTitleOnLaunchProvider.overrideWithValue(false),
     ],
     child: const IAmChadApp(),
   ));
