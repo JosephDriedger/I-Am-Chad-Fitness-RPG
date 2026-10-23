@@ -5,6 +5,7 @@ import '../data/repository.dart';
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/player_state.dart';
+import '../domain/streaks.dart';
 import '../domain/workout.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -30,6 +31,21 @@ final heroProvider = StreamProvider<HeroProfile?>(
 
 final itemsProvider = StreamProvider<List<OwnedItem>>(
     (ref) => ref.watch(repositoryProvider).watchItems());
+
+final claimedStreaksProvider = StreamProvider<Set<int>>(
+    (ref) => ref.watch(repositoryProvider).watchClaimedStreaks());
+
+/// Where the hero's streak stands today, or null until things have loaded.
+final streakProvider = Provider<StreakStatus?>((ref) {
+  final hero = ref.watch(heroProvider).value;
+  final workouts = ref.watch(workoutsProvider).value;
+  if (hero == null || workouts == null) return null;
+  return StreakRules.evaluate(
+    workouts: workouts,
+    today: ref.watch(clockProvider)(),
+    experience: hero.experience,
+  );
+});
 
 final activeExpeditionProvider = StreamProvider<ExpeditionProgress?>(
     (ref) => ref.watch(repositoryProvider).watchActiveExpedition());

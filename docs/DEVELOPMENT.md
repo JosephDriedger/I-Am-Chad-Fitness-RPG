@@ -59,7 +59,7 @@ Before committing, `flutter analyze` should report no issues and `flutter test` 
 - **Persisted ids are forever.** Activity ids, item ids and enum names stored in the database must never be renamed or reused.
 - **Rules live in the domain layer.** Widgets display results; they do not compute rewards, damage or quests.
 - **Everything the game does should be explainable.** If a reward or outcome would surprise the player, show why.
-- **No shame, no streak pressure.** Read the [Content guidelines](CONTENT_GUIDELINES.md) before adding text or mechanics.
+- **No shame, no streak pressure** (streaks exist, but only in the forgiving form described in the guidelines). Read the [Content guidelines](CONTENT_GUIDELINES.md) before adding text or mechanics.
 - **Determinism.** Use `GameRng` with explicit seeds for anything random in game logic. Do not use `Random()` in the domain layer.
 - **Lints.** The project uses `flutter_lints`. Fix findings rather than silencing them.
 

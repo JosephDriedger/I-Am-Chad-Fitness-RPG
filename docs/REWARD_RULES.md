@@ -96,6 +96,37 @@ The note appears live under the effort fields while the player types, and again 
 - Reps counted by the phone camera need no second opinion, so those entries skip the check. They earn exactly the same rewards as typed entries.
 - Thresholds live on `ActivityType` (`plausibleRepsPerSet`, `plausibleKmh`) and in `HonestyCheck`, and `test/domain/honesty_test.dart` covers them.
 
+## Streaks
+
+Added after the original design, in a form that fits the rest of this document. The rules are in `lib/domain/streaks.dart`.
+
+- **What counts.** A streak is the number of *active days* in a row, where any logged movement makes a day active. Several workouts in one day count once.
+- **Rest is built in.** The streak survives quiet days in between, up to a limit by experience: **3** for Just Starting, **2** for Getting Back Into It and Already Active. Two quiet days always covers a weekend off. Go past the limit and the next active day simply starts a fresh run.
+- **Nothing is taken away.** A lapse never removes coins, XP or items already earned. The best run is remembered ("Best 12") and shown. The wording is always kind: a fresh start, never a loss, and there is no countdown or "don't break it" message.
+- **Rewards are one-time milestones**, paid when the streak first reaches them:
+
+| Active days | Reward | Coins | XP |
+| --- | --- | --- | --- |
+| 3 | Getting Started | 15 | 20 |
+| 5 | On a Roll | 25 | 30 |
+| 7 | A Heroic Week | 40 | 50 |
+| 10 | Ten Strong | 50 | 60 |
+| 14 | Fortnight of Might | 80 | 100 |
+| 21 | Three Weeks Strong | 100 | 120 |
+| 30 | Month of Might | 150 | 200 |
+| 45 | Steady as Stone | 180 | 240 |
+| 60 | Two Months Strong | 220 | 300 |
+| 90 | Season of Strength | 300 | 400 |
+| 120 | Four Months Strong | 350 | 450 |
+| 180 | Half-Year Hero | 450 | 600 |
+| 270 | Nine Months Strong | 600 | 800 |
+| 365 | Year of the Hero | 800 | 1000 |
+| every 100 after | Legendary Run | 500 | 600 |
+
+- **They reward consistency, not volume.** A milestone is reached by being active on enough days, which any amount of movement satisfies, so it never pushes anyone to do more in a day. The daily XP and energy cap is untouched, and streak XP is paid on top as a small, occasional extra (the early ones are well under one day's maximum of 120).
+- **Paid once, never revoked.** Rewards go into `streak_rewards` in the same transaction that adds the coins and XP. If a workout is deleted afterwards the reward stays, and rebuilding the same streak does not pay again. The cost is that someone could back-date a workout to claim a reward; since the game is single-player and the rewards are small, that is accepted (the [honesty check](#honesty-check) still applies).
+- **Where it shows.** A flame and count on the hall HUD, a Streak panel on the quest board (current, best, progress to the next reward, and the rest-day rule), the "Streak Reward!" card in the workout-saved dialog, and a "From Streaks" line in the hero's records.
+
 ## Versioning and history
 
 - `RewardRules.version` is stored on each day's row in `reward_grants`.

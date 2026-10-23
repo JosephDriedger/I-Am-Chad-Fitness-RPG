@@ -43,7 +43,7 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 
 ## Rewards and mechanics
 
-- No streaks that reset, no daily login rewards, no countdowns.
+- Streaks are allowed only in the forgiving form in [Reward rules](REWARD_RULES.md#streaks): rest days are built in, rewards pay for showing up and never for doing more, nothing already earned is ever taken back, and the text never speaks of loss or pressure ("Don't break your streak" is still banned). No daily login rewards and no countdowns.
 - Rewards are capped per day so exercise is never pushed beyond what is healthy for the reward.
 - Rewards never depend on weight lifted, pace, body measurements or "perceived effort".
 - Loot is earned, never bought. No gacha or loot boxes, no paid XP or energy.
