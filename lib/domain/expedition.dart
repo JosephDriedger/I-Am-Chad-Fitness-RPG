@@ -113,18 +113,18 @@ class ExpeditionEvent {
   static const all = <ExpeditionEvent>[
     ExpeditionEvent(
       EventKind.restock,
-      'A traveling apothecary',
+      'A Traveling Apothecary',
       'A friendly merchant tops up your potion satchel.',
     ),
     ExpeditionEvent(
       EventKind.rest,
-      'A quiet campfire',
+      'A Quiet Campfire',
       'You catch your breath and recover some health. Rest is part of the '
           'adventure.',
     ),
     ExpeditionEvent(
       EventKind.treasure,
-      'Chad\'s "secret" stash',
+      'Chad\'s "Secret" Stash',
       'Chad insists he buried this here years ago. There are coins inside.',
     ),
   ];

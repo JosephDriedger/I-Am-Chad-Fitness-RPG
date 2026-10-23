@@ -27,7 +27,7 @@ class AdventureScreen extends ConsumerWidget {
             Expanded(child: Text('Adventure', style: t.headlineSmall)),
             StatChip(
               icon: Icons.bolt,
-              text: '${player.energy} energy',
+              text: '${player.energy} Energy',
               tip: 'Adventure energy: ${player.energy}',
             ),
           ],
@@ -57,14 +57,14 @@ class AdventureScreen extends ConsumerWidget {
                 Wrap(spacing: 8, children: [
                   StatChip(
                       icon: Icons.bolt,
-                      text: 'Costs ${Expedition.energyCost} energy'),
-                  const StatChip(icon: Icons.timer_outlined, text: 'About 3 min'),
+                      text: 'Costs ${Expedition.energyCost} Energy'),
+                  const StatChip(icon: Icons.timer_outlined, text: 'About 3 Min'),
                 ]),
                 const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: canGo ? () => _start(context, ref, practice: false) : null,
                   icon: const Icon(Icons.explore),
-                  label: Text(canGo ? 'Set out' : 'Need ${Expedition.energyCost} energy'),
+                  label: Text(canGo ? 'Set Out' : 'Need ${Expedition.energyCost} Energy'),
                 ),
                 if (!canGo) ...[
                   const SizedBox(height: 8),
@@ -85,7 +85,7 @@ class AdventureScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Practice yard', style: t.titleLarge),
+                Text('Practice Yard', style: t.titleLarge),
                 const SizedBox(height: 4),
                 Text(
                   'A relaxed duel that is always free. No XP, just a few coins. '
@@ -96,14 +96,14 @@ class AdventureScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _start(context, ref, practice: true),
                   icon: const Icon(Icons.sports_martial_arts),
-                  label: const Text('Practice duel'),
+                  label: const Text('Practice Duel'),
                 ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 12),
-        Text('Expeditions won: ${player.hero.victories}', style: t.bodyMedium),
+        Text('Expeditions Won: ${player.hero.victories}', style: t.bodyMedium),
       ],
     );
   }

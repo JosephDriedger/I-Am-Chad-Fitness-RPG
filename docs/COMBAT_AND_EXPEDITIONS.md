@@ -84,6 +84,10 @@ Enemies scale with the hero's level using the same soft-capped curve as the hero
 - Retreating from the pause dialog behaves the same way: rewards so far are kept, no loot.
 - The **practice duel** is always free. It exists so rest days still have something to play (GDD pillar: progress without punishment).
 
+## Presentation
+
+Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGuarded`, `EnemyAttacked`, `EnemyDefeated`, ...). The animated Flame battle scene plays them back in order; see [Game scenes](GAME_SCENES.md). The scene can only display results, never change them.
+
 ## Roster
 
 Regular enemies: Snooze Slime, Fog Imp, Rusty Gear Golem, Cobweb Wisp, Pebble Gremlin, Mist Wisp.
@@ -111,4 +115,4 @@ That is deliberately friendly for a first prototype, and probably too easy at hi
 - **New enemy:** add an `EnemyTemplate` to `EnemyPool.regular` or `bosses`. Existing seeds will map to different enemies afterwards, which is fine because expeditions are not stored, only their results.
 - **New item:** add to `ItemCatalog.all`. Never rename or reuse an `id`; it is persisted in the inventory.
 - **New action or status effect:** extend `BattleAction` and `BattleEngine.act`, then add tests alongside the existing ones in `test/domain/combat_test.dart`.
-- **Flame scene:** drive `BattleEngine` from the scene and keep all rules in the domain layer.
+- **New visual for an action:** add a `BattleEvent` type in the engine, emit it from `act`, and handle it in `BattleScene.play`. Add a test next to the existing event tests.

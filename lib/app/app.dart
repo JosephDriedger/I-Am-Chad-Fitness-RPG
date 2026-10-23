@@ -7,7 +7,10 @@ import 'providers.dart';
 import 'theme.dart';
 
 class IAmChadApp extends ConsumerWidget {
-  const IAmChadApp({super.key});
+  const IAmChadApp({super.key, this.homeOverride});
+
+  /// Dev preview only (see lib/dev/preview.dart).
+  final Widget? homeOverride;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +30,7 @@ class IAmChadApp extends ConsumerWidget {
           child: child!,
         );
       },
-      home: const _Gate(),
+      home: homeOverride ?? const _Gate(),
     );
   }
 }

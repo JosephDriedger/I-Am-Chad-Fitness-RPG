@@ -27,6 +27,50 @@ enum EnemyMove {
 
 enum BattlePhase { playerTurn, victory, defeat }
 
+/// What happened during one action, in order. The log is text for reading;
+/// events are structured so a scene can animate each beat.
+sealed class BattleEvent {
+  const BattleEvent();
+}
+
+class PlayerAttacked extends BattleEvent {
+  const PlayerAttacked(this.damage);
+  final int damage;
+}
+
+class PlayerUsedSkill extends BattleEvent {
+  const PlayerUsedSkill(this.damage);
+  final int damage;
+}
+
+class PlayerGuarded extends BattleEvent {
+  const PlayerGuarded();
+}
+
+class PlayerHealed extends BattleEvent {
+  const PlayerHealed(this.amount);
+  final int amount;
+}
+
+class EnemyAttacked extends BattleEvent {
+  const EnemyAttacked({
+    required this.damage,
+    required this.heavy,
+    required this.guarded,
+  });
+  final int damage;
+  final bool heavy;
+  final bool guarded;
+}
+
+class EnemyDefeated extends BattleEvent {
+  const EnemyDefeated();
+}
+
+class PlayerDefeated extends BattleEvent {
+  const PlayerDefeated();
+}
+
 class Combatant {
   const Combatant({
     required this.name,
@@ -77,6 +121,7 @@ class BattleState {
     this.turn = 1,
     this.phase = BattlePhase.playerTurn,
     this.log = const [],
+    this.events = const [],
   });
 
   static const int maxFocus = 5;
@@ -95,6 +140,9 @@ class BattleState {
 
   /// Events produced by the most recent action.
   final List<String> log;
+
+  /// Structured version of [log], in the order things happened.
+  final List<BattleEvent> events;
 
   bool get isOver => phase != BattlePhase.playerTurn;
   bool get canUseSkill => focus >= skillCost;
@@ -115,6 +163,7 @@ class BattleState {
     int? turn,
     BattlePhase? phase,
     List<String>? log,
+    List<BattleEvent>? events,
   }) =>
       BattleState(
         player: player ?? this.player,
@@ -125,6 +174,7 @@ class BattleState {
         turn: turn ?? this.turn,
         phase: phase ?? this.phase,
         log: log ?? this.log,
+        events: events ?? this.events,
       );
 }
 
@@ -164,6 +214,7 @@ class BattleEngine {
     if (s.isOver || !s.canAct(action)) return s;
 
     final log = <String>[];
+    final events = <BattleEvent>[];
     var player = s.player;
     var enemy = s.enemy;
     var focus = s.focus;
@@ -176,15 +227,18 @@ class BattleEngine {
         enemy = enemy.withHp(enemy.hp - d);
         focus = (focus + 1).clamp(0, BattleState.maxFocus);
         log.add('${player.name} attacks for $d damage.');
+        events.add(PlayerAttacked(d));
       case BattleAction.guard:
         guarding = true;
         focus = (focus + 1).clamp(0, BattleState.maxFocus);
         log.add('${player.name} braces for impact.');
+        events.add(const PlayerGuarded());
       case BattleAction.skill:
         final d = _damage(player.attack, enemy.defense, rng, mult: 2) + 1;
         enemy = enemy.withHp(enemy.hp - d);
         focus -= BattleState.skillCost;
         log.add('${player.name} unleashes a Power Strike for $d damage!');
+        events.add(PlayerUsedSkill(d));
       case BattleAction.item:
         final heal = (player.maxHp / 3).round();
         final before = player.hp;
@@ -192,10 +246,12 @@ class BattleEngine {
         potions -= 1;
         log.add('${player.name} drinks a potion and recovers '
             '${player.hp - before} HP.');
+        events.add(PlayerHealed(player.hp - before));
     }
 
     if (enemy.isDown) {
       log.add('${enemy.name} is defeated!');
+      events.add(const EnemyDefeated());
       return s.copyWith(
         player: player,
         enemy: enemy,
@@ -203,6 +259,7 @@ class BattleEngine {
         potions: potions,
         phase: BattlePhase.victory,
         log: log,
+        events: events,
       );
     }
 
@@ -213,9 +270,11 @@ class BattleEngine {
     player = player.withHp(player.hp - dmg);
     log.add('${enemy.name} ${heavy ? 'slams down' : 'strikes'} for $dmg'
         '${guarding ? ' (guarded)' : ''}.');
+    events.add(EnemyAttacked(damage: dmg, heavy: heavy, guarded: guarding));
 
     if (player.isDown) {
       log.add('${player.name} is knocked out. Time to rest and regroup!');
+      events.add(const PlayerDefeated());
       return s.copyWith(
         player: player,
         enemy: enemy,
@@ -223,6 +282,7 @@ class BattleEngine {
         potions: potions,
         phase: BattlePhase.defeat,
         log: log,
+        events: events,
       );
     }
 
@@ -236,6 +296,7 @@ class BattleEngine {
       potions: potions,
       turn: s.turn + 1,
       log: log,
+      events: events,
     );
   }
 }

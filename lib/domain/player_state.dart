@@ -42,6 +42,8 @@ class AppPrefs {
     this.useMetric = true,
     this.reducedMotion = false,
     this.quietChad = false,
+    this.soundOn = true,
+    this.hapticsOn = true,
   });
 
   final bool useMetric;
@@ -49,12 +51,22 @@ class AppPrefs {
 
   /// Fewer unprompted Chad lines, for experienced users.
   final bool quietChad;
+  final bool soundOn;
+  final bool hapticsOn;
 
-  AppPrefs copyWith({bool? useMetric, bool? reducedMotion, bool? quietChad}) =>
+  AppPrefs copyWith({
+    bool? useMetric,
+    bool? reducedMotion,
+    bool? quietChad,
+    bool? soundOn,
+    bool? hapticsOn,
+  }) =>
       AppPrefs(
         useMetric: useMetric ?? this.useMetric,
         reducedMotion: reducedMotion ?? this.reducedMotion,
         quietChad: quietChad ?? this.quietChad,
+        soundOn: soundOn ?? this.soundOn,
+        hapticsOn: hapticsOn ?? this.hapticsOn,
       );
 }
 

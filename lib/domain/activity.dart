@@ -5,7 +5,7 @@ enum ActivityCategory {
   bodyweight('Bodyweight'),
   cardio('Cardio'),
   resistance('Resistance'),
-  mobility('Mobility & recovery');
+  mobility('Mobility & Recovery');
 
   const ActivityCategory(this.label);
   final String label;
@@ -74,16 +74,16 @@ class ActivityCatalog {
     metrics: {Metric.sets, Metric.reps},
     formCue: 'Feet about shoulder-width apart, chest up, knees tracking over '
         'your toes.',
-    variants: ['Sit-to-stand (chair)', 'Bodyweight'],
+    variants: ['Sit-to-Stand (Chair)', 'Bodyweight'],
     easierAlternative: 'Try sitting down to a chair and standing back up.',
   );
   static const sitUp = ActivityType(
     id: 'sit_up',
-    name: 'Sit-ups / crunches',
+    name: 'Sit-Ups / Crunches',
     category: ActivityCategory.bodyweight,
     metrics: {Metric.sets, Metric.reps},
     formCue: 'Move slowly and keep your neck relaxed.',
-    variants: ['Small crunch', 'Sit-up'],
+    variants: ['Small Crunch', 'Sit-Up'],
   );
   static const plank = ActivityType(
     id: 'plank',
@@ -104,7 +104,7 @@ class ActivityCatalog {
   );
   static const running = ActivityType(
     id: 'running',
-    name: 'Running / jogging',
+    name: 'Running / Jogging',
     category: ActivityCategory.cardio,
     metrics: {Metric.duration, Metric.distance},
     formCue: 'Start slow, and walk whenever you need to.',
@@ -114,21 +114,21 @@ class ActivityCatalog {
   );
   static const dumbbellRow = ActivityType(
     id: 'dumbbell_row',
-    name: 'Dumbbell row',
+    name: 'Dumbbell Row',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     formCue: 'Brace with your free hand, pull towards your hip, lower slowly.',
   );
   static const dumbbellPress = ActivityType(
     id: 'dumbbell_press',
-    name: 'Dumbbell shoulder press',
+    name: 'Dumbbell Shoulder Press',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     formCue: 'Choose a light weight first; press up without arching your back.',
   );
   static const barbellSquat = ActivityType(
     id: 'barbell_squat',
-    name: 'Barbell squat',
+    name: 'Barbell Squat',
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     formCue: 'Use a spotter or safety rack, and learn the movement unloaded '
@@ -144,7 +144,7 @@ class ActivityCatalog {
   );
   static const mobility = ActivityType(
     id: 'light_mobility',
-    name: 'Light mobility',
+    name: 'Light Mobility',
     category: ActivityCategory.mobility,
     metrics: {Metric.duration},
     formCue: 'Slow joint circles and easy movement. Stop if anything hurts.',

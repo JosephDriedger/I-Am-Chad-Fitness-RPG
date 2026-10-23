@@ -26,6 +26,22 @@ flutter run
 dart run build_runner watch
 ```
 
+## Previewing scenes in a browser
+
+The game scenes can be viewed in Chrome without a phone or emulator. Web is a development convenience only; the shipped targets are Android and iOS.
+
+```bash
+flutter run -d chrome --dart-define=PREVIEW=hub
+```
+
+Modes: `cast` (every character), `hub`, `duel`, `expedition`, `boss`, `event`, `chest`. Preview modes seed a hero, skip animation and sound, and persist to the browser's own storage (via `web/sqlite3.wasm` and `web/drift_worker.js`). Without `PREVIEW` the app runs normally. See [Game scenes](GAME_SCENES.md).
+
+If `web/drift_worker.js` is missing, rebuild it with `dart compile js -O4 web/drift_worker.dart -o web/drift_worker.js`.
+
+## Sound effects
+
+The files in `assets/audio` are synthesized, not recorded. Edit `tool/gen_sfx.mjs` and run `node tool/gen_sfx.mjs` to regenerate them. Each file name must match an `Sfx` value in `lib/game/core.dart` (a test checks this).
+
 ## Everyday commands
 
 | Task | Command |
@@ -66,6 +82,7 @@ Before committing, `flutter analyze` should report no issues and `flutter test` 
   ], child: const IAmChadApp())
   ```
 
+- Use the helpers in `test/helpers.dart`: `bootApp` (fixed clock, silent feedback, reduced motion so scenes finish each animation in one frame), `settle`, `usePhone` and `shutDown`.
 - Inside `testWidgets`, wrap direct database calls in `tester.runAsync(...)`. Awaiting them in the fake-async zone hangs the test. Calls triggered by the UI itself are fine.
 - Drift streams use timers. End widget tests by pumping `SizedBox()` and advancing a second before closing the database, as the existing flow tests do.
 
@@ -81,9 +98,10 @@ Before committing, `flutter analyze` should report no issues and `flutter test` 
 
 ## Known environment notes
 
-- Platforms enabled: Android and iOS only (per the GDD). Desktop and web are not set up, so `flutter run -d windows` will not work without adding those platforms.
+- Platforms enabled: Android and iOS (per the GDD), plus web for development previews only. Desktop is not set up, so `flutter run -d windows` will not work without adding that platform.
 - The generated Android/iOS application id is the placeholder `com.iamchad.i_am_chad`. Change it before any store submission.
-- On Windows without the Android toolchain, only analysis and tests can be run.
+- `android/gradle.properties` sets `kotlin.incremental=false`. When the project and the Flutter package cache are on different drives, plugin Kotlin compiles otherwise fail with "Could not close incremental caches".
+- To run on an emulator: `flutter emulators --launch <id>`, then `flutter run -d <device>`. Analysis and tests need no emulator.
 
 ## Commits
 

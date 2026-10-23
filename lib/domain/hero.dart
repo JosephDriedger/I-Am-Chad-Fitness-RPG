@@ -6,9 +6,9 @@ import 'dart:math' as math;
 import 'activity.dart';
 
 enum ExperienceLevel {
-  starting('Just starting', 'New to exercise. Keep it gentle.'),
-  returning('Getting back into it', 'Some experience, easing back in.'),
-  regular('Already active', 'Exercise is part of my week.');
+  starting('Just Starting', 'New to exercise. Keep it gentle.'),
+  returning('Getting Back Into It', 'Some experience, easing back in.'),
+  regular('Already Active', 'Exercise is part of my week.');
 
   const ExperienceLevel(this.label, this.blurb);
   final String label;
@@ -27,6 +27,7 @@ class HeroProfile {
     required this.name,
     required this.appearanceStyle,
     required this.appearanceColor,
+    this.appearanceSkin = 0,
     required this.experience,
     required this.preferredCategories,
     required this.hasDumbbells,
@@ -39,6 +40,7 @@ class HeroProfile {
   final String name;
   final int appearanceStyle;
   final int appearanceColor;
+  final int appearanceSkin;
   final ExperienceLevel experience;
   final Set<ActivityCategory> preferredCategories;
   final bool hasDumbbells;
@@ -53,6 +55,7 @@ class HeroProfile {
     String? name,
     int? appearanceStyle,
     int? appearanceColor,
+    int? appearanceSkin,
     ExperienceLevel? experience,
     Set<ActivityCategory>? preferredCategories,
     bool? hasDumbbells,
@@ -65,6 +68,7 @@ class HeroProfile {
         name: name ?? this.name,
         appearanceStyle: appearanceStyle ?? this.appearanceStyle,
         appearanceColor: appearanceColor ?? this.appearanceColor,
+        appearanceSkin: appearanceSkin ?? this.appearanceSkin,
         experience: experience ?? this.experience,
         preferredCategories: preferredCategories ?? this.preferredCategories,
         hasDumbbells: hasDumbbells ?? this.hasDumbbells,

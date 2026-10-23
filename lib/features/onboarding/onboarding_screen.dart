@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/providers.dart';
-import '../../app/theme.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
 import '../../domain/chad.dart';
@@ -20,6 +19,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final _name = TextEditingController();
   int _style = 0;
   int _color = 0;
+  int _skin = 0;
   ExperienceLevel _level = ExperienceLevel.starting;
   final Set<ActivityCategory> _prefs = {};
   bool _dumbbells = false;
@@ -41,6 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           name: _name.text.trim(),
           appearanceStyle: _style,
           appearanceColor: _color,
+          appearanceSkin: _skin,
           experience: _level,
           preferredCategories: _prefs,
           hasDumbbells: _dumbbells,
@@ -96,7 +97,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       child: Text(_step == _steps - 1
                           ? 'Enter the Guild'
                           : _step == 0
-                              ? 'Let\'s go'
+                              ? 'Let\'s Go'
                               : 'Next'),
                     ),
                   ),
@@ -119,7 +120,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const SizedBox(height: 16),
         ChadBubble(text: ChadDialogue.line(ChadContext.welcome)),
         const SizedBox(height: 16),
-        Text('How it works', style: t.titleMedium),
+        Text('How It Works', style: t.titleMedium),
         const SizedBox(height: 8),
         const _Bullet(Icons.edit_note,
             'Log real workouts at your own level. Smaller or easier versions '
@@ -143,10 +144,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Create your adventurer', style: t.headlineSmall),
+        Text('Create Your Adventurer', style: t.headlineSmall),
         const SizedBox(height: 16),
         Center(
-          child: HeroAvatar(style: _style, color: _color, size: 96),
+          child: HeroAvatar(style: _style, color: _color, skin: _skin, size: 96),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -160,36 +161,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 8),
-        Text('Look', style: t.titleSmall),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (var i = 0; i < HeroLook.icons.length; i++)
-              ChoiceChip(
-                avatar: Icon(HeroLook.icons[i], size: 20),
-                label: Text('Style ${i + 1}'),
-                selected: _style == i,
-                onSelected: (_) => setState(() => _style = i),
-              ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text('Colour', style: t.titleSmall),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (var i = 0; i < HeroLook.colors.length; i++)
-              ChoiceChip(
-                avatar: CircleAvatar(backgroundColor: HeroLook.colors[i]),
-                label: Text(HeroLook.colorNames[i]),
-                selected: _color == i,
-                onSelected: (_) => setState(() => _color = i),
-              ),
-          ],
+        AppearancePicker(
+          style: _style,
+          color: _color,
+          skin: _skin,
+          onChanged: ({int? style, int? color, int? skin}) => setState(() {
+            _style = style ?? _style;
+            _color = color ?? _color;
+            _skin = skin ?? _skin;
+          }),
         ),
       ],
     );
@@ -201,7 +181,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Where are you starting from?', style: t.headlineSmall),
+        Text('Where Are You Starting From?', style: t.headlineSmall),
         const SizedBox(height: 4),
         Text(
           'This only shapes the suggestions you see. You can change anything '
@@ -226,7 +206,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
         const SizedBox(height: 8),
-        Text('What do you enjoy? (optional)', style: t.titleSmall),
+        Text('What Do You Enjoy? (Optional)', style: t.titleSmall),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
@@ -245,7 +225,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const SizedBox(height: 8),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('I have dumbbells'),
+          title: const Text('I Have Dumbbells'),
           subtitle: const Text('Unlocks weight-based suggestions'),
           value: _dumbbells,
           onChanged: (v) => setState(() => _dumbbells = v),

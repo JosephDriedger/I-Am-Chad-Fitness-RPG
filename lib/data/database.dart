@@ -42,6 +42,7 @@ class Heroes extends Table {
   TextColumn get name => text()();
   IntColumn get appearanceStyle => integer().withDefault(const Constant(0))();
   IntColumn get appearanceColor => integer().withDefault(const Constant(0))();
+  IntColumn get appearanceSkin => integer().withDefault(const Constant(0))();
   TextColumn get experience => text()();
   TextColumn get preferredCategories =>
       text().withDefault(const Constant(''))();
@@ -86,6 +87,8 @@ class AppSettings extends Table {
   BoolColumn get reducedMotion =>
       boolean().withDefault(const Constant(false))();
   BoolColumn get quietChad => boolean().withDefault(const Constant(false))();
+  BoolColumn get soundOn => boolean().withDefault(const Constant(true))();
+  BoolColumn get hapticsOn => boolean().withDefault(const Constant(true))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -95,19 +98,33 @@ class AppSettings extends Table {
   tables: [Workouts, RewardGrants, Heroes, OwnedItems, ExpeditionRuns, AppSettings],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(driftDatabase(name: 'i_am_chad'));
+  AppDatabase()
+      : super(driftDatabase(
+          name: 'i_am_chad',
+          // Only used by the optional web preview (see docs/DEVELOPMENT.md).
+          web: DriftWebOptions(
+            sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+            driftWorker: Uri.parse('drift_worker.js'),
+          ),
+        ));
 
   /// For tests: pass `NativeDatabase.memory()`.
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) => m.createAll(),
-        // Add `onUpgrade` steps here as the schema evolves (see
-        // docs/DATA_MODEL.md). Workout rows must always survive upgrades.
+        // Workout rows must always survive upgrades (see docs/DATA_MODEL.md).
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(heroes, heroes.appearanceSkin);
+            await m.addColumn(appSettings, appSettings.soundOn);
+            await m.addColumn(appSettings, appSettings.hapticsOn);
+          }
+        },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },

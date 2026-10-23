@@ -41,7 +41,7 @@ A single row with `id = 1`.
 
 | Column | Notes |
 | --- | --- |
-| `name`, `appearance_style`, `appearance_color` | Cosmetic, editable |
+| `name`, `appearance_style`, `appearance_color`, `appearance_skin` | Cosmetic, editable. Style is the hair or hood, colour is the outfit, skin is one of six tones |
 | `experience` | `ExperienceLevel` name (`starting`, `returning`, `regular`) |
 | `preferred_categories` | Comma-separated `ActivityCategory` names |
 | `has_dumbbells` | Filters equipment-based suggestions |
@@ -63,7 +63,7 @@ An append-only history of finished runs: `seed`, `finished_at`, `victory`, `batt
 
 ### `app_settings`
 
-A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`. When the row is missing the app uses defaults.
+A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound_on`, `haptics_on`. When the row is missing the app uses defaults (metric, motion on, Chad chatty, sound and vibration on).
 
 ## Derived values (never stored)
 
@@ -87,7 +87,7 @@ No account, analytics or network calls exist in the app.
 
 ## Migrations
 
-`schemaVersion` is currently **1**. When changing a table:
+`schemaVersion` is currently **2**. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. When changing a table:
 
 1. Edit the table in `database.dart` and bump `schemaVersion`.
 2. Add the matching step in `MigrationStrategy.onUpgrade`.

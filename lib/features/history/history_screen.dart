@@ -35,7 +35,7 @@ class HistoryScreen extends ConsumerWidget {
                   Icon(Icons.history,
                       size: 48, color: Theme.of(context).colorScheme.outline),
                   const SizedBox(height: 12),
-                  Text('No workouts yet', style: t.titleMedium),
+                  Text('No Workouts Yet', style: t.titleMedium),
                   const SizedBox(height: 4),
                   const Text(
                     'Your workouts will appear here. Every legend starts '
@@ -136,14 +136,14 @@ class _WorkoutTile extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete this workout?'),
+        title: const Text('Delete This Workout?'),
         content: const Text(
             'The entry is removed from your history and that day\'s rewards '
             'are recalculated.'),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Keep it')),
+              child: const Text('Keep It')),
           FilledButton(
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Delete')),
@@ -183,7 +183,7 @@ class _WeekChart extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Last 7 days', style: Theme.of(context).textTheme.titleSmall),
+              Text('Last 7 Days', style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 12),
               SizedBox(
                 height: 110,

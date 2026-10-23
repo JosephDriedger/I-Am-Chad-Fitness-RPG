@@ -7,6 +7,7 @@ This document describes how the code is organised and the rules that keep it tha
 ```
 ┌──────────────────────────────────────────────┐
 │ features/   Screens (Flutter widgets)         │
+│ game/       Flame scenes and procedural art   │
 │ app/        App shell, providers, theme       │
 ├──────────────────────────────────────────────┤
 │ data/       Drift database + GameRepository   │
@@ -20,8 +21,9 @@ This document describes how the code is organised and the rules that keep it tha
 | --- | --- | --- | --- |
 | Domain | `lib/domain` | Dart core only | No Flutter, no Drift. Everything here is deterministic and unit tested. |
 | Data | `lib/data` | domain, Drift | The only place that touches SQLite. Maps rows to domain types. |
-| App | `lib/app` | domain, data, Flutter, Riverpod | Providers combine repository streams into UI-ready state. |
-| Features | `lib/features` | everything above | One folder per screen. No SQL, no game maths. |
+| App | `lib/app` | domain, data, Flutter, Riverpod | Providers combine repository streams into UI-ready state. `feedback.dart` wires sound and haptics to settings. |
+| Game | `lib/game` | domain, Flame | The guild hall and battle scenes plus all character art. Plain data in, callbacks out: scenes never touch providers or the database. See [Game scenes](GAME_SCENES.md). |
+| Features | `lib/features` | everything above | One folder per screen. No SQL, no game maths. `HubScreen` and `ExpeditionScreen` host the Flame scenes. |
 
 If a rule decides how the game plays (rewards, damage, quests, level curves), it lives in `domain/`. If you find yourself writing it in a widget, move it.
 
@@ -69,13 +71,13 @@ Riverpod 3. All providers live in `lib/app/providers.dart`:
 Combat and expeditions must be reproducible from a seed:
 
 - `GameRng` (`lib/domain/rng.dart`) is a hand-written mulberry32 PRNG rather than `dart:math` `Random`, so a seed gives the same result on every platform and Dart version.
-- `BattleEngine.act` is a pure function of `(state, action, rng)`.
+- `BattleEngine.act` is a pure function of `(state, action, rng)`. It returns structured `BattleEvent`s alongside the text log so a scene can animate each beat without being able to change the result.
 - `Expedition.generate(seed, heroLevel)` always returns the same expedition.
 - Tests replay seeds, including a 200-seed balance check per level.
 
 ## Navigation and app start
 
-`IAmChadApp` shows `OnboardingScreen` until a hero row exists, then `HomeShell` with five tabs (Guild, Workout, Adventure, Hero, History). Quests and Settings are pushed from the Guild screen. Creating the hero is the only thing that moves the player out of onboarding; the gate reacts to the `heroProvider` stream.
+`IAmChadApp` shows `OnboardingScreen` until a hero exists, then `HomeShell`, which hosts `HubScreen`: the Flame guild hall with a HUD and menu bar. Train, Quests, Adventure, Hero and Journal open as pages on top of the hall (and Settings from the HUD gear). When a page closes, the hall compares the player's XP, energy, coins and level before and after and plays the matching celebration. Creating the hero is the only thing that moves the player out of onboarding; the gate reacts to the `heroProvider` stream.
 
 ## Accessibility hooks
 
@@ -83,6 +85,7 @@ Combat and expeditions must be reproducible from a seed:
 - Progress bars and charts always print their numbers; nothing is conveyed by colour alone (enemy intent also uses an icon and text).
 - Interactive stat widgets expose `Semantics` labels; the battle log is a live region.
 - Text size follows the OS setting; layouts scroll rather than clip.
+- The Flame canvas is decorative on top of Flutter widgets: every destination is also a labelled menu button, and battle actions are Flutter buttons with semantic labels.
 
 ## Testing strategy
 
@@ -90,9 +93,9 @@ Combat and expeditions must be reproducible from a seed:
 | --- | --- | --- |
 | Domain unit tests | `test/domain` | Reward maths, level curve, RNG, combat, expeditions, quests, dialogue lint |
 | Repository tests | `test/data` | Real Drift queries against an in-memory SQLite database |
-| Widget flow tests | `test/app_flow_test.dart`, `test/adventure_flow_test.dart` | Onboarding to first logged workout, and earning energy to finishing an expedition |
+| Widget flow tests | `test/app_flow_test.dart`, `test/adventure_flow_test.dart` | Onboarding to the guild hall and a first logged workout, and earning energy to finishing an expedition through the Flame battle scene. Shared setup is in `test/helpers.dart` (fixed clock, silent feedback, reduced motion) |
+| Migration test | `test/data/migration_test.dart` | A schema v1 database with real rows upgrades to v2 intact |
 
 ## Planned extensions
 
-- **Flame** for combat scenes. The domain engine already separates rules from presentation, so a Flame scene can drive the same `BattleEngine`.
 - **Health integrations and cloud sync** are deliberately absent. Before multi-device accounts, sync conflict resolution must be designed (GDD section 10).

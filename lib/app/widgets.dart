@@ -2,37 +2,115 @@ import 'package:flutter/material.dart';
 
 import '../domain/hero.dart';
 import '../domain/quests.dart';
-import 'theme.dart';
+import '../game/art/painters.dart' show paintHeroPortrait;
+import '../game/look.dart';
 
-/// Placeholder hero portrait (final art is a post-prototype task).
+/// Round portrait of the adventurer, drawn with the same art as the game.
 class HeroAvatar extends StatelessWidget {
   const HeroAvatar({
     super.key,
     required this.style,
     required this.color,
+    this.skin = 0,
     this.size = 64,
+    this.equipped = const {},
   });
 
   final int style;
   final int color;
+  final int skin;
   final double size;
+  final Set<String> equipped;
 
   @override
   Widget build(BuildContext context) {
+    final look = HeroLook(style: style, color: color, skin: skin, equipped: equipped);
     return Semantics(
       label: 'Your adventurer',
       image: true,
       child: ExcludeSemantics(
-        child: CircleAvatar(
-          radius: size / 2,
-          backgroundColor: HeroLook.colors[color % HeroLook.colors.length],
-          child: Icon(
-            HeroLook.icons[style % HeroLook.icons.length],
-            size: size * 0.7,
-            color: Colors.white,
-          ),
+        child: SizedBox.square(
+          dimension: size,
+          child: CustomPaint(painter: _PortraitPainter(look)),
         ),
       ),
+    );
+  }
+}
+
+class _PortraitPainter extends CustomPainter {
+  _PortraitPainter(this.look);
+
+  final HeroLook look;
+
+  @override
+  void paint(Canvas canvas, Size size) =>
+      paintHeroPortrait(canvas, size.width, look, 0);
+
+  @override
+  bool shouldRepaint(_PortraitPainter old) =>
+      old.look.style != look.style ||
+      old.look.color != look.color ||
+      old.look.skin != look.skin;
+}
+
+/// Hair/outfit style, outfit colour and skin tone choices with live previews.
+class AppearancePicker extends StatelessWidget {
+  const AppearancePicker({
+    super.key,
+    required this.style,
+    required this.color,
+    required this.skin,
+    required this.onChanged,
+  });
+
+  final int style;
+  final int color;
+  final int skin;
+  final void Function({int? style, int? color, int? skin}) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Style', style: t.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (var i = 0; i < HeroLook.styleNames.length; i++)
+            ChoiceChip(
+              avatar: HeroAvatar(style: i, color: color, skin: skin, size: 28),
+              label: Text(HeroLook.styleNames[i]),
+              selected: style == i,
+              onSelected: (_) => onChanged(style: i),
+            ),
+        ]),
+        const SizedBox(height: 12),
+        Text('Outfit Colour', style: t.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (var i = 0; i < HeroLook.colors.length; i++)
+            ChoiceChip(
+              avatar: CircleAvatar(backgroundColor: HeroLook.colors[i]),
+              label: Text(HeroLook.colorNames[i]),
+              selected: color == i,
+              onSelected: (_) => onChanged(color: i),
+            ),
+        ]),
+        const SizedBox(height: 12),
+        Text('Skin Tone', style: t.titleSmall),
+        const SizedBox(height: 8),
+        Wrap(spacing: 8, runSpacing: 8, children: [
+          for (var i = 0; i < HeroLook.skins.length; i++)
+            ChoiceChip(
+              avatar: CircleAvatar(backgroundColor: HeroLook.skins[i]),
+              label: Text(HeroLook.skinNames[i]),
+              selected: skin == i,
+              onSelected: (_) => onChanged(skin: i),
+            ),
+        ]),
+      ],
     );
   }
 }

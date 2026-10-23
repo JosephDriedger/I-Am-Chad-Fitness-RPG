@@ -49,6 +49,7 @@ ExpeditionRun _run(int seed, int level) {
 }
 
 void main() {
+  eventTests();
   group('GameRng', () {
     test('same seed gives same sequence; different seeds differ', () {
       final a = GameRng(42), b = GameRng(42), c = GameRng(43);
@@ -218,5 +219,62 @@ void main() {
             reason: 'win rate at level $level was $rate');
       });
     }
+  });
+}
+
+void eventTests() {
+  group('BattleEvent', () {
+    test('every action reports what happened, in order', () {
+      final rng = GameRng(21);
+      var s = BattleEngine.start(
+        player: Combatant.fresh(name: 'T', maxHp: 300, attack: 10, defense: 5),
+        enemy: Combatant.fresh(name: 'E', maxHp: 900, attack: 12, defense: 2),
+        rng: rng,
+      );
+      s = BattleEngine.act(s, BattleAction.attack, rng);
+      expect(s.events.first, isA<PlayerAttacked>());
+      expect(s.events[1], isA<EnemyAttacked>());
+      expect((s.events.first as PlayerAttacked).damage, greaterThan(0));
+
+      s = BattleEngine.act(s, BattleAction.guard, rng);
+      expect(s.events.first, isA<PlayerGuarded>());
+      expect((s.events[1] as EnemyAttacked).guarded, isTrue);
+
+      s = BattleEngine.act(s, BattleAction.attack, rng);
+      s = BattleEngine.act(s, BattleAction.skill, rng);
+      expect(s.events.first, isA<PlayerUsedSkill>());
+
+      s = BattleEngine.act(s, BattleAction.item, rng);
+      expect(s.events.first, isA<PlayerHealed>());
+    });
+
+    test('a kill ends with EnemyDefeated and no enemy reply', () {
+      final rng = GameRng(4);
+      final s = BattleEngine.act(
+        BattleEngine.start(
+          player: Combatant.fresh(name: 'T', maxHp: 99, attack: 500, defense: 5),
+          enemy: Combatant.fresh(name: 'E', maxHp: 5, attack: 9, defense: 0),
+          rng: rng,
+        ),
+        BattleAction.attack,
+        rng,
+      );
+      expect(s.events.map((e) => e.runtimeType), [PlayerAttacked, EnemyDefeated]);
+    });
+
+    test('being knocked out ends with PlayerDefeated', () {
+      final rng = GameRng(4);
+      final s = BattleEngine.act(
+        BattleEngine.start(
+          player: Combatant.fresh(name: 'T', maxHp: 1, attack: 1, defense: 0),
+          enemy: Combatant.fresh(name: 'E', maxHp: 999, attack: 99, defense: 99),
+          rng: rng,
+        ),
+        BattleAction.attack,
+        rng,
+      );
+      expect(s.events.last, isA<PlayerDefeated>());
+      expect(s.phase, BattlePhase.defeat);
+    });
   });
 }

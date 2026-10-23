@@ -1,16 +1,24 @@
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:i_am_chad/app/app.dart';
-import 'package:i_am_chad/app/providers.dart';
+import 'package:i_am_chad/game/core.dart';
+import 'package:i_am_chad/game/hub_scene.dart';
 import 'package:i_am_chad/data/database.dart';
 
-Future<void> _settle(WidgetTester tester) async {
-  // Drift streams deliver on microtasks/timers; pump a few frames.
-  for (var i = 0; i < 10; i++) {
-    await tester.pump(const Duration(milliseconds: 50));
-  }
+import 'helpers.dart';
+
+Future<void> _onboard(WidgetTester tester, String name) async {
+  await tester.tap(find.text('Let\'s Go'));
+  await settle(tester);
+  await tester.enterText(find.byType(TextField).first, name);
+  await settle(tester);
+  await tester.tap(find.text('Next'));
+  await settle(tester);
+  await tester.tap(find.text('Getting Back Into It'));
+  await settle(tester);
+  await tester.tap(find.text('Enter the Guild'));
+  await settle(tester, frames: 20);
 }
 
 void main() {
@@ -18,117 +26,97 @@ void main() {
 
   setUp(() => db = AppDatabase.forTesting(NativeDatabase.memory()));
 
-  Future<void> boot(WidgetTester tester) async {
-    await tester.pumpWidget(ProviderScope(
-      overrides: [
-        databaseProvider.overrideWithValue(db),
-        clockProvider.overrideWithValue(() => DateTime(2026, 10, 22, 10)),
-      ],
-      child: const IAmChadApp(),
-    ));
-    await _settle(tester);
-  }
-
-  Future<void> teardown(WidgetTester tester) async {
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 1));
-    await db.close();
-  }
-
-  testWidgets('first run: onboarding, then guild, then log a workout',
+  testWidgets('first run: onboarding, then the guild hall, then log a workout',
       (tester) async {
-    tester.view.physicalSize = const Size(800, 1800);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    final semantics = tester.ensureSemantics();
+    usePhone(tester);
+    await bootApp(tester, db);
 
-    await boot(tester);
-
-    // Step 1: welcome + safety messaging.
+    // Welcome + safety messaging.
     expect(find.text('I Am Chad'), findsOneWidget);
     expect(find.textContaining('not medical advice'), findsOneWidget);
-    await tester.tap(find.text('Let\'s go'));
-    await _settle(tester);
+    await tester.tap(find.text('Let\'s Go'));
+    await settle(tester);
 
-    // Step 2: can't continue without a name.
+    // Can't continue without a name.
     expect(
       tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Next')).onPressed,
       isNull,
     );
+    // Appearance picker offers skin tones.
+    expect(find.text('Skin Tone'), findsOneWidget);
     await tester.enterText(find.byType(TextField).first, 'Ada');
-    await _settle(tester);
+    await settle(tester);
     await tester.tap(find.text('Next'));
-    await _settle(tester);
-
-    // Step 3: pick a level and finish.
-    await tester.tap(find.text('Getting back into it'));
-    await _settle(tester);
+    await settle(tester);
+    await tester.tap(find.text('Getting Back Into It'));
+    await settle(tester);
     await tester.tap(find.text('Enter the Guild'));
-    await _settle(tester);
+    await settle(tester, frames: 20);
 
-    // Guild screen shows the hero and a first suggestion.
-    expect(find.text('The Guild'), findsOneWidget);
+    // The hall HUD shows the hero and the menu offers every destination.
     expect(find.text('Ada'), findsOneWidget);
-    expect(find.text('Level 1'), findsOneWidget);
-    expect(find.text('Next up'), findsOneWidget);
+    expect(find.text('Lv 1'), findsOneWidget);
+    for (final label in ['Train', 'Quests', 'Adventure', 'Hero', 'Journal']) {
+      expect(find.text(label), findsOneWidget, reason: label);
+    }
+    expect(find.bySemanticsLabel('Adventure energy: 0'), findsOneWidget);
 
-    // Log a walk from the Workout tab.
-    await tester.tap(find.text('Workout').last);
-    await _settle(tester);
+    // Train: the hero walks to the dummy, then the log screen opens.
+    await tester.tap(find.text('Train'));
+    await settle(tester, frames: 30);
+    expect(find.text('Log a Workout'), findsOneWidget);
     await tester.tap(find.text('Walking'));
-    await _settle(tester);
+    await settle(tester);
     await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '10');
-    await tester.ensureVisible(find.text('Save workout'));
-    await tester.tap(find.text('Save workout'));
-    await _settle(tester);
+    await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Save Workout'));
+    await settle(tester);
 
-    // Reward explanation is shown.
-    expect(find.text('Workout saved!'), findsOneWidget);
+    // The reward is explained.
+    expect(find.text('Workout Saved!'), findsOneWidget);
     expect(find.text('40 XP'), findsOneWidget);
-    expect(find.text('2 energy'), findsOneWidget);
+    expect(find.text('2 Energy'), findsOneWidget);
     await tester.tap(find.text('Nice'));
-    await _settle(tester);
+    await settle(tester);
 
-    // It is in the history with its reward.
-    await tester.tap(find.text('History').last);
-    await _settle(tester);
+    // Back to the hall: the energy is on the HUD and the gate is open.
+    await tester.pageBack();
+    await settle(tester, frames: 12);
+    // The hall celebrates what you earned with floating popups.
+    final scene = tester.widget<GameWidget<HubScene>>(find.byType(GameWidget<HubScene>)).game!;
+    final popups = scene.world.children.whereType<FloatingText>().length;
+    expect(popups, greaterThanOrEqualTo(1), reason: 'no +XP popup after logging a workout');
+    await settle(tester, frames: 40);
+    expect(find.bySemanticsLabel('Adventure energy: 2'), findsOneWidget);
+
+    // The journal lists it with its reward.
+    await tester.tap(find.text('Journal'));
+    await settle(tester, frames: 30);
     expect(find.text('Walking'), findsOneWidget);
     expect(find.textContaining('+40 XP'), findsOneWidget);
 
-    // And the hero now has energy to spend.
-    await tester.tap(find.text('Guild').last);
-    await _settle(tester);
-    expect(find.text('2 energy'), findsOneWidget);
-
-    await teardown(tester);
+    semantics.dispose();
+    await shutDown(tester, db);
   });
 
   testWidgets('an empty entry is rejected with a helpful message',
       (tester) async {
-    tester.view.physicalSize = const Size(800, 1800);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(tester.view.reset);
+    usePhone(tester);
+    await bootApp(tester, db);
+    await _onboard(tester, 'Bo');
 
-    await boot(tester);
-    await tester.tap(find.text('Let\'s go'));
-    await _settle(tester);
-    await tester.enterText(find.byType(TextField).first, 'Bo');
-    await _settle(tester);
-    await tester.tap(find.text('Next'));
-    await _settle(tester);
-    await tester.tap(find.text('Enter the Guild'));
-    await _settle(tester);
-
-    await tester.tap(find.text('Workout').last);
-    await _settle(tester);
+    await tester.tap(find.text('Train'));
+    await settle(tester, frames: 30);
     await tester.tap(find.text('Push-ups'));
-    await _settle(tester);
-    await tester.ensureVisible(find.text('Save workout'));
-    await tester.tap(find.text('Save workout'));
-    await _settle(tester);
+    await settle(tester);
+    await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(find.text('Save Workout'));
+    await settle(tester);
 
     expect(find.textContaining('Add at least'), findsOneWidget);
-    expect(await db.select(db.workouts).get(), isEmpty);
+    expect(await tester.runAsync(() => db.select(db.workouts).get()), isEmpty);
 
-    await teardown(tester);
+    await shutDown(tester, db);
   });
 }

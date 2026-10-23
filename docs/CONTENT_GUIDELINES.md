@@ -11,6 +11,15 @@ Rules for anything a player reads, sees or is rewarded for. They come from the G
 
 Sample voice: "Every legend started at Level 1. Except me. I started at Level 2. Long story."
 
+## Capitalisation
+
+Follow the usual game convention:
+
+- **Title Case** for anything that is a name or a label: buttons, menu items, screen and dialog titles, section headings, setting names, stat names, exercise, quest, item, enemy and event names, and result banners ("Back to the Guild", "Power Strike", "Expedition Complete!", "Sound Effects", "Wall Push-Ups"). Keep short articles, conjunctions and prepositions ("a", "the", "and", "of", "to", "for", "with", "from") lowercase unless first or last.
+- **Sentence case** for sentences: descriptions, hints, helper text, dialogue and log lines ("Move slowly and keep your neck relaxed.").
+- Units and rewards read as a label: "+40 XP", "+2 Energy", "+8 Coins". "LEVEL UP!" is the one all-caps celebration.
+- Screen-reader labels are plain sentences.
+
 ## Never write
 
 - Guilt, shame or pressure: "You missed yesterday", "Don't break your streak", "Lazy", "Weak", "No excuses".
@@ -59,10 +68,11 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 
 ## Art, audio and licensing
 
-- Use original assets or assets with documented commercial licences. Record the source and licence for each in `docs/ASSET_LICENSES.md` when the first asset is added.
+- Use original assets or assets with documented commercial licences. Today everything is original: characters, props and backdrops are drawn in code (`lib/game/art`), and the sound effects are synthesized by `tool/gen_sfx.mjs`. If any third-party asset is added, record its source and licence in `docs/ASSET_LICENSES.md` first.
 - Chad is an original character. Do not reproduce recognisable meme photography or third-party characters.
+- Offer a range of appearances (hair styles, outfit colours and six skin tones) and never tie a body type or skin tone to any in-game value or role.
 - Audio should reward effort without overwhelming the workout. It must be mutable and never required.
-- Exercise demonstration material, when added, needs a licensed or original source, simple form cues and an easier alternative.
+- Exercise demonstrations are original animations drawn in code (see [Game scenes](GAME_SCENES.md)). Each has simple form cues and points to easier versions, and cues must stay conservative: no "push through the pain", no promised results. Any new demo needs a professional's review before release where possible.
 
 ## Title
 
