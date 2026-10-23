@@ -70,6 +70,10 @@ An append-only history of finished runs: `seed`, `finished_at`, `victory`, `batt
 
 One row per streak milestone the player has been paid for: `days` (primary key), `claimed_at`, `coins`, `xp`. A row is written in the same transaction that adds the coins and `heroes.streak_xp`, so a milestone is paid exactly once. Rows are never deleted when workouts are later edited or removed, so nothing already earned is taken back. `deleteEverything()` clears it.
 
+### `story_progress` and `story_choices`
+
+`story_progress` has one row per chapter the player has finished or skipped: `chapter` (primary key; 0 is the prologue) and `read_at`. `story_choices` has one row per remembered answer: `key` (primary key, such as `motivation`) and `option` (the index picked). Replaying a chapter and answering again replaces the row. Which chapters are *open* is never stored: it is derived from the hero's level (see [Story](STORY.md)). Both tables are in the export and are cleared by `deleteEverything()`.
+
 ### `active_expeditions`
 
 At most one row (`id = 1`): the expedition in progress, if any. Columns: `seed`, `hero_level`, `step_index`, `hero_hp`, `potions`, `battles_won`, `xp`, `coins`. The row is written when an expedition starts (in the same transaction that spends the energy) and at the start of each step, and deleted when the run is recorded or abandoned. The map, enemies and loot are regenerated from `seed` and `hero_level`, never stored. `deleteEverything()` clears it too.
@@ -88,6 +92,7 @@ A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound
 | Energy available | `max(0, energy earned − heroes.energy_spent)` |
 | Weekly goal progress | Distinct active days in the current Monday to Sunday week |
 | Quest completion | Whether an entry for the suggested activity exists today |
+| Open story chapters | Chapters whose unlock level is at or below the hero's level |
 
 Keeping these derived means editing or deleting a workout automatically keeps the whole game state consistent.
 
@@ -100,7 +105,7 @@ No account, analytics or network calls exist in the app.
 
 ## Migrations
 
-`schemaVersion` is currently **6**. Version 6 added `workouts.logged_at` and `heroes.potion_stock`; `test/data/shop_test.dart` proves a v5 save keeps its workouts, rewards and hero. Version 5 added the `streak_rewards` table and `heroes.streak_xp`; `test/data/streak_rewards_test.dart` proves a v4 save keeps its workouts and hero. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
+`schemaVersion` is currently **7**. Version 7 added the `story_progress` and `story_choices` tables; `test/data/story_progress_test.dart` proves a v6 save keeps its workouts and hero. Version 6 added `workouts.logged_at` and `heroes.potion_stock`; `test/data/shop_test.dart` proves a v5 save keeps its workouts, rewards and hero. Version 5 added the `streak_rewards` table and `heroes.streak_xp`; `test/data/streak_rewards_test.dart` proves a v4 save keeps its workouts and hero. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
 
 1. Edit the table in `database.dart` and bump `schemaVersion`.
 2. Add the matching step in `MigrationStrategy.onUpgrade`.

@@ -296,6 +296,29 @@ class GameRepository {
         updates: {_db.heroes},
       );
 
+  // ---- Story --------------------------------------------------------------
+
+  /// The numbers of the chapters the player has read.
+  Stream<Set<int>> watchStoryRead() =>
+      _db.select(_db.storyProgress).watch().map((rows) => {for (final r in rows) r.chapter});
+
+  /// The player's remembered story choices, by key.
+  Stream<Map<String, int>> watchStoryChoices() =>
+      _db.select(_db.storyChoices).watch().map((rows) => {for (final r in rows) r.key: r.option});
+
+  /// Marks a chapter read. Reading it again later changes nothing.
+  Future<void> markChapterRead(int chapter, {required DateTime at}) =>
+      _db.into(_db.storyProgress).insert(
+            StoryProgressCompanion.insert(chapter: Value(chapter), readAt: at),
+            mode: InsertMode.insertOrIgnore,
+          );
+
+  /// Remembers a choice. Choosing differently on a replay replaces it.
+  Future<void> saveStoryChoice(String key, int option) =>
+      _db.into(_db.storyChoices).insertOnConflictUpdate(
+            StoryChoicesCompanion.insert(key: key, option: option),
+          );
+
   // ---- Shop ---------------------------------------------------------------
 
   /// Buys a piece of gear with coins. Nothing is charged unless it is bought.
@@ -446,6 +469,8 @@ class GameRepository {
         .get();
     final hero = await (_db.select(_db.heroes)).getSingleOrNull();
     final grants = await _db.select(_db.rewardGrants).get();
+    final storyRead = await _db.select(_db.storyProgress).get();
+    final storyChoices = await _db.select(_db.storyChoices).get();
     final streaks = await (_db.select(_db.streakRewards)..orderBy([(t) => OrderingTerm.asc(t.days)])).get();
     final data = {
       'app': 'I Am Chad: Fitness RPG',
@@ -473,6 +498,10 @@ class GameRepository {
           'streakXp': hero.streakXp,
           'potionStock': hero.potionStock,
         },
+      'story': {
+        'chaptersRead': [for (final r in storyRead) r.chapter],
+        'choices': {for (final r in storyChoices) r.key: r.option},
+      },
       'streakRewards': [
         for (final r in streaks)
           {'days': r.days, 'claimedAt': r.claimedAt.toIso8601String(), 'coins': r.coins, 'xp': r.xp}

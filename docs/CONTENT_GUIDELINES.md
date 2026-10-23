@@ -37,6 +37,16 @@ The dialogue test (`test/domain/quests_test.dart`) lints Chad's lines for a few 
 - A clear separation between game feedback and professional health advice. The game cannot verify workouts and must not imply it can.
 - Rest as a valid, valued choice. Rest days never reduce progress.
 
+## Story
+
+The story ([STORY.md](STORY.md)) follows the same rules as everything else, and `test/domain/story_test.dart` lints it. In addition:
+
+- It is warm and funny, and the joke is never on the player's body, effort or pace. Chad is the one who gets teased.
+- Nothing in it is timed. No chapter is "limited", "missed" or "overdue", and a chapter that is not open yet says which level opens it, not how far behind anyone is.
+- Choices have no wrong answers and change no rewards. Every option gets a kind reply.
+- Rest, a slow pace and saying "not today" are shown as ordinary and sensible, including by the characters who were once sure otherwise.
+- The player can always skip, leave, or read it again.
+
 ## Enemies
 
 Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They must not personify the player's struggles with their body, weight, laziness or failure.

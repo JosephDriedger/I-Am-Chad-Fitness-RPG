@@ -5,6 +5,7 @@ import '../data/repository.dart';
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/player_state.dart';
+import '../domain/story.dart';
 import '../domain/streaks.dart';
 import '../domain/workout.dart';
 
@@ -46,6 +47,23 @@ final streakProvider = Provider<StreakStatus?>((ref) {
     experience: hero.experience,
   );
 });
+
+final storyReadProvider = StreamProvider<Set<int>>(
+    (ref) => ref.watch(repositoryProvider).watchStoryRead());
+
+final storyChoicesProvider = StreamProvider<Map<String, int>>(
+    (ref) => ref.watch(repositoryProvider).watchStoryChoices());
+
+/// What has opened in the story and what is still unread; null until loaded.
+final storyStatusProvider = Provider<StoryStatus?>((ref) {
+  final player = ref.watch(playerProvider);
+  final read = ref.watch(storyReadProvider).value;
+  if (player == null || read == null) return null;
+  return StoryStatus(level: player.level, read: read);
+});
+
+/// Whether the hall offers an unread chapter by itself. Tests switch it off.
+final storyAutoOfferProvider = Provider<bool>((_) => true);
 
 final activeExpeditionProvider = StreamProvider<ExpeditionProgress?>(
     (ref) => ref.watch(repositoryProvider).watchActiveExpedition());

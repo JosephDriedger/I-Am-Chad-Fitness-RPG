@@ -7,6 +7,7 @@ import '../../app/widgets.dart';
 import '../../domain/quests.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
+import '../story/chronicle_screen.dart';
 import '../workout/log_workout_screen.dart';
 import '../workout/workout_screen.dart';
 
@@ -76,6 +77,8 @@ class QuestsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           const _StreakPanel(),
+          const SizedBox(height: 16),
+          const ChroniclePanel(),
           const SizedBox(height: 16),
           GamePanel(
             title: 'Weekly Goal',

@@ -17,6 +17,7 @@ enum ChadContext {
   streakReward,
   freshStart,
   backDated,
+  newChapter,
 }
 
 class ChadDialogue {
@@ -96,6 +97,12 @@ class ChadDialogue {
           'but the record is yours to keep.',
       'Remembered and written down. Next time, tell me the same day and the '
           'guild will pay up.',
+    ],
+    ChadContext.newChapter: [
+      'A new page has turned in the Chronicle. Read it whenever you like. It '
+          'will keep.',
+      'The Chronicle has something new in it. No hurry, hero. Stories are '
+          'patient.',
     ],
   };
 
