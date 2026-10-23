@@ -9,7 +9,7 @@ Legend: **Done** means implemented and covered by automated tests. **Partial** m
 | # | Deliverable | Exit criterion | Status |
 | --- | --- | --- | --- |
 | 1 | Project skeleton, data models, wireframes | Launches on emulator; records persist locally | **Done**, apart from wireframes (none were produced). Launched and played end to end on an Android emulator (Pixel 10 Pro, Android 17): onboarding, logging, rewards, expeditions and loot, with the save surviving an emulator restart |
-| 2 | Workout catalog and logging | Can log, edit, delete and review workouts | **Done.** 11 activities in 4 categories, timer, units, history. No exercise demonstrations yet |
+| 2 | Workout catalog and logging | Can log, edit, delete and review workouts | **Done.** 11 activities in 4 categories, timer, units, history, an animated demonstration with form cues for every exercise, and a gentle [honesty check](REWARD_RULES.md#honesty-check) on implausible entries |
 | 3 | Onboarding, quests, rewards | Personalised beginner goals and bounded XP work | **Done**, with tuning open. Reward rules are capped and versioned. Personal-baseline scaling is not implemented |
 | 4 | Character, guild, Chad dialogue | Core screens connected with placeholder art | **Done, beyond placeholder.** The guild hall is an animated Flame scene; the hero (hair, outfit, skin tone, equipped gear) and Chad are drawn in code. The Chad tutorial is a welcome screen plus contextual lines, not an interactive intro activity |
 | 5 | Combat and expeditions | One complete repeatable adventure loop | **Done.** Animated Flame battle scenes with effects, a camp event, a boss and a chest finale; synthesized sound and haptics |
@@ -21,13 +21,25 @@ Roughly in priority order.
 
 1. **Run it on a physical phone, and on iOS.** The Android emulator pass found and fixed real problems (portrait framing, reward popups, overlapping text). A physical device will show frame rate, audio latency and haptics, which an emulator can't. iOS has not been built at all.
 2. **Playtest the feel and the numbers.** Combat is probably too easy (a scripted player wins about 90% of level-1 expeditions and 98% or more later), and the animation timings were written blind to a real device. Get human feedback before changing anything.
-3. **Persist an in-progress expedition.** Today, closing the app mid-run loses the run (the 2 energy is already spent). Either save progress or refund energy on an interrupted run.
-4. **More to look at.** More enemies, biomes and hall decoration that reacts to progress (trophies, banners for milestones). A hand-made art pass can replace procedural painters one at a time.
-5. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
-6. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
-7. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
-8. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
-9. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
+3. **First-use guidance in the hall.** A pulsing highlight on Train and a "first steps" line from Chad until the first workout is logged.
+4. **Camera rep checking (spike first).** See the notes below.
+5. **More to look at.** More enemies, biomes and hall decoration that reacts to progress (trophies, banners for milestones). A hand-made art pass can replace procedural painters one at a time.
+6. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
+7. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
+8. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
+9. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
+10. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
+
+### Camera rep checking: notes
+
+The idea is to use the phone camera as the eyes: an optional "Count My Reps" mode that watches the exercise and confirms reps. It fits the GDD's later-phase list and would back up the honesty check with something real. What it would take, and the cautions:
+
+- **How:** on-device pose estimation (for example ML Kit pose detection, or MediaPipe via a plugin) gives body landmarks per frame; a small per-exercise state machine (elbow angle for push-ups, hip and knee angle for squats) counts reps. The demo figure already encodes each exercise's joint motion, so the same description can drive the counter.
+- **Privacy:** frames must be processed live on the device and never saved or sent anywhere, which keeps the "no account, no network" promise. The permission prompt should say so plainly.
+- **Optional, never required:** many people exercise somewhere without a spare place to prop a phone, or are not comfortable on camera. Manual logging must stay equal in rewards.
+- **Count, don't grade:** counting reps is feasible; judging "proper form" reliably from one phone camera is not, and a wrong correction could cause harm or discourage. Start with counting and at most generic cues ("go a little lower"), and get professional input before saying anything stronger.
+- **Scope:** only the bodyweight exercises with a clear side-on motion (push-ups, squats, sit-ups, plank hold time) are good candidates. Walking, running and weights are out.
+- **Testing:** it cannot be properly verified on an emulator. It needs real phones, varied lighting, body types and camera angles, and a fallback when tracking is lost.
 
 ## Backlog
 
@@ -44,7 +56,7 @@ Roughly in priority order.
 
 - Apple HealthKit and Android Health Connect, permission-based.
 - Optional cloud accounts and sync (FastAPI and PostgreSQL), after designing conflict resolution.
-- Camera-based rep recognition, GPS routes and wearables.
+- GPS routes and wearables. (Camera rep checking is under "Next up".)
 - Social and guild features.
 - Larger narrative content and procedural dungeon maps.
 
@@ -52,7 +64,7 @@ Roughly in priority order.
 
 - Verified on an Android emulator and through analysis, unit tests, painter and demo invariant tests, repository and migration tests, and widget flow tests that play a full expedition. **Not yet run on a physical phone or on iOS.**
 - Animation timing and feel were checked in screenshots on the emulator, not by hand on a phone, and **sound and vibration have not been heard or felt** (an emulator has no speaker or motor to judge).
-- Expedition progress is not saved if the app is closed mid-run.
+- An expedition is saved at the start of each step, so closing the app mid-fight replays that fight on resume (nothing is lost).
 - Frame rate on low-end phones is unmeasured. Scenes draw everything with canvas calls each frame, which should be fine at this scale but has not been profiled.
 - The weekly goal counts days with any logged movement and cannot yet be customised.
 - The Android and iOS application id (`com.iamchad.i_am_chad`) is a placeholder.

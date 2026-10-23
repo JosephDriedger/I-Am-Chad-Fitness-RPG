@@ -61,6 +61,10 @@ A single row with `id = 1`.
 
 An append-only history of finished runs: `seed`, `finished_at`, `victory`, `battles_won`, `xp`, `coins`, `loot_item_id`. Expeditions themselves are regenerated from a seed and level, so the full sequence is never stored.
 
+### `active_expeditions`
+
+At most one row (`id = 1`): the expedition in progress, if any. Columns: `seed`, `hero_level`, `step_index`, `hero_hp`, `potions`, `battles_won`, `xp`, `coins`. The row is written when an expedition starts (in the same transaction that spends the energy) and at the start of each step, and deleted when the run is recorded or abandoned. The map, enemies and loot are regenerated from `seed` and `hero_level`, never stored. `deleteEverything()` clears it too.
+
 ### `app_settings`
 
 A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound_on`, `haptics_on`. When the row is missing the app uses defaults (metric, motion on, Chad chatty, sound and vibration on).
@@ -87,7 +91,7 @@ No account, analytics or network calls exist in the app.
 
 ## Migrations
 
-`schemaVersion` is currently **2**. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. When changing a table:
+`schemaVersion` is currently **3**. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
 
 1. Edit the table in `database.dart` and bump `schemaVersion`.
 2. Add the matching step in `MigrationStrategy.onUpgrade`.

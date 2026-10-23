@@ -10,6 +10,7 @@ import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
 import '../../domain/chad.dart';
+import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
@@ -165,12 +166,12 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
         DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
-  Future<void> _save() async {
-    final metric = ref.read(prefsProvider).useMetric;
+  /// The entry as the fields currently describe it.
+  WorkoutEntry _buildEntry(bool metric) {
     final secs = (_int(_minutes) ?? 0) * 60 + (_int(_seconds) ?? 0);
     final dist = _dbl(_distance);
     final load = _dbl(_load);
-    final entry = WorkoutEntry(
+    return WorkoutEntry(
       id: widget.editing?.id,
       activityId: a.id,
       performedAt: _when,
@@ -187,12 +188,54 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       perceivedEffort: _effort,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
     );
+  }
+
+  /// Anything about [entry] that looks unlikely to be real. Never blocks.
+  List<HonestyNote> _honestyNotes(WorkoutEntry entry, bool metric) {
+    if (!entry.hasMeasurement) return const [];
+    final day = dayKey(entry.performedAt);
+    final sameDay = (ref.read(workoutsProvider).value ?? const <WorkoutEntry>[])
+        .where((w) => dayKey(w.performedAt) == day);
+    return const HonestyCheck().review(entry, sameDay: sameDay, metric: metric);
+  }
+
+  Future<void> _save() async {
+    final metric = ref.read(prefsProvider).useMetric;
+    final entry = _buildEntry(metric);
 
     if (!entry.hasMeasurement) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Add at least a time, some reps, or a distance.'),
       ));
       return;
+    }
+
+    final concerns = _honestyNotes(entry, metric);
+    if (concerns.isNotEmpty) {
+      final accurate = await showGameDialog<bool>(
+        context: context,
+        title: 'Quick Honesty Check',
+        content: _HonestyContent(notes: concerns),
+        actions: [
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'Let Me Fix It',
+              icon: Icons.edit_rounded,
+              kind: GameButtonKind.secondary,
+              onPressed: () => Navigator.of(ctx).pop(false),
+            ),
+          ),
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'It\'s Accurate',
+              icon: Icons.check_circle,
+              kind: GameButtonKind.positive,
+              onPressed: () => Navigator.of(ctx).pop(true),
+            ),
+          ),
+        ],
+      );
+      if (accurate != true || !mounted) return;
     }
 
     setState(() => _saving = true);
@@ -346,7 +389,20 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          ListenableBuilder(
+            listenable: Listenable.merge([_sets, _reps, _minutes, _seconds, _distance]),
+            builder: (context, _) {
+              final notes = _honestyNotes(_buildEntry(prefs.useMetric), prefs.useMetric);
+              if (notes.isEmpty) return const SizedBox(height: 16);
+              return Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 16),
+                child: GamePanel(
+                  color: const Color(0xFFFFE3B8),
+                  child: _HonestyContent(notes: notes, compact: true),
+                ),
+              );
+            },
+          ),
           GamePanel(
             title: 'Journal Entry',
             child: Column(
@@ -430,6 +486,49 @@ class _MaxValueFormatter extends TextInputFormatter {
   TextEditingValue formatEditUpdate(TextEditingValue old, TextEditingValue next) {
     final v = int.tryParse(next.text);
     return v != null && v > max ? old : next;
+  }
+}
+
+/// What looks off about an entry, and a reminder that only the player knows.
+/// Shown live under the fields ([compact]) and again when saving.
+class _HonestyContent extends StatelessWidget {
+  const _HonestyContent({required this.notes, this.compact = false});
+
+  final List<HonestyNote> notes;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(color: GameColors.ink, fontWeight: FontWeight.w600);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.visibility_rounded, color: GameColors.goldDark),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                compact ? 'Does This Look Right?' : 'This Looks Unusual',
+                style: gameTitle(18, color: GameColors.ink),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        for (final n in notes) ...[
+          Text(n.text, style: style),
+          const SizedBox(height: 8),
+        ],
+        Text(
+          'Nobody checks but you. The game only works if your log is true, '
+          'and your real progress is the whole point. A typo is fine; nothing '
+          'bad happens either way.',
+          style: TextStyle(color: GameColors.inkSoft, fontSize: compact ? 13 : 14),
+        ),
+      ],
+    );
   }
 }
 

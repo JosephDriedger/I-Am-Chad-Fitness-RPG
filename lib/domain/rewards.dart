@@ -45,27 +45,35 @@ class RewardRules {
   /// Variants, load and perceived effort deliberately do not matter: an easier
   /// version of an exercise earns exactly the same as a harder one.
   double effortMinutes(WorkoutEntry e) {
+    final minutes = unflooredEffortMinutes(e);
+    if (minutes <= 0) return 0;
+    return minutes < minEffortPerEntry ? minEffortPerEntry : minutes;
+  }
+
+  /// What the entry is worth before the "showing up counts" minimum applies.
+  /// The honesty check uses this to spot entries that are implausibly short.
+  double unflooredEffortMinutes(WorkoutEntry e) {
     final a = e.activity;
     if (a == null || !e.hasMeasurement) return 0;
 
-    double minutes;
     if ((e.durationSeconds ?? 0) > 0) {
-      minutes = e.durationSeconds! / 60 * a.effortFactor;
+      var minutes = e.durationSeconds! / 60 * a.effortFactor;
       if (a.metrics.contains(Metric.sets) && (e.sets ?? 1) > 1) {
         // Timed holds (e.g. plank) record the total hold per set.
         minutes = minutes * (e.sets ?? 1);
       }
-    } else if ((e.reps ?? 0) > 0) {
+      return minutes;
+    }
+    if ((e.reps ?? 0) > 0) {
       final sets = (e.sets ?? 1).clamp(1, 20);
       final seconds = sets * e.reps! * a.secondsPerRep +
           (sets - 1) * restAllowancePerExtraSetSeconds;
-      minutes = seconds / 60 * a.effortFactor;
-    } else if ((e.distanceMeters ?? 0) > 0 && a.minutesPerKm != null) {
-      minutes = e.distanceMeters! / 1000 * a.minutesPerKm! * a.effortFactor;
-    } else {
-      return 0;
+      return seconds / 60 * a.effortFactor;
     }
-    return minutes < minEffortPerEntry ? minEffortPerEntry : minutes;
+    if ((e.distanceMeters ?? 0) > 0 && a.minutesPerKm != null) {
+      return e.distanceMeters! / 1000 * a.minutesPerKm! * a.effortFactor;
+    }
+    return 0;
   }
 
   /// Total credited minutes for a day's raw effort, with diminishing returns.

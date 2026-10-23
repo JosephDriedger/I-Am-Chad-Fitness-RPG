@@ -224,7 +224,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   Future<bool> _confirmLeave() async {
     final choice = await showGameDialog<String>(
       context: context,
-      title: 'Retreat from the Expedition?',
+      title: widget.practice ? 'Retreat from the Duel?' : 'Retreat from the Expedition?',
       content: Text(widget.practice
           ? 'It is only practice, so nothing is lost.'
           : 'You keep everything earned so far, and you can also leave and '
