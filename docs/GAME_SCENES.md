@@ -109,7 +109,9 @@ Logging a workout opens with an animated "How to Do It" card (`lib/game/demo/exe
 - **Props.** Wall, bench, chair, mat, dumbbells and barbell where they belong.
 - **Cues that follow the motion.** Each demo has three or so cues ("Hands under your shoulders", "Lower slowly", "Press back up, breathe out as you push") that change as the figure moves, plus a note pointing to easier versions.
 - **Pause, or step through.** A play/pause button; with Reduce Motion on, the demo shows still key poses with a "Next Pose" button instead of looping.
-- **Covers everything.** All 11 activities and every variant listed in the catalog. A test fails if a new variant is added without a demo.
+- **Covers everything.** All 79 exercises and every variant listed in the catalog. A test fails if an exercise or variant is added without a demo.
+- **A keyframe rig for the big catalog.** The first eleven are hand-built poses. The rest use `_rig` (`demo_rig.dart`): each keyframe gives a torso position and lean plus where the hands and feet should be, the targets are blended, and the same IK solves the limbs. Poses live in `demo_standing.dart`, `demo_floor.dart`, `demo_weights.dart` and `demo_gear.dart`, props in `demo_props.dart`, and the entry for each id (title, three cues, props) in `demo_catalog.dart`. Seen from the side, a few moves (jumping jacks, side lunges, lateral raises, side bends, butterfly stretch) are drawn face-on and say so in their note.
+- **Look at them.** `test/tool/demo_sheet_test.dart` draws every demo at four moments of its loop into a contact sheet PNG, which is how the whole catalog was checked by eye. See [Exercise catalog](EXERCISE_CATALOG.md#adding-an-exercise).
 
 `test/game/exercise_demo_test.dart` checks every demo: limb lengths never change, nothing leaves the frame or sinks below the floor, no joint jumps between frames (including across the loop point), and each exercise actually moves.
 

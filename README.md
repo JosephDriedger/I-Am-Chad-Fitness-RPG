@@ -23,7 +23,8 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 | Guild hall (Flame scene) | Done. Tap the quest board, bookshelf, gate, training dummy or armour stand; the hero walks over and the screen opens. Day and night lighting, and Chad reacts to your day |
 | Onboarding and character creation | Done (name, hair style, outfit colour, skin tone, experience level, preferences) |
 | Workout logging (bodyweight, cardio, resistance, mobility) | Done, with edit, delete, timer and unit settings |
-| Exercise demonstrations | Done. A looping animated figure with step-by-step cues for all 11 exercises and every easier variant (wall, incline and knee push-ups, chair squats, small crunches, and more) |
+| Exercise catalog | Done. **79 exercises** in 6 categories (Bodyweight, Core, Cardio, Resistance, Mobility & Recovery, Sports & Play), searchable and filterable, with an "At Home Only" switch. See the [exercise catalog](docs/EXERCISE_CATALOG.md) |
+| Exercise demonstrations | Done. Every exercise has a looping animated figure with step-by-step cues, props (bars, benches, machines, bikes, water) and easier variants (wall, incline and knee push-ups, chair squats, small crunches, and more) |
 | Camera rep counting (push-ups and squats) | First version built and run on an Android emulator, **not yet tried on a real person**. Needs a phone stand; counts reps on-device with generous leeway for beginners, never saves video, and is optional. See [camera notes](docs/ROADMAP.md#camera-rep-checking) |
 | Honesty check on implausible entries | Done. A friendly warning, never a lock |
 | Expedition resume | Done. Leave mid-run and pick it up later |

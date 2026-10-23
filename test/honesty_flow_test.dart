@@ -23,8 +23,7 @@ Future<(AppDatabase, GameRepository)> _boot(WidgetTester tester) async {
   await bootApp(tester, db, now: DateTime(2026, 10, 22, 10));
   await tester.tap(find.text('Train'));
   await settle(tester, frames: 30);
-  await tester.tap(find.text('Walking'));
-  await settle(tester);
+  await openExercise(tester, 'Walking');
   return (db, repo);
 }
 
@@ -108,8 +107,7 @@ void main() {
     await bootApp(tester, db, now: DateTime(2026, 10, 22, 10));
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    await tester.tap(find.text('Push-ups'));
-    await settle(tester);
+    await openExercise(tester, 'Push-ups');
     await tester.enterText(find.widgetWithText(TextField, 'Sets'), '1');
     await tester.enterText(find.widgetWithText(TextField, 'Reps per Set'), '2');
     await settle(tester);

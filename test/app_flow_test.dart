@@ -66,9 +66,7 @@ void main() {
     // Train: the hero walks to the dummy, then the log screen opens.
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    expect(find.text('Walking'), findsOneWidget);
-    await tester.tap(find.text('Walking'));
-    await settle(tester);
+    await openExercise(tester, 'Walking');
     await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '10');
     await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Save Workout'));
@@ -109,8 +107,7 @@ void main() {
 
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    await tester.tap(find.text('Push-ups'));
-    await settle(tester);
+    await openExercise(tester, 'Push-ups');
     await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('Save Workout'));
     await settle(tester);
