@@ -146,7 +146,7 @@ void paintStoryCast(
 
   final n = cast.length;
   for (var i = 0; i < n; i++) {
-    final x = size.width * (0.22 + 0.44 * (n == 1 ? 0.5 : i / (n - 1)));
+    final x = size.width * (0.27 + 0.39 * (n == 1 ? 0.5 : i / (n - 1)));
     actor(cast[i], x, forward: cast[i] == speaking);
   }
   // Painted facing right, so mirror the hero to face the others.
