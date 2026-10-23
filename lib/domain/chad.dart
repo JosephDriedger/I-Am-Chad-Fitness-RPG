@@ -16,6 +16,7 @@ enum ChadContext {
   capReached,
   streakReward,
   freshStart,
+  backDated,
 }
 
 class ChadDialogue {
@@ -89,6 +90,12 @@ class ChadDialogue {
       'A fresh start is a good start. Your best run is still on the wall, and '
           'so are you.',
       'Welcome back, hero. The guild kept your chair warm.',
+    ],
+    ChadContext.backDated: [
+      'Into the chronicle it goes. Rewards are for what you log on the day, '
+          'but the record is yours to keep.',
+      'Remembered and written down. Next time, tell me the same day and the '
+          'guild will pay up.',
     ],
   };
 

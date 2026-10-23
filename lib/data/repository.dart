@@ -8,6 +8,7 @@ import '../domain/hero.dart';
 import '../domain/items.dart';
 import '../domain/player_state.dart';
 import '../domain/rewards.dart';
+import '../domain/shop.dart';
 import '../domain/streaks.dart';
 import '../domain/workout.dart';
 import 'database.dart';
@@ -42,8 +43,12 @@ class GameRepository {
     await _db.transaction(() async {
       final old = await (_db.select(_db.workouts)..where((t) => t.id.equals(id)))
           .getSingleOrNull();
+      // When an entry was logged never changes, and an old entry from before
+      // that was recorded counts as logged when it was performed. So moving a
+      // workout to an earlier day makes it a back-dated one.
+      final logged = old?.loggedAt ?? old?.performedAt ?? e.loggedAt;
       await (_db.update(_db.workouts)..where((t) => t.id.equals(id)))
-          .write(_toCompanion(e));
+          .write(_toCompanion(e.copyWith(loggedAt: logged)));
       await _recomputeDay(e.performedAt);
       if (old != null && dayKey(old.performedAt) != dayKey(e.performedAt)) {
         await _recomputeDay(old.performedAt);
@@ -80,11 +85,13 @@ class GameRepository {
   Future<void> _recomputeDay(DateTime t) async {
     final key = dayKey(t);
     final rows = await _workoutsOnDay(t);
-    if (rows.isEmpty) {
+    // Back-dated workouts are kept in the journal but earn nothing.
+    final eligible = rows.map(_toEntry).where((e) => e.countsForRewards).toList();
+    if (eligible.isEmpty) {
       await (_db.delete(_db.rewardGrants)..where((g) => g.day.equals(key))).go();
       return;
     }
-    final r = rules.rewardForDay(rows.map(_toEntry));
+    final r = rules.rewardForDay(eligible);
     await _db.into(_db.rewardGrants).insertOnConflictUpdate(
           RewardGrantsCompanion.insert(
             day: key,
@@ -178,10 +185,20 @@ class GameRepository {
 
   /// Spends the energy and saves the starting point in one step, so closing
   /// the app at any moment can never lose the energy without the expedition.
-  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost}) {
+  ///
+  /// [broughtPotions] come out of the potion pouch and are part of
+  /// `p.potions`. Any not used come back when the expedition ends.
+  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost, int broughtPotions = 0}) {
     return _db.transaction(() async {
       await spendEnergy(energyCost);
       await saveExpeditionProgress(p);
+      if (broughtPotions > 0) {
+        await _db.customUpdate(
+          'UPDATE heroes SET potion_stock = MAX(0, potion_stock - ?) WHERE id = 1',
+          variables: [Variable.withInt(broughtPotions)],
+          updates: {_db.heroes},
+        );
+      }
     });
   }
 
@@ -221,6 +238,7 @@ class GameRepository {
     required int xp,
     required int coins,
     required String lootItemId,
+    int potionsLeft = 0,
   }) {
     return _db.transaction(() async {
       var newItem = false;
@@ -259,6 +277,15 @@ class GameRepository {
         ],
         updates: {_db.heroes},
       );
+      // Unused pouch potions come home with the hero.
+      final back = Shop.potionsReturned(potionsLeft);
+      if (back > 0) {
+        await _db.customUpdate(
+          'UPDATE heroes SET potion_stock = MIN(?, potion_stock + ?) WHERE id = 1',
+          variables: [Variable.withInt(Shop.potionPouchMax), Variable.withInt(back)],
+          updates: {_db.heroes},
+        );
+      }
       return newItem;
     });
   }
@@ -268,6 +295,46 @@ class GameRepository {
         variables: [Variable.withInt(coins)],
         updates: {_db.heroes},
       );
+
+  // ---- Shop ---------------------------------------------------------------
+
+  /// Buys a piece of gear with coins. Nothing is charged unless it is bought.
+  Future<PurchaseResult> buyItem(String itemId) {
+    return _db.transaction(() async {
+      final price = Shop.priceOf(itemId);
+      if (price == null || ItemCatalog.byId(itemId) == null) return PurchaseResult.unavailable;
+      final hero = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (hero == null) return PurchaseResult.unavailable;
+      final owned = await (_db.select(_db.ownedItems)..where((o) => o.itemId.equals(itemId))).getSingleOrNull();
+      if (owned != null) return PurchaseResult.alreadyOwned;
+      if (hero.coins < price) return PurchaseResult.notEnoughCoins;
+      await _db.customUpdate(
+        'UPDATE heroes SET coins = coins - ? WHERE id = 1',
+        variables: [Variable.withInt(price)],
+        updates: {_db.heroes},
+      );
+      await _db.into(_db.ownedItems).insert(
+            OwnedItemsCompanion.insert(itemId: itemId, acquiredAt: DateTime.now()),
+          );
+      return PurchaseResult.bought;
+    });
+  }
+
+  /// Buys one healing potion for the pouch.
+  Future<PurchaseResult> buyPotion() {
+    return _db.transaction(() async {
+      final hero = await (_db.select(_db.heroes)..where((h) => h.id.equals(1))).getSingleOrNull();
+      if (hero == null) return PurchaseResult.unavailable;
+      if (hero.potionStock >= Shop.potionPouchMax) return PurchaseResult.pouchFull;
+      if (hero.coins < Shop.potionPrice) return PurchaseResult.notEnoughCoins;
+      await _db.customUpdate(
+        'UPDATE heroes SET coins = coins - ?, potion_stock = potion_stock + 1 WHERE id = 1',
+        variables: [Variable.withInt(Shop.potionPrice)],
+        updates: {_db.heroes},
+      );
+      return PurchaseResult.bought;
+    });
+  }
 
   // ---- Streaks ------------------------------------------------------------
 
@@ -404,6 +471,7 @@ class GameRepository {
           'coins': hero.coins,
           'victories': hero.victories,
           'streakXp': hero.streakXp,
+          'potionStock': hero.potionStock,
         },
       'streakRewards': [
         for (final r in streaks)
@@ -437,6 +505,7 @@ class GameRepository {
         perceivedEffort: r.perceivedEffort,
         notes: r.notes,
         cameraCounted: r.cameraCounted,
+        loggedAt: r.loggedAt,
       );
 
   static WorkoutsCompanion _toCompanion(WorkoutEntry e) => WorkoutsCompanion(
@@ -451,6 +520,7 @@ class GameRepository {
         perceivedEffort: Value(e.perceivedEffort),
         notes: Value(e.notes),
         cameraCounted: Value(e.cameraCounted),
+        loggedAt: Value(e.loggedAt),
       );
 
   static HeroProfile _toHero(HeroRow r) => HeroProfile(
@@ -473,5 +543,6 @@ class GameRepository {
         coins: r.coins,
         victories: r.victories,
         streakXp: r.streakXp,
+        potionStock: r.potionStock,
       );
 }

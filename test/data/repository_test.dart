@@ -72,11 +72,18 @@ void main() {
   });
 
   test('moving a workout to another day fixes both days', () async {
+    final yesterday = today.subtract(const Duration(days: 1));
+    await repo.addWorkout(_walk(yesterday, 10)); // an untouched day with its own reward
     final id = await repo.addWorkout(_walk(today, 10));
-    final tomorrow = today.add(const Duration(days: 1));
-    await repo.updateWorkout(_walk(tomorrow, 10).copyWith(id: id));
+    expect((await repo.watchGrants().first).map((g) => g.day).toSet(), {'2026-10-21', '2026-10-22'});
+
+    // Moved to the day before, it is a back-dated entry: it stays in the
+    // journal but earns nothing. Today loses its reward, yesterday keeps its own.
+    await repo.updateWorkout(_walk(yesterday, 10).copyWith(id: id));
     final days = (await repo.watchGrants().first).map((g) => g.day).toList();
-    expect(days, ['2026-10-23']);
+    expect(days, ['2026-10-21']);
+    expect((await repo.watchGrants().first).single.xp, 40, reason: 'only the first walk is paid');
+    expect(await repo.watchWorkouts().first, hasLength(2));
   });
 
   test('deleting the last workout of a day removes that day\'s reward',

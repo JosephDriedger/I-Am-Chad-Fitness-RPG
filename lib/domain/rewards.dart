@@ -91,6 +91,8 @@ class RewardRules {
   DayReward rewardForDay(Iterable<WorkoutEntry> entries) {
     var raw = 0.0;
     for (final e in entries) {
+      // Back-dated workouts are for the journal only.
+      if (!e.countsForRewards) continue;
       raw += effortMinutes(e);
     }
     final credited = creditedMinutes(raw);

@@ -36,6 +36,7 @@ class HeroProfile {
     this.coins = 0,
     this.victories = 0,
     this.streakXp = 0,
+    this.potionStock = 0,
   });
 
   final String name;
@@ -55,6 +56,9 @@ class HeroProfile {
   /// XP paid out for streak milestones.
   final int streakXp;
 
+  /// Healing potions in the pouch, bought from the shop.
+  final int potionStock;
+
   HeroProfile copyWith({
     String? name,
     int? appearanceStyle,
@@ -68,6 +72,7 @@ class HeroProfile {
     int? coins,
     int? victories,
     int? streakXp,
+    int? potionStock,
   }) =>
       HeroProfile(
         name: name ?? this.name,
@@ -82,6 +87,7 @@ class HeroProfile {
         coins: coins ?? this.coins,
         victories: victories ?? this.victories,
         streakXp: streakXp ?? this.streakXp,
+        potionStock: potionStock ?? this.potionStock,
       );
 }
 

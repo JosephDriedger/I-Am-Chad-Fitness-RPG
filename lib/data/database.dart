@@ -20,6 +20,9 @@ class Workouts extends Table {
 
   /// The reps were counted by the camera rather than typed in.
   BoolColumn get cameraCounted => boolean().withDefault(const Constant(false))();
+
+  /// When the workout was entered. Null for entries from before this was kept.
+  DateTimeColumn get loggedAt => dateTime().nullable()();
 }
 
 /// One derived reward per local day, stamped with the rules version used.
@@ -58,6 +61,9 @@ class Heroes extends Table {
 
   /// XP from streak rewards (activity XP is derived; this is paid out once).
   IntColumn get streakXp => integer().withDefault(const Constant(0))();
+
+  /// Healing potions bought from the shop and kept in the pouch.
+  IntColumn get potionStock => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -158,7 +164,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -179,6 +185,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await m.createTable(streakRewards);
             await m.addColumn(heroes, heroes.streakXp);
+          }
+          if (from < 6) {
+            await m.addColumn(workouts, workouts.loggedAt);
+            await m.addColumn(heroes, heroes.potionStock);
           }
         },
         beforeOpen: (details) async {

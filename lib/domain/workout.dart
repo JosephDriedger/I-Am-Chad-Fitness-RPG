@@ -18,6 +18,7 @@ class WorkoutEntry {
     this.perceivedEffort,
     this.notes,
     this.cameraCounted = false,
+    this.loggedAt,
   });
 
   final int? id;
@@ -41,6 +42,25 @@ class WorkoutEntry {
   /// are the same either way; this only marks the entry in the journal.
   final bool cameraCounted;
 
+  /// When the workout was entered into the game. Null for entries from before
+  /// this was recorded, which count as logged when they were performed.
+  final DateTime? loggedAt;
+
+  /// A workout can be logged late for the journal, but only earns rewards
+  /// (XP, energy, streaks, quests, the weekly goal) if it was logged on the day
+  /// it happened, or within [rewardGrace] after it, so a late-night session
+  /// logged just after midnight still counts. See docs/REWARD_RULES.md.
+  static const rewardGrace = Duration(hours: 6);
+
+  bool get countsForRewards {
+    final logged = loggedAt;
+    if (logged == null) return true;
+    // Dated in the future is never a real workout.
+    if (performedAt.isAfter(logged.add(const Duration(minutes: 10)))) return false;
+    if (dayKey(performedAt) == dayKey(logged)) return true;
+    return logged.difference(performedAt) <= rewardGrace;
+  }
+
   ActivityType? get activity => ActivityCatalog.byId(activityId);
 
   /// True when the entry holds enough data to be worth saving.
@@ -62,6 +82,7 @@ class WorkoutEntry {
     int? perceivedEffort,
     String? notes,
     bool? cameraCounted,
+    DateTime? loggedAt,
   }) =>
       WorkoutEntry(
         id: id ?? this.id,
@@ -76,6 +97,7 @@ class WorkoutEntry {
         perceivedEffort: perceivedEffort ?? this.perceivedEffort,
         notes: notes ?? this.notes,
         cameraCounted: cameraCounted ?? this.cameraCounted,
+        loggedAt: loggedAt ?? this.loggedAt,
       );
 
   Map<String, Object?> toJson() => {
@@ -91,6 +113,8 @@ class WorkoutEntry {
         'perceivedEffort': perceivedEffort,
         'notes': notes,
         'cameraCounted': cameraCounted,
+        'loggedAt': loggedAt?.toIso8601String(),
+        'countsForRewards': countsForRewards,
       };
 
   /// Short human summary, e.g. "2 × 8 · Wall" or "10 min · 1.2 km".

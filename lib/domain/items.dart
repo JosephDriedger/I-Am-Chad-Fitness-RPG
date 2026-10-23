@@ -1,4 +1,5 @@
-/// Equipment earned through play. Never sold; bonuses are deliberately small.
+/// Equipment, earned from expeditions or bought with coins in the Guild Shop
+/// (see shop.dart). Bonuses are deliberately small.
 library;
 
 enum EquipmentSlot {

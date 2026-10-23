@@ -176,6 +176,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
         xp: _run.xp,
         coins: _run.coins,
         lootItemId: _run.expedition.lootItemId,
+        potionsLeft: _run.potions,
       );
     }
     if (mounted) setState(() {});

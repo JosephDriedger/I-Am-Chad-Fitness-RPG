@@ -161,7 +161,7 @@ class StreakRules {
     final now = _dayNumber(today);
     final days = <int>{
       for (final w in workouts)
-        if (w.hasMeasurement && _dayNumber(w.performedAt) <= now) _dayNumber(w.performedAt),
+        if (w.hasMeasurement && w.countsForRewards && _dayNumber(w.performedAt) <= now) _dayNumber(w.performedAt),
     }.toList()
       ..sort();
 

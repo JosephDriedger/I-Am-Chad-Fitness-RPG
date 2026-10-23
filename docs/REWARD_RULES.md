@@ -124,8 +124,34 @@ Added after the original design, in a form that fits the rest of this document. 
 | every 100 after | Legendary Run | 500 | 600 |
 
 - **They reward consistency, not volume.** A milestone is reached by being active on enough days, which any amount of movement satisfies, so it never pushes anyone to do more in a day. The daily XP and energy cap is untouched, and streak XP is paid on top as a small, occasional extra (the early ones are well under one day's maximum of 120).
-- **Paid once, never revoked.** Rewards go into `streak_rewards` in the same transaction that adds the coins and XP. If a workout is deleted afterwards the reward stays, and rebuilding the same streak does not pay again. The cost is that someone could back-date a workout to claim a reward; since the game is single-player and the rewards are small, that is accepted (the [honesty check](#honesty-check) still applies).
+- **Paid once, never revoked.** Rewards go into `streak_rewards` in the same transaction that adds the coins and XP. If a workout is deleted afterwards the reward stays, and rebuilding the same streak does not pay again. Only workouts logged on the day they happened count toward a streak, so a streak cannot be built by back-dating (see [back-dated workouts](#back-dated-workouts)).
 - **Where it shows.** A flame and count on the hall HUD, a Streak panel on the quest board (current, best, progress to the next reward, and the rest-day rule), the "Streak Reward!" card in the workout-saved dialog, and a "From Streaks" line in the hero's records.
+
+## Back-dated workouts
+
+A workout can be logged for a day that has already passed, so the journal stays honest and complete. But rewards are for what you do **now**, so a back-dated workout earns nothing.
+
+- **The rule.** A workout counts for rewards only if it was *logged on the day it happened*, or within **6 hours** after it (so a late-night session logged just after midnight still counts). Anything dated in the future never counts. The check is `WorkoutEntry.countsForRewards`, from the time the workout happened and the time it was entered (`logged_at`).
+- **What it covers.** XP and energy for the day, the streak and its milestone rewards, quest completion and the weekly goal. A back-dated entry is still in the journal (tagged "Journal Only"), the history totals and the export.
+- **Edits cannot get around it.** The logged-at time is set once and never changes. Moving a real workout to an earlier day turns it into a back-dated one and removes its reward; moving it back restores it. Older entries from before logged-at times were kept count as logged when they were performed.
+- **The player is told.** Picking an earlier day on the log screen shows "Back-dated: this goes in your journal but earns no rewards", and saving shows "Saved to Your Journal" instead of a reward.
+- **What it does not stop.** The game runs offline, so someone can still change their phone's clock. It cannot be prevented without a server, and it is a single-player game.
+
+## Coins and the shop
+
+Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), practice duels, and streak milestones. The **Guild Shop** (`lib/domain/shop.dart`) is where they are spent. Nothing in it is random, nothing costs real money, and there is no way to buy XP or energy.
+
+| For sale | Price | Notes |
+| --- | --- | --- |
+| Starter gear: Hero's Sweatband, Guild Tunic, Practice Sword | 60 | Small bonuses |
+| Lucky Pebble | 70 | |
+| Upgrade gear: Wayfarer Cap, Trailblazer Vest | 220 | |
+| Upgrade gear: Iron Blade, Stopwatch Charm | 240 | |
+| Healing Potion | 25 each | Up to 5 in the pouch |
+
+- **Gear** is also found as expedition loot, so buying is never the only way, and a duplicate drop pays 10 coins back. The bonuses are deliberately small and unchanged.
+- **Potions.** Every expedition starts with 2 free potions. Up to **3** more come from the pouch, on top. Pouch potions are used last, so any that are not needed come home again when the expedition ends (including after a retreat or an abandon). Potions are taken from the pouch and the expedition saved in one step, so closing the app can never lose them.
+- **Purchases are atomic.** Coins are only taken if the item is actually bought, and you cannot buy what you own or overfill the pouch.
 
 ## Versioning and history
 

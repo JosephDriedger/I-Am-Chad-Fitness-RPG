@@ -223,7 +223,17 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       perceivedEffort: _effort,
       notes: _notes.text.trim().isEmpty ? null : _notes.text.trim(),
       cameraCounted: _cameraCounted,
+      // Entered now; an entry being edited keeps the time it was first logged.
+      loggedAt: widget.editing == null ? ref.read(clockProvider)() : widget.editing!.loggedAt,
     );
+  }
+
+  /// Whether this workout, dated as it is now, would earn rewards. A workout
+  /// moved to an earlier day is back-dated: journal only.
+  bool get _earnsRewards {
+    final e = widget.editing;
+    final logged = e == null ? ref.read(clockProvider)() : (e.loggedAt ?? e.performedAt);
+    return WorkoutEntry(activityId: a.id, performedAt: _when, loggedAt: logged).countsForRewards;
   }
 
   /// Anything about [entry] that looks unlikely to be real. Never blocks.
@@ -282,6 +292,38 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       await repo.addWorkout(entry);
     } else {
       await repo.updateWorkout(entry);
+    }
+    if (!_earnsRewards) {
+      // Back-dated: saved for the journal, nothing to pay.
+      if (!mounted) return;
+      await showGameDialog<void>(
+        context: context,
+        title: 'Saved to Your Journal',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This workout was from an earlier day, so it is in your journal but earns no rewards. '
+              'Rewards are for workouts you log on the day you do them.',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 14),
+            ChadBubble(text: ChadDialogue.line(ChadContext.backDated, seed: entry.performedAt.day)),
+          ],
+        ),
+        actions: [
+          Builder(
+            builder: (ctx) => GameButton(
+              label: 'Got It',
+              icon: Icons.check_circle,
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ),
+        ],
+      );
+      if (mounted) Navigator.of(context).pop();
+      return;
     }
     final reward = await repo.rewardForDay(entry.performedAt);
     // Pay any streak milestone this workout has reached. Never takes anything away.
@@ -515,6 +557,30 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                   trailing: const Icon(Icons.edit_calendar_outlined),
                   onTap: _pickWhen,
                 ),
+                if (!_earnsRewards)
+                  Container(
+                    margin: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE3B8),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: GameColors.goldDark, width: 2),
+                    ),
+                    child: const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(Icons.history_toggle_off_rounded, color: GameColors.goldDark),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Back-dated: this goes in your journal but earns no rewards. '
+                            'Rewards are for workouts you log on the day you do them.',
+                            style: TextStyle(fontWeight: FontWeight.w700, color: GameColors.ink),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

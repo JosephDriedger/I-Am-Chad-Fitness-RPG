@@ -26,6 +26,8 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 | Exercise catalog | Done. **79 exercises** in 6 categories (Bodyweight, Core, Cardio, Resistance, Mobility & Recovery, Sports & Play), searchable and filterable, with an "At Home Only" switch. See the [exercise catalog](docs/EXERCISE_CATALOG.md) |
 | Exercise demonstrations | Done. Every exercise has a looping animated figure with step-by-step cues, props (bars, benches, machines, bikes, water) and easier variants (wall, incline and knee push-ups, chair squats, small crunches, and more) |
 | Camera rep counting (push-ups and squats) | First version built and run on an Android emulator, **not yet tried on a real person**. Needs a phone stand; counts reps on-device with generous leeway for beginners, never saves video, and is optional. See [camera notes](docs/ROADMAP.md#camera-rep-checking) |
+| Guild Shop | Done. Spend coins on gear and healing potions (a pouch of up to 5, with up to 3 taken on each expedition and unused ones returned) |
+| Back-dating | Done. Past workouts can be logged for the journal but earn no rewards, streaks or quest credit |
 | Streaks | Done. Days active in a row, with rest days built in. Milestone rewards of coins and XP from 3 days up to a year, shown on the hall HUD and the quest board. Never a countdown, never lost |
 | Honesty check on implausible entries | Done. A friendly warning, never a lock |
 | Expedition resume | Done. Leave mid-run and pick it up later |
