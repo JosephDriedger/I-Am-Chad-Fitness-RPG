@@ -100,7 +100,8 @@ Before committing, `flutter analyze` should report no issues and `flutter test` 
 
 - Platforms enabled: Android and iOS (per the GDD), plus web for development previews only. Desktop is not set up, so `flutter run -d windows` will not work without adding that platform.
 - The generated Android/iOS application id is the placeholder `com.iamchad.i_am_chad`. Change it before any store submission.
-- On Windows without the Android toolchain, only analysis and tests can be run.
+- `android/gradle.properties` sets `kotlin.incremental=false`. When the project and the Flutter package cache are on different drives, plugin Kotlin compiles otherwise fail with "Could not close incremental caches".
+- To run on an emulator: `flutter emulators --launch <id>`, then `flutter run -d <device>`. Analysis and tests need no emulator.
 
 ## Commits
 

@@ -2,7 +2,7 @@
 
 A cross-platform mobile fitness RPG that turns real-world exercise into fantasy adventures. Complete workouts, develop your character, battle enemies, and embark on endless quests while building healthy fitness habits. Every hero starts somewhere!
 
-> **Status:** early prototype (pre-alpha). The core loop is playable end to end, and it looks and feels like a game: you walk around an animated guild hall, battles play out as animated scenes with effects and sound, and loot comes out of a chest. All art is drawn in code and all sound is synthesized, so nothing is borrowed. "I Am Chad" is a working title pending trademark clearance.
+> **Status:** early prototype (pre-alpha). The core loop is playable end to end and has been played through on an Android emulator, and it looks and feels like a game: you walk around an animated guild hall, battles play out as animated scenes with effects and sound, and loot comes out of a chest. All art is drawn in code and all sound is synthesized, so nothing is borrowed. "I Am Chad" is a working title pending trademark clearance.
 
 ## The idea
 
@@ -23,6 +23,7 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 | Guild hall (Flame scene) | Done. Tap the quest board, bookshelf, gate, training dummy or armour stand; the hero walks over and the screen opens. Day and night lighting, and Chad reacts to your day |
 | Onboarding and character creation | Done (name, hair style, outfit colour, skin tone, experience level, preferences) |
 | Workout logging (bodyweight, cardio, resistance, mobility) | Done, with edit, delete, timer and unit settings |
+| Exercise demonstrations | Done. A looping animated figure with step-by-step cues for all 11 exercises and every easier variant (wall, incline and knee push-ups, chair squats, small crunches, and more) |
 | Reward rules (XP and energy, daily cap, diminishing returns) | Done, versioned, explained to the player after each log |
 | History and 7-day effort chart | Done |
 | Quests (daily suggestions, flexible weekly goal) | Done |

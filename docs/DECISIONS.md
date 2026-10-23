@@ -104,3 +104,19 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 
 **Decision:** The web platform and `sqlite3.wasm` were added so scenes can be reviewed in a browser. The shipped targets remain Android and iOS.
 **Why:** The dev machine has no Android emulator, and visual work needs eyes on it. Preview modes (`--dart-define=PREVIEW=...`) jump to scenes with a seeded hero.
+
+## 20. Exercise demonstrations are drawn with a jointed figure, not video
+
+**Decision:** Each exercise has an animated figure with fixed limb lengths and IK-planted hands and feet, plus cues that follow the motion. It follows the chosen variant and wears the player's look.
+**Why:** The GDD asks for original or licensed demonstrations with form cues and easier alternatives. Drawing them in code avoids licensing, keeps the app small, shows variants accurately, and lets tests prove the figure never breaks (limb lengths, floor contact, smooth motion).
+**Trade-off:** A stylised figure shows movement, not fine technique. The cues carry the detail, and a professional review is on the roadmap.
+
+## 21. Title Case for labels, sentence case for sentences
+
+**Decision:** Buttons, menu items, screen and dialog titles, headings, setting and stat names, and exercise, quest, item, enemy and event names use Title Case. Descriptions, hints and dialogue stay in sentence case.
+**Why:** It is the usual convention in games and reads as part of the game world. The rule and examples are in [Content guidelines](CONTENT_GUIDELINES.md).
+
+## 22. Reward popups wait for the saved data
+
+**Decision:** When you return to the guild hall, it polls briefly (up to 1.5 s) for the new XP, energy or coins before playing the celebration, and the popups draw above everything.
+**Why:** The first version read the player's status the instant the page closed, before the database stream had delivered the new values, so the celebration never ran. A widget test now fails if no popup appears after logging a workout.

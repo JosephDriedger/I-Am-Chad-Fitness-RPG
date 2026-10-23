@@ -101,6 +101,18 @@ The HP bars, names and focus pips are drawn in screen space, so they sit at the 
 - **Reduce motion** (Settings) and the OS setting both switch scenes to instant transitions with no shake or particles.
 - Touch targets are at least 48 px. Text size follows the system setting.
 
+## Exercise demonstrations
+
+Logging a workout opens with an animated "How to Do It" card (`lib/game/demo/exercise_demo.dart`, shown by `ExerciseDemoCard`). It is drawn in code like the rest of the art, in the player's own look, and it follows the version chosen below it, so picking Wall, Incline or Knee push-ups changes the demo.
+
+- **A real skeleton.** Limb lengths are fixed and hands and feet stay planted using two-bone IK, so a push-up pivots on the toes and a wall push-up keeps its hands on the wall. Walking and running use a gait cycle whose hip height is solved each frame so the lowest foot is always on the ground.
+- **Props.** Wall, bench, chair, mat, dumbbells and barbell where they belong.
+- **Cues that follow the motion.** Each demo has three or so cues ("Hands under your shoulders", "Lower slowly", "Press back up, breathe out as you push") that change as the figure moves, plus a note pointing to easier versions.
+- **Pause, or step through.** A play/pause button; with Reduce Motion on, the demo shows still key poses with a "Next Pose" button instead of looping.
+- **Covers everything.** All 11 activities and every variant listed in the catalog. A test fails if a new variant is added without a demo.
+
+`test/game/exercise_demo_test.dart` checks every demo: limb lengths never change, nothing leaves the frame or sinks below the floor, no joint jumps between frames (including across the loop point), and each exercise actually moves.
+
 ## Previewing in a browser
 
 Scenes can be viewed without a phone. The web platform is enabled for development only (the shipped targets remain Android and iOS) and the database falls back to `sqlite3.wasm` plus `web/drift_worker.js`.
@@ -115,6 +127,7 @@ flutter run -d chrome --dart-define=PREVIEW=hub
 | `hub` | The guild hall with a seeded hero |
 | `duel` / `expedition` | A practice duel / a full expedition |
 | `boss`, `event`, `chest` | Still frames of those battle-scene states |
+| `demos` | Every exercise demonstration at its key poses |
 
 Preview modes skip animation and sound. A browser tab that is hidden or unfocused also throttles animation frames heavily, so check choreography on a device or in the widget tests, not in a background tab.
 
