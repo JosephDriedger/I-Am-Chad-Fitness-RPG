@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/player_state.dart';
 import '../domain/workout.dart';
@@ -29,6 +30,9 @@ final heroProvider = StreamProvider<HeroProfile?>(
 
 final itemsProvider = StreamProvider<List<OwnedItem>>(
     (ref) => ref.watch(repositoryProvider).watchItems());
+
+final activeExpeditionProvider = StreamProvider<ExpeditionProgress?>(
+    (ref) => ref.watch(repositoryProvider).watchActiveExpedition());
 
 final settingsProvider = StreamProvider<AppPrefs>(
     (ref) => ref.watch(repositoryProvider).watchSettings());

@@ -204,6 +204,50 @@ class Expedition {
   static int coinsForBattle(EnemyTemplate e) => e.boss ? 12 : 5;
 }
 
+/// Everything needed to put an expedition back exactly where the player left
+/// it. The expedition itself is regenerated from [seed] and [heroLevel], so
+/// only the run's state is stored. It is saved at the start of every step.
+class ExpeditionProgress {
+  const ExpeditionProgress({
+    required this.seed,
+    required this.heroLevel,
+    required this.stepIndex,
+    required this.heroHp,
+    required this.potions,
+    required this.battlesWon,
+    required this.xp,
+    required this.coins,
+  });
+
+  final int seed;
+  final int heroLevel;
+  final int stepIndex;
+  final int heroHp;
+  final int potions;
+  final int battlesWon;
+  final int xp;
+  final int coins;
+
+  Expedition get expedition => Expedition.generate(seed: seed, heroLevel: heroLevel);
+
+  /// The very start of a new expedition.
+  factory ExpeditionProgress.fresh({
+    required int seed,
+    required int heroLevel,
+    required int heroMaxHp,
+  }) =>
+      ExpeditionProgress(
+        seed: seed,
+        heroLevel: heroLevel,
+        stepIndex: 0,
+        heroHp: heroMaxHp,
+        potions: 2,
+        battlesWon: 0,
+        xp: 0,
+        coins: 0,
+      );
+}
+
 /// Mutable-free progress tracker for an expedition in progress.
 class ExpeditionRun {
   ExpeditionRun({
@@ -212,8 +256,40 @@ class ExpeditionRun {
     required this.rng,
   });
 
+  /// Rebuilds a run from saved [progress]. [hero] supplies the hero's current
+  /// stats (gear may have changed since); its HP is set from the save.
+  factory ExpeditionRun.restore({
+    required ExpeditionProgress progress,
+    required Combatant hero,
+  }) {
+    // The battle in progress restarts, so its random stream is re-seeded from
+    // the step instead of being carried over.
+    final rng = GameRng((progress.seed ^ 0x5bd1e995) + progress.stepIndex * 7919);
+    return ExpeditionRun(
+      expedition: progress.expedition,
+      hero: hero.withHp(progress.heroHp),
+      rng: rng,
+    )
+      ..potions = progress.potions
+      ..stepIndex = progress.stepIndex
+      ..battlesWon = progress.battlesWon
+      ..xp = progress.xp
+      ..coins = progress.coins;
+  }
+
   final Expedition expedition;
   final GameRng rng;
+
+  ExpeditionProgress get progress => ExpeditionProgress(
+        seed: expedition.seed,
+        heroLevel: expedition.heroLevel,
+        stepIndex: stepIndex,
+        heroHp: hero.hp,
+        potions: potions,
+        battlesWon: battlesWon,
+        xp: xp,
+        coins: coins,
+      );
 
   Combatant hero;
   int potions = 2;
