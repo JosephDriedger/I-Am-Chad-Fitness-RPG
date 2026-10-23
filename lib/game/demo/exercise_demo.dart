@@ -10,6 +10,14 @@ import 'dart:ui';
 import '../art/painters.dart' show shade;
 import '../look.dart';
 
+part 'demo_rig.dart';
+part 'demo_props.dart';
+part 'demo_standing.dart';
+part 'demo_floor.dart';
+part 'demo_weights.dart';
+part 'demo_gear.dart';
+part 'demo_catalog.dart';
+
 /// Drawing space for every demo.
 const double demoW = 240;
 const double demoH = 140;
@@ -96,14 +104,16 @@ FigurePose _build({
   required Offset handF,
   Offset? handB,
   double kneeSide = -1,
+  double? kneeSideB,
   double elbowSide = 1,
+  double? elbowSideB,
 }) {
   final axis = (shoulder - hip);
   final head = shoulder + (axis / axis.distance) * headGap;
   final legF = _ik(hip, ankleF, legThigh, legShin, kneeSide);
-  final legB = _ik(hip, ankleB ?? ankleF + const Offset(-7, 0), legThigh, legShin, kneeSide);
+  final legB = _ik(hip, ankleB ?? ankleF + const Offset(-7, 0), legThigh, legShin, kneeSideB ?? kneeSide);
   final armF = _ik(shoulder, handF, armUpper, armLower, elbowSide);
-  final armB = _ik(shoulder, handB ?? handF + const Offset(-3, 2), armUpper, armLower, elbowSide);
+  final armB = _ik(shoulder, handB ?? handF + const Offset(-3, 2), armUpper, armLower, elbowSideB ?? elbowSide);
   return FigurePose(
     head: head,
     shoulder: shoulder,
@@ -483,7 +493,7 @@ FigurePose _dumbbellRow(double t) {
 
 FigurePose _shoulderPress(double t) {
   final u = _cycle(t, rise: 0.4, hold: 0.1);
-  const hip = Offset(112, 71);
+  const hip = Offset(112, 77);
   final shoulder = hip + _upDir(0.0) * torsoLen;
   final hand = _lerpO(shoulder + const Offset(6, -3), shoulder + const Offset(3, -33), u);
   return _build(
@@ -765,7 +775,7 @@ DemoConfig? demoFor(String activityId, [String? variant]) {
         keyTimes: const [0.0, 0.25],
       );
   }
-  return null;
+  return _moreDemos(activityId, variant);
 }
 
 // ---------------------------------------------------------------------------

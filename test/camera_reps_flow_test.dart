@@ -119,8 +119,7 @@ Future<(AppDatabase, GameRepository, _FakeCamera)> _boot(
   ]);
   await tester.tap(find.text('Train'));
   await settle(tester, frames: 30);
-  await tester.tap(find.text('Push-ups'));
-  await settle(tester);
+  await openExercise(tester, 'Push-ups');
   return (db, repo, camera);
 }
 
@@ -294,8 +293,7 @@ void main() {
     ]);
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    await tester.tap(find.text('Squats'));
-    await settle(tester);
+    await openExercise(tester, 'Squats');
     await _openCamera(tester);
     expect(find.textContaining('about hip height'), findsOneWidget);
     expect(find.textContaining('low down near the floor'), findsNothing);
@@ -330,8 +328,7 @@ void main() {
     expect(find.text('Count My Reps With the Camera'), findsOneWidget);
     await tester.pageBack();
     await settle(tester, frames: 20);
-    await tester.tap(find.text('Walking'));
-    await settle(tester);
+    await openExercise(tester, 'Walking');
     expect(find.text('Count My Reps With the Camera'), findsNothing);
     await shutDown(tester, db);
   });

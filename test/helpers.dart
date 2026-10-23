@@ -51,3 +51,13 @@ void usePhone(WidgetTester tester) {
   tester.view.devicePixelRatio = 2.0;
   addTearDown(tester.view.reset);
 }
+
+/// Opens an exercise from the Train list the way a player does: search for it,
+/// then tap the card. The list is long, so a card is not always on screen.
+Future<void> openExercise(WidgetTester tester, String name) async {
+  await tester.enterText(find.byType(TextField).first, name);
+  await settle(tester);
+  // The search box also contains this text, so only look at card titles.
+  await tester.tap(find.byWidgetPredicate((w) => w is Text && w.data == name));
+  await settle(tester);
+}

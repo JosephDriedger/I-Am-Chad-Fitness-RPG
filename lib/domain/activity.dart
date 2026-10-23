@@ -1,14 +1,40 @@
 /// Activity catalog: what a player can log, and which fields each activity records.
 library;
 
+import 'exercises.dart';
+
 enum ActivityCategory {
   bodyweight('Bodyweight'),
+  core('Core'),
   cardio('Cardio'),
   resistance('Resistance'),
-  mobility('Mobility & Recovery');
+  mobility('Mobility & Recovery'),
+  sports('Sports & Play');
 
   const ActivityCategory(this.label);
   final String label;
+}
+
+/// What you need to do an exercise. Shown on the exercise card so people can
+/// find things they can do at home.
+enum Equipment {
+  none('No Equipment'),
+  chair('Chair or Step'),
+  wall('Wall'),
+  bar('Pull-Up Bar'),
+  dumbbells('Dumbbells'),
+  kettlebell('Kettlebell'),
+  barbell('Barbell'),
+  band('Resistance Band'),
+  machine('Gym Machine'),
+  cardioGear('Cardio Gear'),
+  ball('Ball or Court');
+
+  const Equipment(this.label);
+  final String label;
+
+  /// Needs nothing beyond the floor (or a wall or chair, which most homes have).
+  bool get atHome => this == none || this == chair || this == wall;
 }
 
 /// A field a workout entry can record.
@@ -26,6 +52,7 @@ class ActivityType {
     this.minutesPerKm,
     this.plausibleRepsPerSet,
     this.plausibleKmh,
+    this.equipment = Equipment.none,
     this.variants = const [],
     this.easierAlternative,
   });
@@ -52,6 +79,8 @@ class ActivityType {
   /// sustained pace, than almost anyone can manage. Null means "don't check".
   final int? plausibleRepsPerSet;
   final double? plausibleKmh;
+
+  final Equipment equipment;
 
   /// Easier/harder ways to do the same activity; all earn identical rewards.
   final List<String> variants;
@@ -89,7 +118,7 @@ class ActivityCatalog {
   static const sitUp = ActivityType(
     id: 'sit_up',
     name: 'Sit-Ups / Crunches',
-    category: ActivityCategory.bodyweight,
+    category: ActivityCategory.core,
     metrics: {Metric.sets, Metric.reps},
     plausibleRepsPerSet: 120,
     formCue: 'Move slowly and keep your neck relaxed.',
@@ -98,7 +127,7 @@ class ActivityCatalog {
   static const plank = ActivityType(
     id: 'plank',
     name: 'Plank',
-    category: ActivityCategory.bodyweight,
+    category: ActivityCategory.core,
     metrics: {Metric.sets, Metric.duration},
     formCue: 'Hold a steady line from head to heels; stop if your back aches.',
     variants: ['Wall', 'Knee', 'Forearm'],
@@ -130,6 +159,7 @@ class ActivityCatalog {
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     plausibleRepsPerSet: 40,
+    equipment: Equipment.dumbbells,
     formCue: 'Brace with your free hand, pull towards your hip, lower slowly.',
   );
   static const dumbbellPress = ActivityType(
@@ -138,6 +168,7 @@ class ActivityCatalog {
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     plausibleRepsPerSet: 40,
+    equipment: Equipment.dumbbells,
     formCue: 'Choose a light weight first; press up without arching your back.',
   );
   static const barbellSquat = ActivityType(
@@ -146,6 +177,7 @@ class ActivityCatalog {
     category: ActivityCategory.resistance,
     metrics: {Metric.sets, Metric.reps, Metric.load},
     plausibleRepsPerSet: 30,
+    equipment: Equipment.barbell,
     formCue: 'Use a spotter or safety rack, and learn the movement unloaded '
         'first.',
   );
@@ -166,7 +198,8 @@ class ActivityCatalog {
     effortFactor: 0.6,
   );
 
-  static const all = <ActivityType>[
+  /// The original eleven; the rest live in `exercises.dart`.
+  static const _original = <ActivityType>[
     pushUp,
     squat,
     sitUp,
@@ -179,6 +212,9 @@ class ActivityCatalog {
     stretching,
     mobility,
   ];
+
+  /// Every exercise, in the order they are listed within each category.
+  static const all = <ActivityType>[..._original, ...moreExercises];
 
   static final Map<String, ActivityType> _byId = {
     for (final a in all) a.id: a,
