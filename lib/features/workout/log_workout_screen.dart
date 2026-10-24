@@ -743,11 +743,13 @@ class _RewardContent extends StatelessWidget {
         Text(forToday ? 'Rewards for today' : 'Rewards for that day',
             style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.inkSoft)),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        // A Wrap, so the two badges stack when text is large and the screen small.
+        Wrap(
+          alignment: WrapAlignment.center,
+          spacing: 14,
+          runSpacing: 10,
           children: [
             _RewardBadge(icon: Icons.star_rounded, text: '${reward.xp} XP', color: GameColors.gold, delay: 0),
-            const SizedBox(width: 14),
             _RewardBadge(icon: Icons.bolt_rounded, text: '${reward.energy} Energy', color: GameColors.teal, delay: 160),
           ],
         ),
@@ -867,15 +869,21 @@ class _StreakRewardCard extends StatelessWidget {
               Text('${milestone.title}: ${milestone.days} active days in a row',
                   style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.ink)),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                spacing: 16,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  const Icon(Icons.monetization_on, color: GameColors.goldDark, size: 20),
-                  const SizedBox(width: 4),
-                  Text('+${milestone.coins} Coins', style: gameTitle(17)),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.star_rounded, color: GameColors.goldDark, size: 20),
-                  const SizedBox(width: 4),
-                  Text('+${milestone.xp} XP', style: gameTitle(17)),
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.monetization_on, color: GameColors.goldDark, size: 20),
+                    const SizedBox(width: 4),
+                    Flexible(child: Text('+${milestone.coins} Coins', style: gameTitle(17))),
+                  ]),
+                  Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.star_rounded, color: GameColors.goldDark, size: 20),
+                    const SizedBox(width: 4),
+                    Flexible(child: Text('+${milestone.xp} XP', style: gameTitle(17))),
+                  ]),
                 ],
               ),
             ],

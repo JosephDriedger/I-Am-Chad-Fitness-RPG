@@ -608,18 +608,20 @@ class _ActionButton extends StatelessWidget {
               ),
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(_icons[action], size: 24),
-              const SizedBox(height: 2),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(action.label, style: gameTitle(13, color: enabled ? Colors.white : const Color(0xFF8A7F6C))),
-              ),
-              if (badge != null)
-                Text(badge!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
-            ],
+          // Scaled down as a whole: the button is a fixed size in a grid, and large
+          // text would otherwise push the badge out of the bottom.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(_icons[action], size: 24),
+                const SizedBox(height: 2),
+                Text(action.label, style: gameTitle(13, color: enabled ? Colors.white : const Color(0xFF8A7F6C))),
+                if (badge != null)
+                  Text(badge!, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800)),
+              ],
+            ),
           ),
         ),
       ),

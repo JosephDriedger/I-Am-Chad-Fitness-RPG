@@ -116,13 +116,7 @@ class _ExerciseDemoCardState extends State<ExerciseDemoCard>
                   Expanded(
                     child: Text('How to Do It: ${config.title}', style: t.titleSmall),
                   ),
-                  if (_reduce)
-                    TextButton.icon(
-                      onPressed: _nextStep,
-                      icon: const Icon(Icons.skip_next),
-                      label: const Text('Next Pose'),
-                    )
-                  else
+                  if (!_reduce)
                     IconButton(
                       tooltip: animated ? 'Pause Demo' : 'Play Demo',
                       onPressed: _togglePlay,
@@ -130,6 +124,17 @@ class _ExerciseDemoCardState extends State<ExerciseDemoCard>
                     ),
                 ],
               ),
+              // Under the title, not beside it: a wide labelled button next to the
+              // title leaves it no room when text is large.
+              if (_reduce)
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton.icon(
+                    onPressed: _nextStep,
+                    icon: const Icon(Icons.skip_next),
+                    label: const Text('Next Pose'),
+                  ),
+                ),
               const SizedBox(height: 8),
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),

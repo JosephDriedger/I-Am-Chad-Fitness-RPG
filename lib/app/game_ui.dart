@@ -280,7 +280,9 @@ class GameChip extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[Icon(icon, size: 16, color: color), const SizedBox(width: 5)],
-              Text(text, style: const TextStyle(color: GameColors.cream, fontWeight: FontWeight.w800, fontSize: 13)),
+              // Flexible, so a long label at a large text size wraps instead of
+              // running off the edge of the screen.
+              Flexible(child: Text(text, style: const TextStyle(color: GameColors.cream, fontWeight: FontWeight.w800, fontSize: 13))),
             ],
           ),
         ),
@@ -451,16 +453,24 @@ class GameIconButton extends ConsumerWidget {
             fx.haptic(Haptic.light);
             onPressed();
           },
-          child: Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: GameColors.woodDark,
-              border: Border.all(color: GameColors.gold, width: 2),
-              boxShadow: const [BoxShadow(color: Color(0x66000000), offset: Offset(0, 2), blurRadius: 0)],
+          // The round face stays 46 wide; the pressable area around it is the
+          // 48 that phones' accessibility guidelines ask for.
+          child: SizedBox(
+            width: 48,
+            height: 48,
+            child: Center(
+              child: Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: GameColors.woodDark,
+                  border: Border.all(color: GameColors.gold, width: 2),
+                  boxShadow: const [BoxShadow(color: Color(0x66000000), offset: Offset(0, 2), blurRadius: 0)],
+                ),
+                child: Icon(icon, color: GameColors.cream, size: 26),
+              ),
             ),
-            child: Icon(icon, color: GameColors.cream, size: 26),
           ),
         ),
       ),

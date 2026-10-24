@@ -30,7 +30,7 @@ Roughly in priority order.
 7. **Music.** Built: a calm loop for the hall and a livelier one for battles, synthesized in code, off by default, quiet, and mixed under other apps' audio (see [Game scenes](GAME_SCENES.md#sound-and-haptics)). Still open: hearing it on a real phone, and deciding whether synthesized tunes are good enough or a composer is wanted.
 8. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
 9. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
-10. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
+10. **Accessibility pass.** Large text and small screens are now covered by automated layout tests (see [Development](DEVELOPMENT.md#random-play-tests)). Still open: TalkBack and VoiceOver, high contrast and reduced motion on real devices.
 11. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
 
 ### Camera rep checking

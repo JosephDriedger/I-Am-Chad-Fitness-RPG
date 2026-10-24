@@ -34,14 +34,22 @@ class DeviceMusicBackend implements MusicBackend {
     await AudioPlayer.global.setAudioContext(AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers).build());
   }
 
+  /// Whether any music has been started. Until it has, there is nothing to
+  /// stop, so the audio system is left alone (the game starts with music off).
+  bool _started = false;
+
   @override
   Future<void> play(MusicTrack track) async {
     await _configure();
+    _started = true;
     await FlameAudio.bgm.play(track.file, volume: volume);
   }
 
   @override
-  Future<void> stop() => FlameAudio.bgm.stop();
+  Future<void> stop() async {
+    if (!_started) return;
+    await FlameAudio.bgm.stop();
+  }
 }
 
 final musicBackendProvider = Provider<MusicBackend>((_) => DeviceMusicBackend());

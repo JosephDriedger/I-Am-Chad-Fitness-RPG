@@ -199,41 +199,57 @@ class _Offer extends StatelessWidget {
   Widget build(BuildContext context) {
     final short = coins < price;
     final canBuy = disabledLabel == null && !short;
+    final largeText = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final words = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(name, style: gameTitle(18)),
+        const SizedBox(height: 2),
+        Text(detail, style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13)),
+        if (disabledLabel == null && short)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text('Need ${price - coins} more coins',
+                style: const TextStyle(color: GameColors.goldDark, fontWeight: FontWeight.w800, fontSize: 13)),
+          ),
+      ],
+    );
+    GameButton buttonFor(bool stacked) => GameButton(
+          label: disabledLabel ?? '$price Coins',
+          icon: disabledLabel == null ? Icons.monetization_on : null,
+          kind: GameButtonKind.primary,
+          expanded: stacked,
+          small: true,
+          onPressed: canBuy ? onBuy : null,
+        );
     return Semantics(
       container: true,
       label: '$name. $detail. ${disabledLabel ?? '$price coins${short ? ', you need ${price - coins} more' : ''}'}.',
       child: ExcludeSemantics(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            icon,
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name, style: gameTitle(18)),
-                  const SizedBox(height: 2),
-                  Text(detail, style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13)),
-                  if (disabledLabel == null && short)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text('Need ${price - coins} more coins',
-                          style: const TextStyle(color: GameColors.goldDark, fontWeight: FontWeight.w800, fontSize: 13)),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            GameButton(
-              label: disabledLabel ?? '$price Coins',
-              icon: disabledLabel == null ? Icons.monetization_on : null,
-              kind: GameButtonKind.primary,
-              expanded: false,
-              small: true,
-              onPressed: canBuy ? onBuy : null,
-            ),
-          ],
+        // With large text, or on a narrow screen, the button no longer fits
+        // beside the words, so it moves underneath them instead of pushing off
+        // the edge of the screen.
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final stacked = largeText || box.maxWidth < 290;
+            final button = buttonFor(stacked);
+            return stacked
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [icon, const SizedBox(width: 12), Expanded(child: words)],
+                      ),
+                      const SizedBox(height: 8),
+                      button,
+                    ],
+                  )
+                : Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [icon, const SizedBox(width: 12), Expanded(child: words), const SizedBox(width: 8), button],
+                  );
+          },
         ),
       ),
     );

@@ -255,7 +255,9 @@ class _WeekChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 120,
+              // Room for the bars plus the two text labels at whatever text size the
+              // player has chosen (about 128 at the normal size).
+              height: 82 + MediaQuery.textScalerOf(context).scale(46),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [

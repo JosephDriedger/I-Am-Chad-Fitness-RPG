@@ -112,7 +112,11 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        Row(
+        // A Wrap, so the count drops to a second line when text is large.
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 12,
           children: [
             FilterChip(
               label: const Text('At Home Only'),
@@ -120,7 +124,6 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               selected: _atHomeOnly,
               onSelected: (v) => setState(() => _atHomeOnly = v),
             ),
-            const Spacer(),
             Text(
               '${matches.length} ${matches.length == 1 ? 'Exercise' : 'Exercises'}',
               style: const TextStyle(

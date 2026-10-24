@@ -62,9 +62,13 @@ class CharacterScreen extends ConsumerWidget {
         Row(
           children: [
             Expanded(
+              flex: 3,
               child: Text(h.name, style: gameTitle(32), maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
-            _LevelBadge(level: player.level),
+            const SizedBox(width: 8),
+            // Flexible, so the badge shrinks rather than overflowing when the
+            // player has set a very large text size.
+            Flexible(flex: 2, child: _LevelBadge(level: player.level)),
           ],
         ),
         const SizedBox(height: 8),
@@ -606,7 +610,10 @@ class _LevelBadge extends StatelessWidget {
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: GameColors.gold, width: 3),
           ),
-          child: Text('Level $level', style: gameTitle(20, color: GameColors.gold)),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text('Level $level', style: gameTitle(20, color: GameColors.gold)),
+          ),
         ),
       ),
     );
@@ -727,11 +734,14 @@ class _Record extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
+      // Both sides may wrap, so a long label or a large text size cannot push
+      // the value off the edge of the screen.
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-          const Spacer(),
-          Text(value, style: gameTitle(18)),
+          Flexible(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700))),
+          const SizedBox(width: 12),
+          Expanded(child: Text(value, textAlign: TextAlign.end, style: gameTitle(18))),
         ],
       ),
     );

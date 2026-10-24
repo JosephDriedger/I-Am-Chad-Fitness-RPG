@@ -119,3 +119,7 @@ Use short, imperative commit messages that describe the change ("Add reward expl
 ## Random-play tests
 
 `test/domain/fuzz_test.dart` throws thousands of random days, streaks and battles at the rules and checks the promises they make (caps never exceeded, logging more never earns less, battles always end). `test/monkey_test.dart` taps, types, scrolls and goes back at random through the real app, twelve seeds of 160 steps each, and fails on any exception, printing the seed, the step and the last actions so the run can be replayed. When either finds a bug, fix it and keep a small test for that case beside it, as `test/double_tap_test.dart` and `test/save_failure_test.dart` do.
+
+`test/layout_tour_test.dart` opens every main screen and dialog (hall menu, Train and an exercise's log screen with its honesty check and saved dialog, Quests, Adventure with the shop and a duel, Hero with Customise, Journal, Settings and the Patron's Hall) on a 320 x 568 phone at 2x text, a 360 x 640 phone at 1.5x, and a wide screen, and fails on any overflow. `test/monkey_test.dart` also runs on those small, large-text setups. They found and fixed overflows in the hero header, records, exercise filter row, battle action buttons, journal chart, shop rows, exercise demo card, reward badges and streak reward card.
+
+`test/accessibility_test.dart` runs Flutter's own accessibility checks (tap targets at least 48 x 48, every control named for a screen reader, text contrast) on each main screen. The layout tour also covers a phone on its side.

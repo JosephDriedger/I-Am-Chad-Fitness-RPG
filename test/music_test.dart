@@ -25,6 +25,7 @@ class _Broken implements MusicBackend {
 }
 
 void main() {
+  deviceBackendTests();
   late _Recorder music;
   late StreamController<AppPrefs> prefs;
   late ProviderContainer container;
@@ -116,5 +117,13 @@ void main() {
     broken.listen(musicProvider, (_, _) {});
     await settle();
     await settle();
+  });
+}
+
+void deviceBackendTests() {
+  test('stopping music that never started leaves the audio system alone', () async {
+    // The game starts with music off and asks to stop it at launch. With no
+    // audio plugin in a test, touching the audio system would throw.
+    await DeviceMusicBackend().stop();
   });
 }
