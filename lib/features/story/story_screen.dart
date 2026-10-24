@@ -224,11 +224,25 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     return Scaffold(
       backgroundColor: const Color(0xFF1B1109),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(flex: 11, child: _stage(speaker)),
-            Expanded(flex: 8, child: _panel(n)),
-          ],
+        child: LayoutBuilder(
+          builder: (context, box) {
+            // Held sideways, the picture and the text sit side by side, so each has the
+            // whole height. Upright, the text goes underneath.
+            if (box.maxWidth > box.maxHeight * 1.2) {
+              return Row(
+                children: [
+                  Expanded(flex: 11, child: _stage(speaker)),
+                  Expanded(flex: 9, child: _panel(n, sideBySide: true)),
+                ],
+              );
+            }
+            return Column(
+              children: [
+                Expanded(flex: 11, child: _stage(speaker)),
+                Expanded(flex: 8, child: _panel(n)),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -303,33 +317,37 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
         label:
             '${widget.chapter.label}: ${widget.chapter.title}. Tap to begin.',
         child: ExcludeSemantics(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.chapter.label,
-                style: gameTitle(22, color: GameColors.gold),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                widget.chapter.title,
-                textAlign: TextAlign.center,
-                style: gameTitle(34, color: GameColors.cream),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                Story.seasonOf(widget.chapter.season).title,
-                style: const TextStyle(
-                  color: Color(0xFFCDB68C),
-                  fontWeight: FontWeight.w700,
+          // Shrinks to fit when the picture is small (large text, or a short screen).
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.chapter.label,
+                  style: gameTitle(22, color: GameColors.gold),
                 ),
-              ),
-              const SizedBox(height: 28),
-              Text(
-                _adPending ? 'One moment...' : 'Tap to begin',
-                style: const TextStyle(color: Color(0xFFCDB68C)),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Text(
+                  widget.chapter.title,
+                  textAlign: TextAlign.center,
+                  style: gameTitle(34, color: GameColors.cream),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  Story.seasonOf(widget.chapter.season).title,
+                  style: const TextStyle(
+                    color: Color(0xFFCDB68C),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  _adPending ? 'One moment...' : 'Tap to begin',
+                  style: const TextStyle(color: Color(0xFFCDB68C)),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -342,7 +360,9 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
       color: const Color(0xE61B1109),
       alignment: Alignment.center,
       padding: const EdgeInsets.all(24),
-      child: Column(
+      // Scrolls if the picture is small (large text, or a short screen), so the button
+      // at the bottom can always be reached.
+      child: SingleChildScrollView(child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(
@@ -384,18 +404,20 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
             onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
-      ),
+      )),
     );
   }
 
-  Widget _panel(StoryNode? node) {
+  Widget _panel(StoryNode? node, {bool sideBySide = false}) {
     final theme = GameColors.woodDark;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       decoration: BoxDecoration(
         color: theme,
-        border: const Border(top: BorderSide(color: GameColors.gold, width: 3)),
+        border: sideBySide
+            ? const Border(left: BorderSide(color: GameColors.gold, width: 3))
+            : const Border(top: BorderSide(color: GameColors.gold, width: 3)),
       ),
       child: _title || _done
           ? const SizedBox.shrink()
@@ -438,41 +460,47 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
                 ),
               if (!narrator) const SizedBox(height: 8),
               Expanded(
-                child: AnimatedBuilder(
-                  animation: _typing,
-                  builder: (context, _) {
-                    final shown = (full.length * _typing.value).round().clamp(
-                      0,
-                      full.length,
-                    );
-                    return SingleChildScrollView(
-                      child: Text(
-                        full.substring(0, shown),
-                        style: TextStyle(
-                          color: GameColors.cream,
-                          fontSize: 17,
-                          height: 1.3,
-                          fontWeight: FontWeight.w600,
-                          fontStyle: narrator
-                              ? FontStyle.italic
-                              : FontStyle.normal,
+                // The "carry on" arrow floats over the corner of the text, so it takes
+                // no height of its own and a short panel keeps all it can for the words.
+                child: Stack(
+                  children: [
+                    AnimatedBuilder(
+                      animation: _typing,
+                      builder: (context, _) {
+                        final shown = (full.length * _typing.value)
+                            .round()
+                            .clamp(0, full.length);
+                        return SingleChildScrollView(
+                          child: Text(
+                            full.substring(0, shown),
+                            style: TextStyle(
+                              color: GameColors.cream,
+                              fontSize: 17,
+                              height: 1.3,
+                              fontWeight: FontWeight.w600,
+                              fontStyle: narrator
+                                  ? FontStyle.italic
+                                  : FontStyle.normal,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: AnimatedBuilder(
+                        animation: _typing,
+                        builder: (context, _) => Opacity(
+                          opacity: _typing.isAnimating ? 0 : 1,
+                          child: const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            color: GameColors.gold,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: AnimatedBuilder(
-                  animation: _typing,
-                  builder: (context, _) => Opacity(
-                    opacity: _typing.isAnimating ? 0 : 1,
-                    child: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: GameColors.gold,
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
@@ -483,29 +511,25 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
   }
 
   Widget _choiceView(StoryChoice choice) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(choice.prompt, style: gameTitle(19, color: GameColors.gold)),
-        const SizedBox(height: 8),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                for (var i = 0; i < choice.options.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: GameButton(
-                      label: choice.options[i].label,
-                      kind: GameButtonKind.secondary,
-                      onPressed: () => _pick(choice, i),
-                    ),
-                  ),
-              ],
+    // The question and its answers scroll together, so at large text or on a short
+    // screen nothing is cut off and every answer can still be reached.
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(choice.prompt, style: gameTitle(19, color: GameColors.gold)),
+          const SizedBox(height: 8),
+          for (var i = 0; i < choice.options.length; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GameButton(
+                label: choice.options[i].label,
+                kind: GameButtonKind.secondary,
+                onPressed: () => _pick(choice, i),
+              ),
             ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

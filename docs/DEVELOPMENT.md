@@ -129,6 +129,8 @@ Nearly every test runs with Reduce Motion on, so scenes finish each animation in
 
 `test/expedition_layout_test.dart` covers the expedition screens at the awkward sizes: a fork in the road, a camp with a long description, a battle with its four actions and the result panel. It found that the panel under the scene overflowed on a phone held sideways, so the screen now puts the scene and the panel side by side in landscape, caps the panel at about half the height when upright, and keeps it scrolled to its buttons so the way on is always in view.
 
+`test/story_layout_test.dart` reads whole chapters (the one with the most choices in each season, and the one with the longest line) at the same awkward sizes, answering every choice and checking each option can be reached. It found the chapter title card overflowing at every small size, the question above the answers pushing past the panel at large text, and the "carry on" arrow taking a row of its own, so a phone held sideways now shows the picture and the text side by side.
+
 `test/accessibility_test.dart` runs Flutter's own accessibility checks (tap targets at least 48 x 48, every control named for a screen reader, text contrast) on each main screen. The layout tour also covers a phone on its side.
 
 ## Ads in development
