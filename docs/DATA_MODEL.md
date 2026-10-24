@@ -52,6 +52,7 @@ A single row with `id = 1`.
 | `adventure_xp`, `coins`, `victories` | Earned through play |
 | `streak_xp` | XP paid out for streak milestones (schema v5) |
 | `potion_stock` | Healing potions in the pouch, bought in the shop (schema v6) |
+| `cape`, `hair_dye` | The chosen cape and hair dye, as ids from `Cosmetics` (`classic` and `''` by default; schema v8). Looks only. A look the player does not have access to is drawn as the default, never as an error |
 | `created_at` | |
 
 ### `owned_items`
@@ -73,6 +74,10 @@ One row per streak milestone the player has been paid for: `days` (primary key),
 ### `story_progress` and `story_choices`
 
 `story_progress` has one row per chapter the player has finished or skipped: `chapter` (primary key; 0 is the prologue) and `read_at`. `story_choices` has one row per remembered answer: `key` (primary key, such as `motivation`) and `option` (the index picked). Replaying a chapter and answering again replaces the row. Which chapters are *open* is never stored: it is derived from the hero's level (see [Story](STORY.md)). Both tables are in the export and are cleared by `deleteEverything()`.
+
+### `purchase_receipts`
+
+One row per purchase made through the app store (schema v8): `key` (primary key), `product_id` and `granted_at`. The key is the product id for the one-time Patron Pack, so a restore or a repeated delivery can never create a second copy, and `tip:<transaction id>` for a tip, so each tip counts once. Rows are written in the same step that precedes confirming the purchase to the store. `Entitlements.fromReceipts` turns them into what the player owns; unknown product ids are ignored. Nothing here can change XP, energy, coins or any stat. The export lists `productId` and `grantedAt` only, never a transaction id, and `deleteEverything()` clears the table (the pack returns with Restore Purchases, because it belongs to the store account). See [Monetization](MONETIZATION.md).
 
 ### `active_expeditions`
 

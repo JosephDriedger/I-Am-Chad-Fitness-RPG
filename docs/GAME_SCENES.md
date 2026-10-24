@@ -63,6 +63,8 @@ The hall is the app's home. The HUD and menu are Flutter widgets (so they work w
 
 - **Tap an object** and the hero walks to it, does a short interaction (hits the dummy, hops at the board, steps into the gate), then the screen opens. Tap the floor to just walk around.
 - **Time of day.** The windows show daylight, dusk or night from the device clock, with a moon, stars and warmer torch glow after dark.
+- **First-steps hint.** Until the first workout is logged, `HubState.highlight` makes the training dummy glow softly. It is a hint, not a gate: everything stays tappable, and it is gone for good after the first workout.
+- **Decorations.** The hall starts bare. **Pennants** hang on bunting across the top of the wall as milestones are reached (first workout, first expedition, levels, streaks, the finished season); each has a fixed slot, filling outward from the banner, so earlier ones never move. They are earned, never sold, never removed. The optional Patron Pack adds string lights on the gate and quest board, a patron rosette on the banner and a potted lantern tree. All of it is passed in as plain data (`HubState.pennants`, `HubState.patronDecor`) and does nothing but draw.
 - **Coming back from a screen** the hall plays what you earned: floating "+40 XP", "+2 energy" and coins with sparkles, and a confetti burst with "LEVEL UP!" when your level rose.
 
 The same five destinations are also buttons in the bottom menu. They are the accessible route; the canvas is a bonus layer on top.
@@ -127,6 +129,8 @@ flutter run -d chrome --dart-define=PREVIEW=hub
 | --- | --- |
 | `cast` | Every character on one sheet |
 | `hub` | The guild hall with a seeded hero |
+| `patron` | The hall with the Patron Pack and several pennants earned: bunting, string lights on the gate and quest board, a patron rosette on the banner and a potted lantern tree |
+| `wardrobe` | Every cape and hair dye on one sheet |
 | `duel` / `expedition` | A practice duel / a full expedition |
 | `boss`, `event`, `chest` | Still frames of those battle-scene states |
 | `demos` | Every exercise demonstration at its key poses |

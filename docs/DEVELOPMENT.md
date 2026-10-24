@@ -96,6 +96,12 @@ Before committing, `flutter analyze` should report no issues and `flutter test` 
 | A setting | Add a column to `AppSettings`, a field on `AppPrefs`, map it in the repository, expose it in the Settings screen, bump the schema. |
 | A screen | Create `lib/features/<name>/` and read state through providers. |
 
+## Purchases and the test store
+
+The Patron's Hall talks to the platform store through `StoreGateway` (`lib/app/store.dart`). Widget tests and the browser preview use `TestStoreGateway`, a pretend store with made-up prices, so no test or preview ever reaches a real store or spends real money. `bootApp` in `test/helpers.dart` installs one by default and accepts your own (`bootApp(tester, db, store: myGateway)`) to script a cancel, a failure, a pending purchase, an offline store, or a purchase delivered at launch (`store.deliver(...)`). The preview modes `wardrobe` (every cape and hair dye) and `patron` (a hall with the Patron Pack and several pennants earned) show the cosmetics.
+
+Real checkout needs the application id replaced and the products created in both store consoles first; the steps are in [Monetization](MONETIZATION.md#setting-it-up-in-the-stores). Never hard-code a price in the app: prices come from the store. Product ids are persisted and never renamed.
+
 ## Known environment notes
 
 - Platforms enabled: Android and iOS (per the GDD), plus web for development previews only. Desktop is not set up, so `flutter run -d windows` will not work without adding that platform.

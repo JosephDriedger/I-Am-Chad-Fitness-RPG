@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/app/app.dart';
 import 'package:i_am_chad/app/feedback.dart';
 import 'package:i_am_chad/app/providers.dart';
+import 'package:i_am_chad/app/store.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/domain/player_state.dart';
 
@@ -23,6 +24,7 @@ Future<void> bootApp(
   DateTime? now,
   List<Override> overrides = const [],
   bool storyOffers = false,
+  StoreGateway? store,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -34,6 +36,8 @@ Future<void> bootApp(
       showTitleOnLaunchProvider.overrideWithValue(false),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),
+      // Never reach a real store from a test.
+      storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
       ...overrides,
     ],
     child: const IAmChadApp(),

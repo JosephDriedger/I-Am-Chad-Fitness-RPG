@@ -12,6 +12,7 @@ import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/painting.dart'
     show TextPainter, TextSpan, TextStyle, FontWeight, TextDirection, TextAlign;
 
+import '../domain/cosmetics.dart' show PatronDecor;
 import 'art/painters.dart';
 import 'core.dart';
 import 'look.dart';
@@ -30,6 +31,9 @@ class HubState {
     this.weeklyGoal = 1,
     this.hour = 12,
     this.itemsOwned = 0,
+    this.pennants = const [],
+    this.patronDecor = const {},
+    this.highlight,
   });
 
   final HeroLook look;
@@ -42,6 +46,17 @@ class HubState {
   /// Local hour of day, for the light through the windows.
   final int hour;
   final int itemsOwned;
+
+  /// Colours (ARGB) of the pennants the player has earned, in hanging order.
+  /// The bunting starts bare and fills in as milestones are reached.
+  final List<int> pennants;
+
+  /// Ids from `PatronDecor` for the optional Patron Pack. Looks only.
+  final Set<String> patronDecor;
+
+  /// An object to glow softly as a first-steps hint, or null. It is only set
+  /// until the first workout is logged, and it never blocks or times out.
+  final HubTarget? highlight;
 }
 
 class HubScene extends GameScene {
@@ -341,6 +356,16 @@ class HubScene extends GameScene {
       c.restore();
     }
     c.restore();
+    if (_state.patronDecor.contains(PatronDecor.lights)) {
+      _stringLights(
+        c,
+        Path()
+          ..moveTo(s.rect.left - 2, s.rect.bottom - 8)
+          ..lineTo(s.rect.left - 2, s.rect.top - 2)
+          ..lineTo(s.rect.right + 2, s.rect.top - 2)
+          ..lineTo(s.rect.right + 2, s.rect.bottom - 8),
+      );
+    }
     if (_state.questPending) {
       final bob = math.sin(clock * 5) * 3;
       circle(c, s.rect.right - 6, s.rect.top + 2 + bob, 11, const Color(0xFFF5A623));
@@ -415,6 +440,34 @@ class HubScene extends GameScene {
     for (var i = 0; i < 6; i++) {
       line(c, r.left, r.top + 70 + i * 28, r.left + 10, r.top + 70 + i * 28, 1.2, const Color(0xFF5E5145));
       line(c, r.right - 10, r.top + 70 + i * 28, r.right, r.top + 70 + i * 28, 1.2, const Color(0xFF5E5145));
+    }
+    if (_state.patronDecor.contains(PatronDecor.lights)) {
+      _stringLights(
+        c,
+        Path()
+          ..moveTo(r.left - 4, r.bottom - 6)
+          ..lineTo(r.left - 4, r.top + 60)
+          ..quadraticBezierTo(r.left - 4, r.top - 4, r.center.dx, r.top - 4)
+          ..quadraticBezierTo(r.right + 4, r.top - 4, r.right + 4, r.top + 60)
+          ..lineTo(r.right + 4, r.bottom - 6),
+      );
+    }
+  }
+
+  /// Warm bulbs along [wire], twinkling gently. Part of the Patron Pack.
+  void _stringLights(Canvas c, Path wire) {
+    strokePath(c, wire, 1.2, const Color(0xFF4A2F1A));
+    const colors = [Color(0xFFFFE08A), Color(0xFFFFB3A7), Color(0xFFA7E3FF), Color(0xFFC8F0A8)];
+    var i = 0;
+    for (final m in wire.computeMetrics()) {
+      for (var d = 10.0; d < m.length; d += 20) {
+        final p = m.getTangentForOffset(d)!.position;
+        final tw = 0.55 + 0.45 * math.sin(clock * 2.6 + i * 1.7);
+        final col = colors[i % colors.length];
+        circle(c, p.dx, p.dy, 5.5, col.withValues(alpha: 0.22 * tw));
+        circle(c, p.dx, p.dy, 2.4, Color.lerp(const Color(0xFF8A7A5A), col, 0.5 + 0.5 * tw)!);
+        i++;
+      }
     }
   }
 
@@ -511,9 +564,26 @@ class _Hotspot extends PositionComponent with TapCallbacks {
       canvas.scale(1.03, 1.03);
       canvas.translate(-rect.center.dx, -rect.center.dy);
     }
+    if (scene._state.highlight == target) _drawHint(canvas);
     painter(canvas, this);
     _drawSign(canvas);
     canvas.restore();
+  }
+
+  /// A soft golden glow behind the object, for a brand-new player. It breathes
+  /// slowly, or just stays lit when motion is reduced.
+  void _drawHint(Canvas canvas) {
+    final pulse = scene.reducedMotion ? 0.6 : 0.5 + 0.5 * math.sin(scene.clock * 2.6);
+    final r = rect.inflate(8 + pulse * 5);
+    final shape = RRect.fromRectAndRadius(r, const Radius.circular(20));
+    canvas.drawRRect(shape, Paint()..color = Color.fromRGBO(255, 224, 130, 0.14 + 0.16 * pulse));
+    canvas.drawRRect(
+      shape,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..color = Color.fromRGBO(255, 214, 90, 0.45 + 0.4 * pulse),
+    );
   }
 
   void _drawSign(Canvas canvas) {
@@ -661,12 +731,14 @@ class HallBackdrop extends Component {
     canvas.drawRect(Rect.fromLTWH(left, 300, width, 5), _p);
 
     _windows(canvas, night);
+    _bunting(canvas);
 
     // Banner.
     fillPath(canvas, poly([160, 40, 200, 40, 200, 130, 180, 148, 160, 130]), const Color(0xFFB23A3A));
     fillPath(canvas, poly([164, 44, 196, 44, 196, 128, 180, 143, 164, 128]), const Color(0xFFC54A4A));
     circle(canvas, 180, 82, 13, const Color(0xFFF2C94C));
     strokePath(canvas, Path()..addArc(Rect.fromCircle(center: const Offset(180, 82), radius: 7), 0.6, 4.9), 3, const Color(0xFFB8860B));
+    if (state.patronDecor.contains(PatronDecor.rosette)) _rosette(canvas);
 
     // Torches.
     for (final x in [136.0, 224.0]) {
@@ -700,6 +772,8 @@ class HallBackdrop extends Component {
     canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(78, 476, 204, 104), const Radius.circular(8)), _p..style = PaintingStyle.stroke..strokeWidth = 3);
     _p.style = PaintingStyle.fill;
 
+    if (state.patronDecor.contains(PatronDecor.lantern)) _lanternTree(canvas, night);
+
     // Night tint over everything so far; torches stay warm on top.
     if (night > 0) {
       _p.color = Color.fromRGBO(10, 14, 48, 0.34 * night);
@@ -709,6 +783,78 @@ class HallBackdrop extends Component {
         canvas.drawCircle(Offset(x, 112), 80, _p);
         _p.shader = null;
       }
+    }
+  }
+
+  /// Where each earned pennant hangs, so earlier ones never shift as more are
+  /// added. They fill outward from the banner.
+  static const _pennantSlots = <double>[148, 212, 116, 244, 84, 276, 52, 308, 20, 340];
+
+  double _ropeY(double x) {
+    final k = (x - 180) / 190;
+    return 30 + 22 * (1 - k * k);
+  }
+
+  /// Bunting across the top of the wall: one pennant for each milestone the
+  /// player has earned. Nothing here is sold, and nothing is ever taken down.
+  void _bunting(Canvas canvas) {
+    final pennants = state.pennants;
+    if (pennants.isEmpty) return;
+    final rope = Path()..moveTo(-10, _ropeY(-10));
+    for (var x = 0.0; x <= 370; x += 10) {
+      rope.lineTo(x, _ropeY(x));
+    }
+    strokePath(canvas, rope, 1.6, const Color(0xFF6F4727));
+    for (var i = 0; i < pennants.length && i < _pennantSlots.length; i++) {
+      final x = _pennantSlots[i];
+      final sway = math.sin(_t * 1.6 + i * 1.7) * 1.4;
+      final top = _ropeY(x);
+      fillPath(
+        canvas,
+        poly([x - 10, top - 0.5, x + 10, top - 0.5, x + sway, top + 26]),
+        Color(pennants[i]),
+      );
+      fillPath(
+        canvas,
+        poly([x - 10, top - 0.5, x + 10, top - 0.5, x + 8, top + 3, x - 8, top + 3]),
+        const Color(0x26FFFFFF),
+      );
+    }
+  }
+
+  /// A patron rosette pinned to the banner.
+  void _rosette(Canvas canvas) {
+    fillPath(canvas, poly([172, 118, 178, 118, 174, 134, 170, 130]), const Color(0xFFF2C94C));
+    fillPath(canvas, poly([182, 118, 188, 118, 190, 130, 186, 134]), const Color(0xFFF2C94C));
+    circle(canvas, 180, 114, 9, const Color(0xFFF2C94C));
+    circle(canvas, 180, 114, 6.6, const Color(0xFFB23A3A));
+    final heart = Path()
+      ..moveTo(180, 118.4)
+      ..cubicTo(175, 114.8, 176.4, 110.6, 180, 112.6)
+      ..cubicTo(183.6, 110.6, 185, 114.8, 180, 118.4)
+      ..close();
+    fillPath(canvas, heart, const Color(0xFFFFE9B0));
+  }
+
+  /// A potted lantern tree on the floor by the wall, glowing a little more at
+  /// night.
+  void _lanternTree(Canvas canvas, double night) {
+    const x = 24.0, base = 414.0;
+    oval(canvas, x, base + 2, 18, 4, const Color(0x2E000000));
+    rrect(canvas, x - 9, base - 14, 18, 16, 3, const Color(0xFF8A5A38));
+    rrect(canvas, x - 10, base - 16, 20, 4, 2, const Color(0xFF6F4727));
+    rrect(canvas, x - 1.6, base - 48, 3.2, 34, 1.6, const Color(0xFF5A3A22));
+    circle(canvas, x, base - 56, 15, const Color(0xFF3F8F5A));
+    circle(canvas, x - 9, base - 46, 10, const Color(0xFF4FA56A));
+    circle(canvas, x + 10, base - 48, 9, const Color(0xFF357F4D));
+    for (var i = 0; i < 4; i++) {
+      final lx = x + (i - 1.5) * 9;
+      final ly = base - 60 + (i % 2) * 14;
+      final glow = 0.55 + 0.45 * math.sin(_t * 2.2 + i * 1.3);
+      _p.shader = Gradient.radial(Offset(lx, ly), 11, [Color.fromRGBO(255, 214, 120, 0.30 + night * 0.25 * glow), const Color(0x00FFD678)]);
+      canvas.drawCircle(Offset(lx, ly), 11, _p);
+      _p.shader = null;
+      rrect(canvas, lx - 2.4, ly - 3.4, 4.8, 6.8, 2, Color.lerp(const Color(0xFFFFE08A), const Color(0xFFFFB347), glow)!);
     }
   }
 

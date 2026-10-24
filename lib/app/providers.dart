@@ -2,12 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/database.dart';
 import '../data/repository.dart';
+import '../domain/cosmetics.dart';
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
+import '../domain/patronage.dart';
 import '../domain/player_state.dart';
 import '../domain/story.dart';
 import '../domain/streaks.dart';
 import '../domain/workout.dart';
+import '../game/look.dart';
 
 final databaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -64,6 +67,46 @@ final storyStatusProvider = Provider<StoryStatus?>((ref) {
 
 /// Whether the hall offers an unread chapter by itself. Tests switch it off.
 final storyAutoOfferProvider = Provider<bool>((_) => true);
+
+/// What the player's saved store purchases unlock (cosmetics only).
+final entitlementsProvider = StreamProvider<Entitlements>(
+    (ref) => ref.watch(repositoryProvider).watchEntitlements());
+
+/// What cosmetics care about: level, story, victories, streaks and the
+/// Patron Pack. Null until everything has loaded.
+final cosmeticContextProvider = Provider<CosmeticContext?>((ref) {
+  final player = ref.watch(playerProvider);
+  final read = ref.watch(storyReadProvider).value;
+  final streaks = ref.watch(claimedStreaksProvider).value;
+  final workouts = ref.watch(workoutsProvider).value;
+  if (player == null || read == null || streaks == null || workouts == null) return null;
+  return Cosmetics.contextFor(
+    level: player.level,
+    chaptersRead: read,
+    victories: player.hero.victories,
+    claimedStreakDays: streaks,
+    workouts: workouts.length,
+    entitlements: ref.watch(entitlementsProvider).value ?? const Entitlements.none(),
+  );
+});
+
+/// The hero as drawn everywhere in the game: appearance, worn gear, and the
+/// chosen cape and hair dye if the player has them.
+final heroLookProvider = Provider<HeroLook?>((ref) {
+  final player = ref.watch(playerProvider);
+  if (player == null) return null;
+  final ctx = ref.watch(cosmeticContextProvider);
+  final h = player.hero;
+  final cape = ctx == null ? null : Cosmetics.wornCape(h.cape, ctx);
+  return HeroLook(
+    style: h.appearanceStyle,
+    color: h.appearanceColor,
+    skin: h.appearanceSkin,
+    equipped: {for (final i in player.equipped) i.id},
+    cape: cape?.color == null ? null : cape,
+    dye: ctx == null ? null : Cosmetics.wornDye(h.hairDye, ctx),
+  );
+});
 
 final activeExpeditionProvider = StreamProvider<ExpeditionProgress?>(
     (ref) => ref.watch(repositoryProvider).watchActiveExpedition());

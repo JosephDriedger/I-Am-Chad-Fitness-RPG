@@ -64,6 +64,12 @@ class Heroes extends Table {
 
   /// Healing potions bought from the shop and kept in the pouch.
   IntColumn get potionStock => integer().withDefault(const Constant(0))();
+
+  /// The cape and hair dye the player chose (ids from `Cosmetics`, schema v8).
+  /// Looks only; a look the player no longer has access to is drawn as the
+  /// classic cape or the natural hair colour.
+  TextColumn get cape => text().withDefault(const Constant('classic'))();
+  TextColumn get hairDye => text().withDefault(const Constant(''))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -126,6 +132,21 @@ class StoryChoices extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+/// A purchase made with real money through the app store, kept so the
+/// cosmetics it unlocked work offline. The store account is the real record:
+/// everything here can be restored from it. `key` is the product id for a
+/// one-time pack and `tip:<transaction id>` for a tip, so a repeated delivery
+/// from the store can never be counted twice (see `Entitlements.receiptKey`).
+@DataClassName('PurchaseReceiptRow')
+class PurchaseReceipts extends Table {
+  TextColumn get key => text()();
+  TextColumn get productId => text()();
+  DateTimeColumn get grantedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
 /// The expedition the player is in the middle of, if any (id is always 1).
 /// Written at the start of every step so closing the app never loses it.
 @DataClassName('ActiveExpeditionRow')
@@ -169,6 +190,7 @@ class AppSettings extends Table {
     StreakRewards,
     StoryProgress,
     StoryChoices,
+    PurchaseReceipts,
     AppSettings,
   ],
 )
@@ -187,7 +209,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -216,6 +238,11 @@ class AppDatabase extends _$AppDatabase {
           if (from < 7) {
             await m.createTable(storyProgress);
             await m.createTable(storyChoices);
+          }
+          if (from < 8) {
+            await m.createTable(purchaseReceipts);
+            await m.addColumn(heroes, heroes.cape);
+            await m.addColumn(heroes, heroes.hairDye);
           }
         },
         beforeOpen: (details) async {

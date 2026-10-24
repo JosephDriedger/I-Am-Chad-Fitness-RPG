@@ -27,6 +27,8 @@ This document describes how the code is organised and the rules that keep it tha
 
 The story follows the same split: the script, the unlock rules and the conditions on remembered choices are pure Dart in `domain/story.dart`; the backdrops and characters are painted in `game/art/story_art.dart`; and `features/story` holds the reading screen and the Chronicle.
 
+Money follows the same split. What may be sold, and the wording of the promise, is pure Dart in `domain/patronage.dart`; the looks themselves (capes, hair dyes, hall pennants and decorations, each with a way to unlock it and no stats) are in `domain/cosmetics.dart`. `app/store.dart` is the only code that talks to the platform store (behind a `StoreGateway` that tests replace with a pretend store) and turns a finished purchase into a saved receipt before confirming it. `heroLookProvider` combines the hero, worn gear and unlocked cosmetics into the one `HeroLook` every scene draws. See [Monetization](MONETIZATION.md).
+
 If a rule decides how the game plays (rewards, damage, quests, level curves), it lives in `domain/`. If you find yourself writing it in a widget, move it.
 
 ## Source of truth
@@ -67,6 +69,8 @@ Riverpod 3. All providers live in `lib/app/providers.dart`:
 | `workoutsProvider`, `grantsProvider`, `heroProvider`, `itemsProvider`, `settingsProvider` | `StreamProvider` | Live views of stored data. |
 | `prefsProvider` | `Provider<AppPrefs>` | Settings with defaults while loading. |
 | `playerProvider` | `Provider<PlayerStatus?>` | Hero plus derived XP and energy. `null` until loaded or before onboarding. |
+| `entitlementsProvider`, `cosmeticContextProvider`, `heroLookProvider` | `StreamProvider` / `Provider` | What saved purchases unlock, what cosmetics need to know (level, story, victories, streaks, pack), and the hero as drawn. |
+| `storeGatewayProvider`, `storeProvider` | `Provider` / `NotifierProvider` | The platform store, and the controller that loads prices, starts checkout, restores, and saves each finished purchase. Listened to from launch so a purchase finished while the app was closed is delivered. |
 
 ## Determinism
 

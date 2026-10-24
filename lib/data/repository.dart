@@ -6,6 +6,7 @@ import '../domain/activity.dart';
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/items.dart';
+import '../domain/patronage.dart';
 import '../domain/player_state.dart';
 import '../domain/rewards.dart';
 import '../domain/shop.dart';
@@ -145,9 +146,13 @@ class GameRepository {
     int? appearanceStyle,
     int? appearanceColor,
     int? appearanceSkin,
+    String? cape,
+    String? hairDye,
   }) async {
     await (_db.update(_db.heroes)..where((h) => h.id.equals(1))).write(
       HeroesCompanion(
+        cape: cape == null ? const Value.absent() : Value(cape),
+        hairDye: hairDye == null ? const Value.absent() : Value(hairDye),
         name: name == null ? const Value.absent() : Value(name),
         appearanceStyle: appearanceStyle == null
             ? const Value.absent()
@@ -359,6 +364,32 @@ class GameRepository {
     });
   }
 
+  // ---- Real-money purchases -----------------------------------------------
+
+  /// What the saved purchase receipts add up to.
+  Stream<Entitlements> watchEntitlements() => _db.select(_db.purchaseReceipts).watch().map(_toEntitlements);
+
+  Future<Entitlements> entitlements() async => _toEntitlements(await _db.select(_db.purchaseReceipts).get());
+
+  static Entitlements _toEntitlements(List<PurchaseReceiptRow> rows) =>
+      Entitlements.fromReceipts([for (final r in rows) (key: r.key, productId: r.productId)]);
+
+  /// Saves a completed store purchase. Safe to call again with the same
+  /// purchase: a pack is stored once and a tip once per transaction, so a
+  /// repeated delivery from the store never grants anything twice. Returns
+  /// true if it was new. Nothing here touches XP, energy, coins or any stat.
+  Future<bool> recordPurchase(StoreProduct product, String transactionId, {required DateTime at}) async {
+    final key = Entitlements.receiptKey(product, transactionId);
+    return _db.transaction(() async {
+      final existing = await (_db.select(_db.purchaseReceipts)..where((r) => r.key.equals(key))).getSingleOrNull();
+      if (existing != null) return false;
+      await _db.into(_db.purchaseReceipts).insert(
+            PurchaseReceiptsCompanion.insert(key: key, productId: product.id, grantedAt: at),
+          );
+      return true;
+    });
+  }
+
   // ---- Streaks ------------------------------------------------------------
 
   /// Where the streak stands right now, from everything ever logged.
@@ -472,6 +503,7 @@ class GameRepository {
     final storyRead = await _db.select(_db.storyProgress).get();
     final storyChoices = await _db.select(_db.storyChoices).get();
     final streaks = await (_db.select(_db.streakRewards)..orderBy([(t) => OrderingTerm.asc(t.days)])).get();
+    final receipts = await (_db.select(_db.purchaseReceipts)..orderBy([(t) => OrderingTerm.asc(t.grantedAt)])).get();
     final data = {
       'app': 'I Am Chad: Fitness RPG',
       'exportVersion': 1,
@@ -497,7 +529,12 @@ class GameRepository {
           'victories': hero.victories,
           'streakXp': hero.streakXp,
           'potionStock': hero.potionStock,
+          'cape': hero.cape,
+          'hairDye': hero.hairDye,
         },
+      'purchases': [
+        for (final r in receipts) {'productId': r.productId, 'grantedAt': r.grantedAt.toIso8601String()}
+      ],
       'story': {
         'chaptersRead': [for (final r in storyRead) r.chapter],
         'choices': {for (final r in storyChoices) r.key: r.option},
@@ -573,5 +610,7 @@ class GameRepository {
         victories: r.victories,
         streakXp: r.streakXp,
         potionStock: r.potionStock,
+        cape: r.cape,
+        hairDye: r.hairDye,
       );
 }

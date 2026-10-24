@@ -10,6 +10,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../app/providers.dart';
 import '../domain/activity.dart';
 import '../domain/hero.dart';
+import '../domain/patronage.dart';
+import '../domain/workout.dart';
 import '../features/adventure/expedition_screen.dart';
 import '../features/home/home_shell.dart';
 import '../game/demo/exercise_demo.dart';
@@ -18,7 +20,8 @@ import 'cast_scene.dart';
 /// Developer shortcuts, enabled with `--dart-define=PREVIEW=<mode>`.
 ///
 /// Modes: `cast` (art sheet), `duel` (practice duel), `expedition`, `hub`,
-/// the still scene states `boss`, `event`, `chest`, and `demos` (every
+/// `wardrobe` (capes and hair dyes), `patron` (a hall with the Patron Pack and
+/// earned pennants), the still scene states `boss`, `event`, `chest`, and `demos` (every
 /// exercise demonstration at its key poses).
 /// The hero is created on demand so a scene can be opened in one step.
 Widget? previewHome(String mode) {
@@ -31,6 +34,10 @@ Widget? previewHome(String mode) {
       return const _Seeded(child: ExpeditionScreen(seed: 11, practice: false));
     case 'demos':
       return const _DemoGallery();
+    case 'wardrobe':
+      return Scaffold(body: GameWidget(game: CastScene(wardrobe: true)));
+    case 'patron':
+      return const _Seeded(showcase: true, child: HomeShell());
     case 'boss':
     case 'event':
     case 'chest':
@@ -42,9 +49,12 @@ Widget? previewHome(String mode) {
 }
 
 class _Seeded extends ConsumerStatefulWidget {
-  const _Seeded({required this.child});
+  const _Seeded({required this.child, this.showcase = false});
 
   final Widget child;
+
+  /// Also grants the Patron Pack and some milestones, to see the decorations.
+  final bool showcase;
 
   @override
   ConsumerState<_Seeded> createState() => _SeededState();
@@ -69,6 +79,14 @@ class _SeededState extends ConsumerState<_Seeded> {
         preferredCategories: {ActivityCategory.cardio},
         hasDumbbells: true,
       ));
+    }
+    if (widget.showcase && !(await repo.entitlements()).hasPatronPack) {
+      final now = DateTime.now();
+      await repo.recordPurchase(Patronage.patronPack, 'preview', at: now);
+      await repo.updateHeroDetails(cape: 'crimson', hairDye: 'mint');
+      await repo.addWorkout(WorkoutEntry(activityId: 'walking', performedAt: now, durationSeconds: 1200, loggedAt: now));
+      await repo.recordExpedition(seed: 1, victory: true, battlesWon: 3, xp: 2500, coins: 40, lootItemId: 'iron_blade');
+      await repo.markChapterRead(7, at: now);
     }
   }
 

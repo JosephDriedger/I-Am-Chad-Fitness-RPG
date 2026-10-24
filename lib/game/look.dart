@@ -3,12 +3,16 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../domain/cosmetics.dart';
+
 class HeroLook {
   const HeroLook({
     this.style = 0,
     this.color = 0,
     this.skin = 0,
     this.equipped = const {},
+    this.cape,
+    this.dye,
   });
 
   final int style;
@@ -18,9 +22,16 @@ class HeroLook {
   /// Ids of equipped items; drawn on the character.
   final Set<String> equipped;
 
+  /// A cape other than the classic one, or null. Looks only (see cosmetics.dart).
+  final Cape? cape;
+
+  /// A hair dye replacing the natural colour, or null.
+  final HairDye? dye;
+
   Color get tunic => colors[color % colors.length];
   Color get skinColor => skins[skin % skins.length];
-  Color get hairColor => hairColors[style % hairColors.length];
+  Color get hairColor =>
+      dye != null ? Color(dye!.color) : hairColors[style % hairColors.length];
 
   static const colors = <Color>[
     Color(0xFF00796B),
@@ -65,7 +76,19 @@ class HeroLook {
         color: color ?? this.color,
         skin: skin ?? this.skin,
         equipped: equipped ?? this.equipped,
+        cape: cape,
+        dye: dye,
       );
+
+  /// Whether two looks draw the same hero, for `shouldRepaint`.
+  bool sameAs(HeroLook o) =>
+      style == o.style &&
+      color == o.color &&
+      skin == o.skin &&
+      cape?.id == o.cape?.id &&
+      dye?.id == o.dye?.id &&
+      equipped.length == o.equipped.length &&
+      equipped.containsAll(o.equipped);
 }
 
 /// Mutable per-frame state that character painters read.

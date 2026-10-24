@@ -10,6 +10,7 @@ import 'dart:ui';
 
 import 'package:flutter/painting.dart' show HSLColor;
 
+import '../../domain/cosmetics.dart' show Cape;
 import '../look.dart';
 
 final Paint _p = Paint();
@@ -91,15 +92,20 @@ void paintHero(Canvas c, HeroLook look, ActorState s) {
 
   // Cape, behind everything, swaying a little.
   final sway = math.sin(s.time * 3) * 2 + (s.walking ? -4 : 0) - s.attack * 3;
-  fillPath(
-    c,
-    Path()
-      ..moveTo(-9, -36 + bob)
-      ..lineTo(-17 + sway, -8)
-      ..lineTo(-3, -10)
-      ..close(),
-    shade(tunic, -0.14),
-  );
+  final cape = look.cape;
+  if (cape != null && cape.color != null) {
+    _paintMantle(c, cape, bob, sway);
+  } else {
+    fillPath(
+      c,
+      Path()
+        ..moveTo(-9, -36 + bob)
+        ..lineTo(-17 + sway, -8)
+        ..lineTo(-3, -10)
+        ..close(),
+      shade(tunic, -0.14),
+    );
+  }
 
   // Legs.
   rrect(c, -7 + swing, -14, 6, 14, 2, const Color(0xFF5D4037));
@@ -152,6 +158,43 @@ void paintHero(Canvas c, HeroLook look, ActorState s) {
     oval(c, 0, 0, 6, 9, const Color(0xFFB0BEC5));
     circle(c, 0, 0, 2.6, const Color(0xFFF2C94C));
     c.restore();
+  }
+}
+
+/// A full-length mantle from the Patron Pack or earned in play. It hangs behind
+/// the torso and sways with the hero, so only its edges and hem show.
+void _paintMantle(Canvas c, Cape cape, double bob, double sway) {
+  final base = Color(cape.color!);
+  final trim = Color(cape.trim ?? cape.color!);
+  final body = Path()
+    ..moveTo(-9, -38 + bob)
+    ..lineTo(9, -38 + bob)
+    ..quadraticBezierTo(15, -22, 13 + sway * 0.2, -5)
+    ..lineTo(-21 + sway, -3)
+    ..quadraticBezierTo(-14, -22, -9, -38 + bob)
+    ..close();
+  fillPath(c, body, base);
+  fillPath(
+    c,
+    Path()
+      ..moveTo(-3, -38 + bob)
+      ..lineTo(3, -38 + bob)
+      ..lineTo(2 + sway * 0.1, -4)
+      ..lineTo(-8 + sway * 0.5, -3.5)
+      ..close(),
+    shade(base, -0.1),
+  );
+  line(c, 13 + sway * 0.2, -5, -21 + sway, -3, 2.6, trim);
+  if (cape.stars) {
+    for (final p in [
+      (-12.0 + sway * 0.45, -20.0),
+      (-3.0 + sway * 0.1, -11.0),
+      (9.0, -17.0),
+      (-17.0 + sway * 0.7, -8.0),
+      (6.0, -8.0),
+    ]) {
+      circle(c, p.$1, p.$2, 1.1, trim);
+    }
   }
 }
 

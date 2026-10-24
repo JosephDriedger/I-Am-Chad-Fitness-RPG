@@ -4,20 +4,24 @@ import 'package:flame/components.dart';
 import 'package:flutter/painting.dart'
     show TextPainter, TextSpan, TextStyle, FontWeight, TextDirection;
 
+import '../domain/cosmetics.dart';
 import '../game/art/painters.dart';
 import '../game/core.dart';
 import '../game/look.dart';
 
 /// Every character on one sheet, for checking the art. Dev preview only.
 class CastScene extends GameScene {
-  CastScene() : super(designWidth: 360, designHeight: 640);
+  /// [wardrobe] shows the capes and hair dyes instead of the characters.
+  CastScene({this.wardrobe = false}) : super(designWidth: 360, designHeight: 640);
+
+  final bool wardrobe;
 
   @override
   Color backgroundColor() => const Color(0xFFEFE2C4);
 
   @override
   Future<void> onLoad() async {
-    final items = <(String, ActorPainter, double)>[
+    final items = wardrobe ? _wardrobeItems() : <(String, ActorPainter, double)>[
       ('Hero (Short, Teal)', (c, s) => paintHero(c, const HeroLook(), s), 1.5),
       ('Hero (Hood, Ember, Brown)', (c, s) => paintHero(c, const HeroLook(style: 5, color: 2, skin: 4), s), 1.5),
       ('Hero + gear', (c, s) => paintHero(c, const HeroLook(style: 2, color: 1, skin: 2, equipped: {'iron_blade', 'wayfarer_cap', 'trail_vest', 'stopwatch_charm'}), s), 1.5),
@@ -44,6 +48,25 @@ class CastScene extends GameScene {
     }
   }
 }
+
+List<(String, ActorPainter, double)> _wardrobeItems() => [
+      for (var i = 0; i < Cosmetics.capes.length; i++)
+        (
+          Cosmetics.capes[i].name,
+          (Canvas c, ActorState s) => paintHero(
+                c,
+                HeroLook(style: i % 6, color: i, skin: i, cape: Cosmetics.capes[i], equipped: const {'iron_blade'}),
+                s,
+              ),
+          1.5,
+        ),
+      for (var i = 0; i < Cosmetics.dyes.length; i++)
+        (
+          '${Cosmetics.dyes[i].name} Dye',
+          (Canvas c, ActorState s) => paintHero(c, HeroLook(style: i % 6, color: 1, skin: 2, dye: Cosmetics.dyes[i]), s),
+          1.5,
+        ),
+    ];
 
 class _Caption extends PositionComponent {
   _Caption(String text, Vector2 p) : super(position: p) {

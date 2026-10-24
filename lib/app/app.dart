@@ -6,6 +6,7 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/title_screen.dart';
 import 'game_ui.dart';
 import 'providers.dart';
+import 'store.dart';
 import 'theme.dart';
 
 /// Whether returning players see the title screen on launch. Tests turn it
@@ -52,6 +53,14 @@ class _Gate extends ConsumerStatefulWidget {
 
 class _GateState extends ConsumerState<_Gate> {
   bool _titleDone = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to the store from launch, so a purchase that finished while the
+    // app was closed (a parent approving one, say) is delivered and saved.
+    ref.read(storeProvider);
+  }
 
   @override
   Widget build(BuildContext context) {
