@@ -87,18 +87,16 @@ class _ChapterCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      open ? chapter.title : 'A chapter yet to come',
-                      style: gameTitle(
-                        21,
-                        color: open ? GameColors.ink : GameColors.inkSoft,
-                      ),
+              LayoutBuilder(
+                builder: (context, box) {
+                  final title = Text(
+                    open ? chapter.title : 'A chapter yet to come',
+                    style: gameTitle(
+                      21,
+                      color: open ? GameColors.ink : GameColors.inkSoft,
                     ),
-                  ),
-                  GameChip(
+                  );
+                  final chip = GameChip(
                     text: stateText,
                     icon: open
                         ? (read
@@ -106,8 +104,17 @@ class _ChapterCard extends StatelessWidget {
                               : Icons.auto_awesome_rounded)
                         : Icons.lock_rounded,
                     color: open && !read ? GameColors.gold : GameColors.cream,
-                  ),
-                ],
+                  );
+                  // Side by side when there is room, stacked on a narrow screen or at large text.
+                  final roomy = box.maxWidth >= 300 && MediaQuery.textScalerOf(context).scale(16) <= 20;
+                  if (roomy) {
+                    return Row(children: [Expanded(child: title), chip]);
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [title, const SizedBox(height: 6), chip],
+                  );
+                },
               ),
               if (open) ...[
                 const SizedBox(height: 6),

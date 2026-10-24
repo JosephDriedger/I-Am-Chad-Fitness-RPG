@@ -123,12 +123,18 @@ class _BestsPanelState extends State<_BestsPanel> {
                   const Icon(Icons.workspace_premium_rounded, color: GameColors.teal, size: 22),
                   const SizedBox(width: 8),
                   Expanded(
+                    flex: 3,
                     child: Text(
                       '${ActivityCatalog.byId(b.activityId)?.name ?? 'Unknown'}: ${b.kind.label}',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
-                  Text(b.describe(metric: widget.metric), style: gameTitle(17)),
+                  const SizedBox(width: 8),
+                  // May wrap onto a second line when text is large, rather than run off the edge.
+                  Flexible(
+                    flex: 2,
+                    child: Text(b.describe(metric: widget.metric), textAlign: TextAlign.end, style: gameTitle(17)),
+                  ),
                 ],
               ),
             ),
@@ -164,12 +170,21 @@ class _DayHeader extends StatelessWidget {
       padding: const EdgeInsets.only(top: 6, bottom: 6),
       child: Row(
         children: [
-          Expanded(child: Text(DateFormat('EEEE, MMM d').format(d), style: gameTitle(19))),
-          if (grant != null) ...[
-            GameChip(text: '+${grant!.xp} XP', icon: Icons.star_rounded),
-            const SizedBox(width: 6),
-            GameChip(text: '+${grant!.energy}', icon: Icons.bolt_rounded, color: GameColors.teal),
-          ],
+          Expanded(flex: 3, child: Text(DateFormat('EEEE, MMM d').format(d), style: gameTitle(19))),
+          if (grant != null)
+            // The chips drop onto a second line when text is large, instead of running off the edge.
+            Flexible(
+              flex: 2,
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  GameChip(text: '+${grant!.xp} XP', icon: Icons.star_rounded),
+                  GameChip(text: '+${grant!.energy}', icon: Icons.bolt_rounded, color: GameColors.teal),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -271,20 +286,28 @@ class _WeekChart extends StatelessWidget {
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
                           ),
                           const SizedBox(height: 2),
-                          Container(
-                            height: 4 + 70 * (values[i] / maxV),
-                            margin: const EdgeInsets.symmetric(horizontal: 6),
-                            decoration: BoxDecoration(
-                              gradient: values[i] > 0
-                                  ? const LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [GameColors.gold, GameColors.goldDark],
-                                    )
-                                  : null,
-                              color: values[i] > 0 ? null : GameColors.parchmentDark,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(color: GameColors.wood, width: 1.5),
+                          // The bar takes whatever height the labels leave, so it never overflows.
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, box) => Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: (4 + (box.maxHeight - 4) * (values[i] / maxV)).clamp(0.0, box.maxHeight),
+                                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                                  decoration: BoxDecoration(
+                                    gradient: values[i] > 0
+                                        ? const LinearGradient(
+                                            begin: Alignment.topCenter,
+                                            end: Alignment.bottomCenter,
+                                            colors: [GameColors.gold, GameColors.goldDark],
+                                          )
+                                        : null,
+                                    color: values[i] > 0 ? null : GameColors.parchmentDark,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: GameColors.wood, width: 1.5),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 4),

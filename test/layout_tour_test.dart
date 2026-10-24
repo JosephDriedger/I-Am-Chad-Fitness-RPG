@@ -66,6 +66,29 @@ Future<void> _back(WidgetTester tester) async {
   _noProblem(tester, 'going back');
 }
 
+/// Scrolls the main list of the current screen from top to bottom a screenful
+/// at a time, failing with the screen and the position named if any panel,
+/// however far down, overflows. Lists build their panels lazily, so a layout
+/// bug in the lower half of a screen shows up only when it is scrolled to.
+Future<void> _scrollThrough(WidgetTester tester, String screen) async {
+  final lists = find.byType(Scrollable);
+  if (lists.evaluate().isEmpty) return;
+  final list = lists.first;
+  final position = tester.state<ScrollableState>(list).position;
+  var last = -1.0;
+  for (var i = 0; i < 80 && position.pixels != last; i++) {
+    last = position.pixels;
+    await tester.drag(list, const Offset(0, -240));
+    await settle(tester, frames: 3);
+    _noProblem(tester, '$screen, after scrolling down ${position.pixels.round()} px');
+  }
+  // And back up, so the next step starts from the top.
+  for (var i = 0; i < 80 && position.pixels > 0; i++) {
+    await tester.drag(list, const Offset(0, 600));
+    await settle(tester, frames: 2);
+  }
+}
+
 /// Fails with the step named if anything has gone wrong on screen, so a
 /// layout overflow says where it happened.
 void _noProblem(WidgetTester tester, String step) {
@@ -113,7 +136,12 @@ void main() {
         await tester.tap(find.text(label));
         await settle(tester, frames: 30);
         _noProblem(tester, 'opening $label');
+        await _scrollThrough(tester, label);
         if (label == 'Quests') {
+          // The Chronicle lists every chapter of every season. Its button is near the top.
+          await _tap(tester, find.text('Open the Chronicle'));
+          await _scrollThrough(tester, 'the Chronicle');
+          await _back(tester);
           // The panels further down the board are built lazily, so scroll to each one.
           for (final panel in ['Weekly Goal', 'Last Week', 'Self-Directed Adventures']) {
             await _reveal(tester, find.text(panel));
@@ -122,6 +150,7 @@ void main() {
         }
         if (label == 'Adventure') {
           await _tap(tester, find.text('Visit the Shop'));
+          await _scrollThrough(tester, 'the Shop');
           await _back(tester);
           await _tap(tester, find.text('Practice Duel'));
           expect(find.text('Attack'), findsOneWidget);
@@ -169,12 +198,12 @@ void main() {
       // Settings and the Patron's Hall.
       await tester.tap(find.byTooltip('Settings'));
       await settle(tester, frames: 30);
+      await _scrollThrough(tester, 'Settings');
       await _tap(tester, find.byKey(const Key('open_guide')));
-      for (final s in ['Moving and Rewards', 'Adventures', 'Coins, Gear and Looks', 'Story', 'Your Data']) {
-        await _reveal(tester, find.text(s));
-      }
+      await _scrollThrough(tester, 'the guide');
       await _back(tester);
       await _tap(tester, find.text("Open the Patron's Hall"));
+      await _scrollThrough(tester, "the Patron's Hall");
       await _back(tester);
       await _back(tester);
 
