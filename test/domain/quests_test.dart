@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/domain/activity.dart';
 import 'package:i_am_chad/domain/chad.dart';
+import 'package:i_am_chad/domain/difficulty.dart';
 import 'package:i_am_chad/domain/hero.dart';
 import 'package:i_am_chad/domain/quests.dart';
 import 'package:i_am_chad/domain/workout.dart';
@@ -129,6 +130,56 @@ void main() {
           }
         }
       }
+    });
+
+    test('every line there is follows the content guidelines', () {
+      // Whole words and phrases from docs/CONTENT_GUIDELINES.md. "fat" is matched as
+      // a word so it does not trip on "fatal" or "Fatima".
+      const phrases = [
+        'lazy', 'ugly', 'pathetic', 'weak', 'failure', 'failed', 'excuse', 'no pain',
+        'don\'t break', 'you missed', 'overdue', 'weight', 'in shape', 'burn off', 'hurry up',
+        'you must', 'you have to', 'keep up', 'falling behind',
+      ];
+      final fat = RegExp(r'\bfat\b');
+      for (final line in ChadDialogue.every) {
+        final lower = line.toLowerCase();
+        for (final p in phrases) {
+          expect(lower.contains(p), isFalse, reason: '"$p" in: $line');
+        }
+        expect(fat.hasMatch(lower), isFalse, reason: line);
+      }
+    });
+
+    test('lines are short, finished sentences, and none is repeated', () {
+      final all = ChadDialogue.every;
+      expect(all.toSet().length, all.length, reason: 'a line appears twice');
+      for (final line in all) {
+        expect(line.trim(), line);
+        expect(line.length, inInclusiveRange(20, 190), reason: line);
+        expect(RegExp(r'[.!?"]$').hasMatch(line), isTrue, reason: 'does not end like a sentence: $line');
+      }
+    });
+
+    test('every region has tips for setting out, so a new region cannot ship without one', () {
+      expect(ChadDialogue.tipRegions.toSet(), {for (var t = 1; t <= Difficulty.maxTier; t++) t});
+      for (var tier = 1; tier <= Difficulty.maxTier; tier++) {
+        // Across a spread of seeds, the tips for that region come up.
+        final seen = {for (var s = 0; s < 40; s++) ChadDialogue.adventureLine(tier, seed: s)};
+        expect(seen.length, greaterThan(5), reason: 'region $tier');
+        expect(ChadDialogue.adventureLine(tier, seed: 7), ChadDialogue.adventureLine(tier, seed: 7));
+        expect(ChadDialogue.adventureLine(tier, seed: -3), isNotEmpty);
+      }
+    });
+
+    test('a region\'s tips are about the enemies met there', () {
+      String tips(int tier) => [
+            for (var s = 0; s < 40; s++) ChadDialogue.adventureLine(tier, seed: s),
+          ].join(' ').toLowerCase();
+      expect(tips(2), allOf(contains('crab'), contains('jell'), contains('gull')));
+      expect(tips(4), allOf(contains('yeti'), contains('golem')));
+      expect(tips(6), allOf(contains('scarab'), contains('sphinx')));
+      // Nobody is told about an enemy that lives in a region they have not reached.
+      expect(tips(1), isNot(contains('crab')));
     });
   });
 }

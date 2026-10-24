@@ -82,10 +82,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       );
     }
     final resumed = saved != null && saved.stepIndex > 0;
-    _chadStart = ChadDialogue.line(
-      resumed ? ChadContext.resume : ChadContext.adventureStart,
-      seed: widget.seed,
-    );
+    _chadStart = resumed
+        ? ChadDialogue.line(ChadContext.resume, seed: widget.seed)
+        : ChadDialogue.adventureLine(_run.expedition.tier, seed: widget.seed);
 
     _scene = BattleScene(
       look: ref.read(heroLookProvider) ??

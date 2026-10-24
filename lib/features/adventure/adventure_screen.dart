@@ -43,7 +43,7 @@ class AdventureScreen extends ConsumerWidget {
           text: active != null
               ? ChadDialogue.line(ChadContext.resume, seed: active.seed)
               : canGo
-                  ? ChadDialogue.line(ChadContext.adventureStart, seed: player.hero.victories)
+                  ? ChadDialogue.adventureLine(tier, seed: player.hero.victories)
                   : ChadDialogue.line(ChadContext.lowEnergy),
         ),
         const SizedBox(height: 16),

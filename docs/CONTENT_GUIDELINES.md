@@ -28,7 +28,7 @@ Follow the usual game convention:
 - Medical claims or promises of health outcomes.
 - Urgency tricks, countdown timers, or fear of missing out.
 
-The dialogue test (`test/domain/quests_test.dart`) lints Chad's lines for a few shaming words. It is a safety net, not a substitute for judgement.
+The dialogue tests (`test/domain/quests_test.dart`) lint every one of Chad's lines against the banned words above, and check that each is a short, finished sentence and that every region has setting-out tips. They are a safety net, not a substitute for judgement.
 
 ## Always include
 

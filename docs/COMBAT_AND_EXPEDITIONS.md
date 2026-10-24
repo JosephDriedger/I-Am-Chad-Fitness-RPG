@@ -132,7 +132,7 @@ Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGua
 | Thunder Heights | Thunder Cloud (flurries), Gale Hawk (flurries), Static Imp (braces and mends) | The Thunderhead, Stormcaller Skarn |
 | The Sunstone Dunes | Dust Devil (flurries), Cactus Knight (heavy blows, braces), Scarab Roller (braces and mends) | The Great Dune Worm, The Riddling Sphinx |
 
-Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md). The enemy art is in [`enemy_art.dart`](../lib/game/art/enemy_art.dart); several bosses are a recoloured or crowned version of a regular enemy's drawing.
+Chad teaches each region's enemy moves when you set out: `ChadDialogue.adventureLine` mixes his usual send-offs with tips for that region, and a test requires tips for every region. Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md). The enemy art is in [`enemy_art.dart`](../lib/game/art/enemy_art.dart); several bosses are a recoloured or crowned version of a regular enemy's drawing.
 
 ## Equipment
 
