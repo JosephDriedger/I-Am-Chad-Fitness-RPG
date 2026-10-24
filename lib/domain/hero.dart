@@ -37,6 +37,8 @@ class HeroProfile {
     this.victories = 0,
     this.streakXp = 0,
     this.potionStock = 0,
+    this.cape = 'classic',
+    this.hairDye = '',
   });
 
   final String name;
@@ -59,6 +61,10 @@ class HeroProfile {
   /// Healing potions in the pouch, bought from the shop.
   final int potionStock;
 
+  /// Chosen cape and hair dye (ids from cosmetics.dart). Looks only.
+  final String cape;
+  final String hairDye;
+
   HeroProfile copyWith({
     String? name,
     int? appearanceStyle,
@@ -73,6 +79,8 @@ class HeroProfile {
     int? victories,
     int? streakXp,
     int? potionStock,
+    String? cape,
+    String? hairDye,
   }) =>
       HeroProfile(
         name: name ?? this.name,
@@ -88,6 +96,8 @@ class HeroProfile {
         victories: victories ?? this.victories,
         streakXp: streakXp ?? this.streakXp,
         potionStock: potionStock ?? this.potionStock,
+        cape: cape ?? this.cape,
+        hairDye: hairDye ?? this.hairDye,
       );
 }
 

@@ -139,7 +139,7 @@ A workout can be logged for a day that has already passed, so the journal stays 
 
 ## Coins and the shop
 
-Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), practice duels, and streak milestones. The **Guild Shop** (`lib/domain/shop.dart`) is where they are spent. Nothing in it is random, nothing costs real money, and there is no way to buy XP or energy.
+Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), practice duels, and streak milestones. The **Guild Shop** (`lib/domain/shop.dart`) is where they are spent. Nothing in it is random, nothing costs real money, and there is no way to buy XP, energy or coins, with money or otherwise. Real money buys only cosmetics and thanks, in a separate place (see [Monetization](MONETIZATION.md)), and never changes a reward.
 
 | For sale | Price | Notes |
 | --- | --- | --- |

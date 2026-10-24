@@ -5,6 +5,7 @@ import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
+import '../../domain/cosmetics.dart';
 import '../../domain/hero.dart';
 import '../../domain/items.dart';
 import '../../domain/player_state.dart';
@@ -12,6 +13,7 @@ import '../../game/art/painters.dart';
 import '../../game/battle_scene.dart' show paintItemIcon;
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/look.dart';
+import '../patron/wardrobe.dart';
 import '../shop/shop_screen.dart';
 
 /// The character sheet: your hero on a lit stage with equipment slots, stat
@@ -28,12 +30,13 @@ class CharacterScreen extends ConsumerWidget {
     }
     final h = player.hero;
     final ownedIds = {for (final o in owned) o.itemId: o};
-    final look = HeroLook(
-      style: h.appearanceStyle,
-      color: h.appearanceColor,
-      skin: h.appearanceSkin,
-      equipped: {for (final i in player.equipped) i.id},
-    );
+    final look = ref.watch(heroLookProvider) ??
+        HeroLook(
+          style: h.appearanceStyle,
+          color: h.appearanceColor,
+          skin: h.appearanceSkin,
+          equipped: {for (final i in player.equipped) i.id},
+        );
     EquipmentItem? worn(EquipmentSlot s) {
       for (final i in player.equipped) {
         if (i.slot == s) return i;
@@ -153,11 +156,19 @@ class CharacterScreen extends ConsumerWidget {
     );
   }
 
+  /// The dye the preview should show: the pick, if the player has it.
+  HairDye? _pickedDye(WidgetRef ref, String id) {
+    final ctx = ref.read(cosmeticContextProvider);
+    return ctx == null ? null : Cosmetics.wornDye(id, ctx);
+  }
+
   Future<void> _customise(BuildContext context, WidgetRef ref, PlayerStatus player) async {
     final name = TextEditingController(text: player.hero.name);
     var pickStyle = player.hero.appearanceStyle;
     var pickColor = player.hero.appearanceColor;
     var pickSkin = player.hero.appearanceSkin;
+    var pickCape = player.hero.cape;
+    var pickDye = player.hero.hairDye;
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -175,7 +186,15 @@ class CharacterScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(child: HeroAvatar(style: pickStyle, color: pickColor, skin: pickSkin, size: 80)),
+                Center(
+                  child: HeroAvatar(
+                    style: pickStyle,
+                    color: pickColor,
+                    skin: pickSkin,
+                    dye: _pickedDye(ref, pickDye),
+                    size: 80,
+                  ),
+                ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: name,
@@ -193,6 +212,15 @@ class CharacterScreen extends ConsumerWidget {
                     pickSkin = skin ?? pickSkin;
                   }),
                 ),
+                const SizedBox(height: 12),
+                Wardrobe(
+                  cape: pickCape,
+                  dye: pickDye,
+                  onChanged: ({String? cape, String? dye}) => setState(() {
+                    pickCape = cape ?? pickCape;
+                    pickDye = dye ?? pickDye;
+                  }),
+                ),
                 const SizedBox(height: 16),
                 GameButton(
                   label: 'Save',
@@ -205,6 +233,8 @@ class CharacterScreen extends ConsumerWidget {
                           appearanceStyle: pickStyle,
                           appearanceColor: pickColor,
                           appearanceSkin: pickSkin,
+                          cape: pickCape,
+                          hairDye: pickDye,
                         );
                     if (ctx.mounted) Navigator.pop(ctx);
                   },

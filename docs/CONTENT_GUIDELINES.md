@@ -56,7 +56,8 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 - Streaks are allowed only in the forgiving form in [Reward rules](REWARD_RULES.md#streaks): rest days are built in, rewards pay for showing up and never for doing more, nothing already earned is ever taken back, and the text never speaks of loss or pressure ("Don't break your streak" is still banned). No daily login rewards and no countdowns.
 - Rewards are capped per day so exercise is never pushed beyond what is healthy for the reward.
 - Rewards never depend on weight lifted, pace, body measurements or "perceived effort".
-- Everything is paid for with coins earned through play, never with real money. No gacha, loot boxes or random purchases, no paid XP or energy, and nothing is sold that makes the game easier to win by spending rather than exercising (potions and gear are small, bounded and priced in coins).
+- Everything that affects play is paid for with coins earned through play, never with real money. No gacha, loot boxes or random purchases, no paid XP or energy, and nothing is sold that makes the game easier to win by spending rather than exercising (potions and gear are small, bounded and priced in coins).
+- Real money buys only looks and thanks, and only in the Patron's Hall (see [Monetization](MONETIZATION.md)). No ads, no tracking, no subscriptions, no countdowns or limited-time offers, no "best value" or strike-through prices, no purchase prompts after a workout, win, loss or level-up, and no text that makes someone feel lesser for not buying. Cosmetics have no stat, bonus or reward fields, free and earned looks always sit beside paid ones, and the words in the Patron's Hall are linted like the rest of Chad's.
 - Any number the player sees (XP, energy, damage) should be explainable.
 
 ## Accessibility checklist for new UI
@@ -74,6 +75,7 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 - Collect only what a feature needs. Onboarding asks experience level, preferred categories and whether the player has dumbbells, nothing about body measurements, age or health conditions.
 - No public body measurements, leaderboards, or compulsory social features.
 - Local export and deletion must always work.
+- No advertising or analytics SDK, ever, without a new decision first ([Decision 32](DECISIONS.md#32-optional-cosmetic-patronage-and-nothing-else)). The only network contact is the platform store, and only when the Patron's Hall is open or a purchase is being delivered.
 - Any future health integration (HealthKit, Health Connect) requires an explicit permission screen explaining what data is read and why.
 
 ## Art, audio and licensing

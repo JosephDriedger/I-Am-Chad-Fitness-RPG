@@ -82,12 +82,13 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
     );
 
     _scene = BattleScene(
-      look: HeroLook(
-        style: player.hero.appearanceStyle,
-        color: player.hero.appearanceColor,
-        skin: player.hero.appearanceSkin,
-        equipped: {for (final i in player.equipped) i.id},
-      ),
+      look: ref.read(heroLookProvider) ??
+          HeroLook(
+            style: player.hero.appearanceStyle,
+            color: player.hero.appearanceColor,
+            skin: player.hero.appearanceSkin,
+            equipped: {for (final i in player.equipped) i.id},
+          ),
       heroName: player.hero.name,
       reducedMotion: prefs.reducedMotion,
       onSfx: fx.sfx,

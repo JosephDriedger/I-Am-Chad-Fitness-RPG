@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/domain/cosmetics.dart';
 import 'package:i_am_chad/domain/expedition.dart';
 import 'package:i_am_chad/domain/items.dart';
 import 'package:i_am_chad/game/art/painters.dart';
@@ -43,6 +44,31 @@ void main() {
           }
         }
       }
+    });
+
+    test('hero draws with every cape and hair dye, in every pose', () {
+      for (final cape in Cosmetics.capes) {
+        for (final dye in [null, ...Cosmetics.dyes]) {
+          for (var style = 0; style < HeroLook.styleNames.length; style++) {
+            final look = HeroLook(style: style, cape: cape, dye: dye);
+            for (final pose in _poses()) {
+              paintHero(_canvas(), look, pose);
+            }
+          }
+        }
+      }
+      paintHeroPortrait(_canvas(), 64, HeroLook(dye: Cosmetics.dyes.last), 0);
+    });
+
+    test('a dye replaces the natural hair colour, and only that', () {
+      const natural = HeroLook(style: 1);
+      final dyed = HeroLook(style: 1, dye: Cosmetics.dyeById('mint'));
+      expect(dyed.hairColor, isNot(natural.hairColor));
+      expect(dyed.hairColor, Color(Cosmetics.dyeById('mint')!.color));
+      expect(dyed.tunic, natural.tunic);
+      expect(dyed.skinColor, natural.skinColor);
+      expect(dyed.sameAs(natural), isFalse);
+      expect(dyed.copyWith(color: 0).dye, same(dyed.dye), reason: 'copyWith keeps the cosmetics');
     });
 
     test('hero draws with every item equipped, alone and together', () {

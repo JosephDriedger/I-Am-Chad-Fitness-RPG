@@ -19,12 +19,14 @@ Legend: **Done** means implemented and covered by automated tests. **Partial** m
 
 Roughly in priority order.
 
+0. **Switch on the store.** The Patron's Hall, receipts, restore and cosmetics are built and tested against a pretend store, but nothing can be bought for real until the application id is replaced, the four products are created in Google Play Console and App Store Connect, and a build is tested with license testers (Play) and a sandbox account (Apple). Steps are in [Monetization](MONETIZATION.md#setting-it-up-in-the-stores). Real checkout has never been run, on any device.
+
 1. **Run it on a physical phone, and on iOS.** The Android emulator pass found and fixed real problems (portrait framing, reward popups, overlapping text). A physical device will show frame rate, audio latency and haptics, which an emulator can't. iOS has not been built at all.
 2. **Playtest the feel and the numbers.** Combat is probably too easy (a scripted player wins about 90% of level-1 expeditions and 98% or more later), and the animation timings were written blind to a real device. Get human feedback before changing anything.
-3. **First-use guidance in the hall.** A pulsing highlight on Train and a "first steps" line from Chad until the first workout is logged.
+3. **First-use guidance in the hall.** Built: until the first workout is logged, the training dummy glows softly (steady if motion is reduced) and Chad's welcome line is shown. It never blocks anything and disappears for good after the first workout. Still open: first-use tooltips on the Train and log screens, and the interactive intro (item 8).
 4. **Try camera rep counting on real people.** The first version is built (push-ups and squats; see below) and runs on an emulator, but it has never counted a real rep. It needs testing on physical phones with different body types, clothing, light and angles, then the thresholds in `rep_counter.dart` tuned, an iOS build, and a decision on sit-ups and planks.
 5. **More story.** Season One is written and playable. Season Two needs new places, a new problem for the guild and chapters further up the level curve; hand-made portraits and scene art would lift it a lot. Watch whether people read the chapters or skip them, and whether the choices are noticed.
-6. **More to look at.** More enemies, biomes and hall decoration that reacts to progress (trophies, banners for milestones). A hand-made art pass can replace procedural painters one at a time.
+6. **More to look at.** More enemies and biomes, and more hall decoration. The first step is done: ten pennants on the hall's bunting appear as milestones are earned (see [Monetization](MONETIZATION.md#free-looks-sit-beside-the-paid-ones)). More earned decoration, such as trophies on the shelf, would fit. A hand-made art pass can replace procedural painters one at a time.
 7. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
 8. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
 9. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
@@ -54,7 +56,8 @@ The original thinking, still the guide for what comes next: use the phone camera
 - Reminder notifications that are opt-in, kind and never guilt-based.
 - Recovery-friendly mini-games beyond the practice duel.
 - Weightlifting progression tracking and personal bests.
-- Release preparation: real application id, icons, store listings, privacy disclosures, age rating.
+- Release preparation: real application id, icons, store listings, privacy disclosures (declare only store-handled purchases, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), age rating.
+- Season Two as an optional one-time expansion sold through the Patron's Hall, with Season One staying free (see [Monetization](MONETIZATION.md#changing-this-later)). More cosmetics, free and earned first.
 - Asset licence register if any third-party asset is ever added.
 
 ## Later (post-MVP, per the GDD)
@@ -73,7 +76,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 - An expedition is saved at the start of each step, so closing the app mid-fight replays that fight on resume (nothing is lost).
 - Frame rate on low-end phones is unmeasured. Scenes draw everything with canvas calls each frame, which should be fine at this scale but has not been profiled.
 - The weekly goal counts days with any logged movement and cannot yet be customised.
-- The Android and iOS application id (`com.iamchad.i_am_chad`) is a placeholder.
+- The Android and iOS application id (`com.iamchad.i_am_chad`) is a placeholder, and the store products do not exist yet, so **a real purchase has never been made**. The checkout code (`InAppPurchaseGateway`) is a thin layer over the `in_app_purchase` plugin and is untested against Google Play or StoreKit; everything around it (receipts, restore, confirm-after-save, cosmetics) is tested with a pretend store. On a device without the store set up, the Patron's Hall says the store cannot be reached and offers nothing to buy.
 
 ## Open design decisions
 

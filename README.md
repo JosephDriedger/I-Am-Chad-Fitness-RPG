@@ -14,7 +14,7 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 - **Beginner friendly.** Easier versions of an exercise earn exactly the same as harder ones.
 - **Progress without punishment.** Streaks are gentle: rest days are built in, nothing is ever taken away, and a missed stretch just starts a fresh run. Missed days cost nothing.
 - **Adventure with agency.** You are the hero, and Chad is the mentor.
-- **Trustworthy.** Transparent rewards, offline-first, data stays on your device, no pay-to-win.
+- **Trustworthy.** Transparent rewards, offline-first, data stays on your device, no pay-to-win, no ads, and money only ever buys looks and thanks.
 
 ## What works today
 
@@ -28,6 +28,7 @@ Design pillars (full detail in the [Game Design Document](docs/I_Am_Chad_Fitness
 | Camera rep counting (push-ups and squats) | First version built and run on an Android emulator, **not yet tried on a real person**. Needs a phone stand; counts reps on-device with generous leeway for beginners, never saves video, and is optional. See [camera notes](docs/ROADMAP.md#camera-rep-checking) |
 | Story | Done. Season One, "The Dawn Bell": a prologue and seven comedic chapters that open as you level up, with remembered choices, a Chronicle to read them again, and nothing timed. See [Story](docs/STORY.md) |
 | Guild Shop | Done. Spend coins on gear and healing potions (a pouch of up to 5, with up to 3 taken on each expedition and unused ones returned) |
+| Support the game (optional) | Done in code; **needs store set-up before anything can be bought**. The whole game is free, with no ads, no tracking and no subscriptions. Settings opens a Patron's Hall with one cosmetic Patron Pack (mantles, hair dyes, hall decorations) and a tip jar that only says thanks. Money never buys XP, energy, coins, gear or any advantage. Free and earned looks sit beside the paid ones, including hall pennants for milestones. See [Monetization](docs/MONETIZATION.md) |
 | Back-dating | Done. Past workouts can be logged for the journal but earn no rewards, streaks or quest credit |
 | Streaks | Done. Days active in a row, with rest days built in. Milestone rewards of coins and XP from 3 days up to a year, shown on the hall HUD and the quest board. Never a countdown, never lost |
 | Honesty check on implausible entries | Done. A friendly warning, never a lock |
@@ -104,6 +105,7 @@ docs/         Design and engineering documentation
 | [Data model](docs/DATA_MODEL.md) | Tables, derived data, migrations |
 | [Development guide](docs/DEVELOPMENT.md) | Setup, code generation, testing, conventions |
 | [Content guidelines](docs/CONTENT_GUIDELINES.md) | Tone, safety and accessibility rules for writing and design |
+| [Monetization](docs/MONETIZATION.md) | What money can and cannot buy, the promises, and the store set-up |
 | [Roadmap](docs/ROADMAP.md) | Milestone status against the GDD plan |
 | [Decision log](docs/DECISIONS.md) | Why things are the way they are, and open questions |
 

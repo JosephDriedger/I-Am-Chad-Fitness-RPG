@@ -71,6 +71,8 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
   String get _hero => ref.read(heroProvider).value?.name ?? 'Hero';
 
   HeroLook get _look {
+    final cosmetic = ref.read(heroLookProvider);
+    if (cosmetic != null) return cosmetic;
     final h = ref.read(heroProvider).value;
     if (h == null) return const HeroLook();
     final owned = ref.read(itemsProvider).value;

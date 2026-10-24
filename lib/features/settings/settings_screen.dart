@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import '../patron/patron_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -112,6 +113,28 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
+          GamePanel(
+            title: 'Support the Game',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'The whole game is free, with no ads and no tracking, and it always will be. '
+                  'If you would like to help it grow, there are optional cosmetic extras and a tip jar. '
+                  'Nothing there makes the game easier.',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 14),
+                GameButton(
+                  label: "Open the Patron's Hall",
+                  icon: Icons.favorite_rounded,
+                  kind: GameButtonKind.secondary,
+                  onPressed: () => Navigator.of(context).push(gameRoute<void>(const PatronScreen())),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
           const GamePanel(
             title: 'About',
             child: Text(
@@ -134,7 +157,8 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       title: 'Delete Everything?',
       content: const Text(
-        'This permanently removes your hero, workouts, rewards and equipment from this device. It cannot be undone.',
+        'This permanently removes your hero, workouts, rewards and equipment from this device. It cannot be undone.\n\n'
+        'Anything you bought from the Patron\'s Hall belongs to your store account, so Restore Purchases brings it back.',
       ),
       actions: [
         Builder(

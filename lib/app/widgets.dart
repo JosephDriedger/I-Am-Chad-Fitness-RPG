@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../domain/cosmetics.dart' show HairDye;
 import '../domain/hero.dart';
 import '../domain/quests.dart';
 import '../game/art/painters.dart' show paintHeroPortrait;
@@ -14,6 +15,7 @@ class HeroAvatar extends StatelessWidget {
     this.skin = 0,
     this.size = 64,
     this.equipped = const {},
+    this.dye,
   });
 
   final int style;
@@ -22,9 +24,12 @@ class HeroAvatar extends StatelessWidget {
   final double size;
   final Set<String> equipped;
 
+  /// A hair dye, if the player wears one.
+  final HairDye? dye;
+
   @override
   Widget build(BuildContext context) {
-    final look = HeroLook(style: style, color: color, skin: skin, equipped: equipped);
+    final look = HeroLook(style: style, color: color, skin: skin, equipped: equipped, dye: dye);
     return Semantics(
       label: 'Your adventurer',
       image: true,
@@ -48,10 +53,7 @@ class _PortraitPainter extends CustomPainter {
       paintHeroPortrait(canvas, size.width, look, 0);
 
   @override
-  bool shouldRepaint(_PortraitPainter old) =>
-      old.look.style != look.style ||
-      old.look.color != look.color ||
-      old.look.skin != look.skin;
+  bool shouldRepaint(_PortraitPainter old) => !old.look.sameAs(look);
 }
 
 /// Hair/outfit style, outfit colour and skin tone choices with live previews.

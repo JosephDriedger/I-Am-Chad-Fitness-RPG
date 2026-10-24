@@ -7,6 +7,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/chad.dart';
+import '../../domain/cosmetics.dart';
 import '../../domain/expedition.dart';
 import '../../domain/player_state.dart';
 import '../../domain/quests.dart';
@@ -76,13 +77,19 @@ class _HubScreenState extends ConsumerState<HubScreen> {
                 : ChadContext.idle;
     final seed = now.difference(DateTime(now.year)).inDays + _chadNudge;
     final quiet = prefs.quietChad && workouts.isNotEmpty;
+    final cosmetics = ref.read(cosmeticContextProvider);
     return HubState(
-      look: HeroLook(
-        style: p.hero.appearanceStyle,
-        color: p.hero.appearanceColor,
-        skin: p.hero.appearanceSkin,
-        equipped: {for (final i in p.equipped) i.id},
-      ),
+      look: ref.read(heroLookProvider) ??
+          HeroLook(
+            style: p.hero.appearanceStyle,
+            color: p.hero.appearanceColor,
+            skin: p.hero.appearanceSkin,
+            equipped: {for (final i in p.equipped) i.id},
+          ),
+      // A gentle "start here" until the first workout is logged, then never again.
+      highlight: workouts.isEmpty ? HubTarget.train : null,
+      pennants: cosmetics == null ? const [] : [for (final x in Cosmetics.earnedPennants(cosmetics)) x.color],
+      patronDecor: cosmetics == null ? const {} : Cosmetics.patronDecor(cosmetics),
       chadLine: quiet ? 'Tap me if you want a word.' : ChadDialogue.line(ctx, seed: seed),
       questPending: quests.any((q) => !q.isDoneBy(today)),
       canAdventure: p.energy >= Expedition.energyCost,
@@ -197,6 +204,8 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     // Rebuild whenever anything the hall shows changes.
     ref.watch(workoutsProvider);
     ref.watch(itemsProvider);
+    ref.watch(heroLookProvider);
+    ref.watch(cosmeticContextProvider);
     final prefs = ref.watch(prefsProvider);
     _scene.reducedMotion = prefs.reducedMotion;
     if (player == null) {
@@ -211,7 +220,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
         SafeArea(
           child: Column(
             children: [
-              _Hud(player: player, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, streak: ref.watch(streakProvider)?.current ?? 0, onSettings: () {
+              _Hud(player: player, dye: ref.watch(heroLookProvider)?.dye, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, streak: ref.watch(streakProvider)?.current ?? 0, onSettings: () {
                 Navigator.of(context).push(
                     gameRoute<void>(const SettingsScreen()));
               }),
@@ -247,6 +256,7 @@ const _cream = Color(0xFFFFF3D6);
 class _Hud extends StatelessWidget {
   const _Hud({
     required this.player,
+    required this.dye,
     required this.goalDone,
     required this.goalTarget,
     required this.streak,
@@ -254,6 +264,7 @@ class _Hud extends StatelessWidget {
   });
 
   final PlayerStatus player;
+  final HairDye? dye;
   final int goalDone;
   final int goalTarget;
   final int streak;
@@ -282,6 +293,7 @@ class _Hud extends StatelessWidget {
                 color: h.appearanceColor,
                 skin: h.appearanceSkin,
                 equipped: {for (final i in player.equipped) i.id},
+                dye: dye,
                 size: 48,
               ),
             ),
