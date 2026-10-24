@@ -149,6 +149,30 @@ void main() {
       expect(dawn.unlock.n, Story.inSeason(1).last.number);
     });
 
+    test('each finished season earns its own mantle, and the earned looks outnumber none', () {
+      for (final (id, season) in [('dawn', 1), ('lantern', 2), ('chime', 3)]) {
+        final cape = Cosmetics.capeById(id);
+        expect(cape.unlock.kind, UnlockKind.chapter, reason: id);
+        expect(cape.unlock.n, Story.inSeason(season).last.number, reason: id);
+        expect(Cosmetics.wornCape(id, const CosmeticContext()).id, Cosmetics.classicCapeId);
+        expect(Cosmetics.wornCape(id, CosmeticContext(chaptersRead: {cape.unlock.n})).id, id);
+      }
+      // As many earned looks as paid ones, so the pack is extra choice, not better standing.
+      final earnedCapes = Cosmetics.capes.where((c) => c.unlock.isEarned).length;
+      final patronCapes = Cosmetics.capes.where((c) => c.unlock.isPatron).length;
+      expect(earnedCapes, greaterThanOrEqualTo(patronCapes - 1));
+      final earnedDyes = Cosmetics.dyes.where((d) => d.unlock.isEarned).length;
+      final patronDyes = Cosmetics.dyes.where((d) => d.unlock.isPatron).length;
+      expect(earnedDyes, greaterThanOrEqualTo(patronDyes - 1));
+    });
+
+    test('earned dyes open at their levels, none before', () {
+      for (final (id, level) in [('ember', 20), ('glacier', 30), ('sunstone', 40)]) {
+        expect(Cosmetics.wornDye(id, CosmeticContext(level: level - 1)), isNull, reason: id);
+        expect(Cosmetics.wornDye(id, CosmeticContext(level: level))!.id, id);
+      }
+    });
+
     test('pennants hang in a fixed order and only for what was earned', () {
       expect(Cosmetics.earnedPennants(const CosmeticContext()), isEmpty);
       final some = Cosmetics.earnedPennants(const CosmeticContext(workouts: 1, victories: 1, level: 5));

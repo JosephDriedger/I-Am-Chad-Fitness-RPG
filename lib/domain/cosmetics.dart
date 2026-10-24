@@ -154,6 +154,8 @@ class Cosmetics {
   static const capes = <Cape>[
     Cape(classicCapeId, 'Classic Cape', Unlock.free),
     Cape('dawn', 'Dawn Mantle', Unlock.chapter(7), color: 0xFFF2A65A, trim: 0xFFFFE9B0),
+    Cape('lantern', 'Lantern Mantle', Unlock.chapter(15), color: 0xFF1F7A8C, trim: 0xFFFFC857),
+    Cape('chime', 'Chime Mantle', Unlock.chapter(23), color: 0xFF6A7FBF, trim: 0xFFE6EEF8),
     Cape('crimson', 'Crimson Mantle', Unlock.patron, color: 0xFFB3202F, trim: 0xFFF2C94C),
     Cape('starlit', 'Starlit Mantle', Unlock.patron, color: 0xFF1F2F66, trim: 0xFFB9C7FF, stars: true),
     Cape('aurora', 'Aurora Mantle', Unlock.patron, color: 0xFF1F8F86, trim: 0xFFC9A6FF),
@@ -162,6 +164,9 @@ class Cosmetics {
   static const dyes = <HairDye>[
     HairDye('sunrise', 'Sunrise', Unlock.level(5), 0xFFE8703A),
     HairDye('moonlit', 'Moonlit', Unlock.level(10), 0xFFC9D3E3),
+    HairDye('ember', 'Ember', Unlock.level(20), 0xFFD84B2A),
+    HairDye('glacier', 'Glacier', Unlock.level(30), 0xFF8FD3F4),
+    HairDye('sunstone', 'Sunstone', Unlock.level(40), 0xFFFFB627),
     HairDye('mint', 'Mint', Unlock.patron, 0xFF5FD3A5),
     HairDye('sky', 'Sky', Unlock.patron, 0xFF4FA8E8),
     HairDye('rose', 'Rose', Unlock.patron, 0xFFE26A9B),

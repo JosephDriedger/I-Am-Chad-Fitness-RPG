@@ -39,10 +39,10 @@ Cosmetics have three sources, and the game has plenty to look at without paying:
 | Source | Examples |
 | --- | --- |
 | **Free** | The classic cape, six hair styles, six outfit colours, six skin tones, and every piece of gear. |
-| **Earned by playing** | The Dawn Mantle (finish Season One), the Sunrise and Moonlit hair dyes (levels 5 and 10), and ten hall **pennants** that hang on bunting across the guild hall: first workout, first expedition, a heroic week, levels 5, 10, 20 and 30, ten expeditions, a month's streak and the finished season. They appear as milestones are reached, are never taken down, and are never for sale. Six **trophies** on the Journal bookshelf work the same way, for the long haul: the Season Two and Three finales, levels 40 and 50, 25 expeditions and a 90-day streak. |
+| **Earned by playing** | Three mantles, one for finishing each season (Dawn, Lantern and Chime), five hair dyes (Sunrise, Moonlit, Ember, Glacier and Sunstone, at levels 5, 10, 20, 30 and 40), and ten hall **pennants** that hang on bunting across the guild hall: first workout, first expedition, a heroic week, levels 5, 10, 20 and 30, ten expeditions, a month's streak and the finished season. They appear as milestones are reached, are never taken down, and are never for sale. Six **trophies** on the Journal bookshelf work the same way, for the long haul: the Season Two and Three finales, levels 40 and 50, 25 expeditions and a 90-day streak. |
 | **Patron Pack** | The extra mantles, dyes and decorations listed above. |
 
-So paying does not make a hero look "more accomplished": the pennants and the Dawn Mantle can only be earned. The pack is extra choice, not better standing.
+So paying does not make a hero look "more accomplished": the pennants, trophies, season mantles and the earned dyes can only be earned. The pack is extra choice, not better standing.
 
 ## How it works in the code
 
