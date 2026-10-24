@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/app/ads.dart';
 import 'package:i_am_chad/app/app.dart';
 import 'package:i_am_chad/app/feedback.dart';
 import 'package:i_am_chad/app/providers.dart';
@@ -26,6 +27,10 @@ Future<void> bootApp(
   bool storyOffers = false,
   StoreGateway? store,
 
+  /// The pretend ad system. By default a test never reaches Google, and there is
+  /// always an ad available to "show".
+  AdGateway? ads,
+
   /// Leave the sound, vibration and settings providers to [overrides], so a test
   /// can run the real feedback pipeline instead of the silent one.
   bool liveFeedback = false,
@@ -42,6 +47,7 @@ Future<void> bootApp(
       storyAutoOfferProvider.overrideWithValue(storyOffers),
       // Never reach a real store from a test.
       storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
+      adGatewayProvider.overrideWithValue(ads ?? TestAdGateway()),
       ...overrides,
     ],
     child: const IAmChadApp(),

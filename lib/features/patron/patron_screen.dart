@@ -42,6 +42,7 @@ class _PatronScreenState extends ConsumerState<PatronScreen> {
     _seenSerial = s.noticeSerial;
     final line = switch (s.notice) {
       StoreNotice.thanksPack => PatronDialogue.thanksPack,
+      StoreNotice.thanksPremium => PatronDialogue.thanksPremium,
       StoreNotice.thanksTip => PatronDialogue.thanksTip,
       StoreNotice.restored => PatronDialogue.restored,
       StoreNotice.nothingToRestore => PatronDialogue.nothingToRestore,
@@ -52,7 +53,10 @@ class _PatronScreenState extends ConsumerState<PatronScreen> {
     };
     if (line == null) return;
     setState(() => _line = line);
-    if (s.notice == StoreNotice.thanksPack || s.notice == StoreNotice.thanksTip || s.notice == StoreNotice.restored) {
+    if (s.notice == StoreNotice.thanksPack ||
+        s.notice == StoreNotice.thanksPremium ||
+        s.notice == StoreNotice.thanksTip ||
+        s.notice == StoreNotice.restored) {
       final fx = ref.read(feedbackProvider);
       fx.sfx(Sfx.levelUp);
       fx.haptic(Haptic.medium);
@@ -60,7 +64,12 @@ class _PatronScreenState extends ConsumerState<PatronScreen> {
   }
 
   Future<void> _confirmAndBuy(StoreProduct product, String price) async {
-    final owned = product.isTip ? false : ref.read(entitlementsProvider).value?.hasPatronPack ?? false;
+    final entitlements = ref.read(entitlementsProvider).value;
+    final owned = switch (product.kind) {
+      ProductKind.tip => false,
+      ProductKind.premium => entitlements?.hasPremium ?? false,
+      ProductKind.cosmeticPack => entitlements?.hasPatronPack ?? false,
+    };
     if (owned) {
       setState(() => _line = PatronDialogue.alreadyOwned);
       return;
@@ -68,10 +77,18 @@ class _PatronScreenState extends ConsumerState<PatronScreen> {
     final test = ref.read(storeGatewayProvider).isTestStore;
     final ok = await showGameDialog<bool>(
       context: context,
-      title: product.isTip ? 'Say Thanks?' : 'Get the Patron Pack?',
+      title: switch (product.kind) {
+        ProductKind.tip => 'Say Thanks?',
+        ProductKind.premium => 'Get Premium?',
+        ProductKind.cosmeticPack => 'Get the Patron Pack?',
+      },
       content: Text(
         '${product.name} · $price\n\n'
-        '${product.isTip ? PatronAdvice.tipTerms : PatronAdvice.packTerms}'
+        '${switch (product.kind) {
+          ProductKind.tip => PatronAdvice.tipTerms,
+          ProductKind.premium => PatronAdvice.premiumTerms,
+          ProductKind.cosmeticPack => PatronAdvice.packTerms,
+        }}'
         '${test ? '\n\nThis is a test store, so no real money is used.' : ''}',
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
@@ -139,6 +156,17 @@ class _PatronScreenState extends ConsumerState<PatronScreen> {
           ),
           const SizedBox(height: 16),
           GamePanel(
+            title: Patronage.premium.name,
+            child: _PremiumCard(
+              owned: entitlements.hasPremium,
+              price: store.prices[Patronage.premiumId],
+              busy: store.busyProductId == Patronage.premiumId,
+              loading: loading,
+              onBuy: store.busy || unavailable ? null : (price) => _confirmAndBuy(Patronage.premium, price),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GamePanel(
             title: 'Say Thanks',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,6 +227,8 @@ class PatronAdvice {
 
   static const packTerms = 'One payment, yours for good. It adds looks only: three mantles, four hair dyes and '
       'some hall decorations. You will confirm the price again in the store.';
+  static const premiumTerms = 'One payment, yours for good. It removes the ad at the start of each story chapter, '
+      'and nothing else changes: every chapter is free either way. You will confirm the price again in the store.';
   static const tipTerms = 'A one-off thank-you that unlocks nothing. You will confirm the price again in the store.';
 }
 
@@ -216,8 +246,9 @@ class _Promise extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Everything in the game is free and always will be, with no ads and no tracking. '
-              'Money here buys looks and thanks, never power. It will never buy:',
+              'Everything in the game is free and always will be, every story chapter included. The only ad is '
+              'one at the start of each chapter, and Premium removes it. Money here buys looks, quiet and thanks, '
+              'never power. It will never buy:',
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
@@ -291,6 +322,51 @@ class _PackCard extends ConsumerWidget {
         GameButton(
           label: label,
           icon: owned ? Icons.favorite_rounded : Icons.shopping_bag_rounded,
+          kind: owned ? GameButtonKind.secondary : GameButtonKind.positive,
+          onPressed: enabled ? () => onBuy!(price!) : null,
+        ),
+      ],
+    );
+  }
+}
+
+/// Premium: the one-time upgrade that removes the chapter ads.
+class _PremiumCard extends StatelessWidget {
+  const _PremiumCard({
+    required this.owned,
+    required this.price,
+    required this.busy,
+    required this.loading,
+    required this.onBuy,
+  });
+
+  final bool owned;
+  final String? price;
+  final bool busy;
+  final bool loading;
+  final void Function(String price)? onBuy;
+
+  @override
+  Widget build(BuildContext context) {
+    final String label;
+    if (owned) {
+      label = 'Owned. Thank You!';
+    } else if (busy) {
+      label = 'Waiting for the Store...';
+    } else if (price != null) {
+      label = 'Remove Ads · $price';
+    } else {
+      label = loading ? 'Asking the Store...' : 'Not Available Right Now';
+    }
+    final enabled = !owned && !busy && price != null && onBuy != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(Patronage.premium.blurb, style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        GameButton(
+          label: label,
+          icon: owned ? Icons.favorite_rounded : Icons.volume_off_rounded,
           kind: owned ? GameButtonKind.secondary : GameButtonKind.positive,
           onPressed: enabled ? () => onBuy!(price!) : null,
         ),

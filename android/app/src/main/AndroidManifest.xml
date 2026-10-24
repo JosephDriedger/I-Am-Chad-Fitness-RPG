@@ -28,6 +28,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Google AdMob. This is Google's public TEST app id, so only test ads can
+             appear. Replace it with the real AdMob app id before release (see
+             docs/MONETIZATION.md). Ads show only at the start of a story chapter. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

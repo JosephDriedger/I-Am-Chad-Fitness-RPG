@@ -23,7 +23,7 @@ void main() {
   testWidgets('draw the story scenes', (tester) async {
     final cells = <(String, StoryScene)>[
       for (final c in Story.chapters)
-        for (var i = 0; i < c.scenes.length; i++) ('${c.label} scene ${i + 1}: ${c.scenes[i].backdrop.name}', c.scenes[i]),
+        for (var i = 0; i < c.scenes.length; i++) ('S${c.season} ${c.label} scene ${i + 1}: ${c.scenes[i].backdrop.name}', c.scenes[i]),
     ];
     await tester.runAsync(() async {
       Directory(out!).createSync(recursive: true);

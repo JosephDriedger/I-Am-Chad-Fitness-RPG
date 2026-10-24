@@ -234,6 +234,7 @@ class TestStoreGateway implements StoreGateway {
     if (!available) return null;
     const prices = {
       Patronage.patronPackId: r'$3.99',
+      Patronage.premiumId: r'$2.99',
       'tip_shake': r'$1.99',
       'tip_lunch': r'$4.99',
       'tip_banquet': r'$9.99',
@@ -297,6 +298,7 @@ enum StoreStatus { idle, loading, ready, unavailable }
 enum StoreNotice {
   none,
   thanksPack,
+  thanksPremium,
   thanksTip,
   restored,
   nothingToRestore,
@@ -437,7 +439,11 @@ class StoreController extends Notifier<StoreState> {
         } else {
           state = state.copyWith(
             busyProductId: null,
-            notice: product.isTip ? StoreNotice.thanksTip : StoreNotice.thanksPack,
+            notice: product.isTip
+                ? StoreNotice.thanksTip
+                : product.kind == ProductKind.premium
+                    ? StoreNotice.thanksPremium
+                    : StoreNotice.thanksPack,
           );
         }
     }

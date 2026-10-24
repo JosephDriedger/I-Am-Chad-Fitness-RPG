@@ -127,7 +127,7 @@ void main() {
     await tester.tap(find.text('Open the Chronicle'));
     await settle(tester, frames: 30);
 
-    expect(find.text(Story.seasonTitle), findsOneWidget);
+    expect(find.text(Story.seasons.first.title), findsOneWidget);
     expect(find.text(_prologue.title), findsOneWidget);
     expect(find.text('Read Again'), findsOneWidget);
     // Chapters still to come say when they open, and keep their titles secret.

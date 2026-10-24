@@ -1,15 +1,16 @@
 /// What real money can and cannot buy. This file is the whole list.
 ///
 /// The game is free and complete. Every exercise, expedition, story chapter,
-/// reward and piece of gear is available to everyone, forever, with no ads,
-/// no account and no tracking. Players who want to support the game can buy
-/// one optional cosmetic pack, or leave a tip that is only a thank-you.
+/// reward and piece of gear is available to everyone, forever, with no account.
+/// The only advertising is one ad at the start of each story chapter, and
+/// **Premium** removes it for good. Players who want to support the game can
+/// also buy one optional cosmetic pack, or leave a tip that is only a thank-you.
 ///
 /// The rules, which `test/domain/patronage_test.dart` enforces:
 ///
 /// * Nothing here changes XP, energy, coins, potions, damage, health, loot,
-///   streaks or story. Money never makes the game easier to win, and exercise
-///   is still the only source of adventure energy.
+///   streaks or story. Money never makes the game easier to win, never locks
+///   a story chapter, and exercise is still the only source of adventure energy.
 /// * Everything is a one-time purchase. No subscriptions, no consumable
 ///   currencies, no random rewards, no timers or limited-time offers.
 /// * Prices come from the store at the moment of purchase, so they are never
@@ -22,6 +23,10 @@ library;
 enum ProductKind {
   /// Bought once and owned for good; restorable from the store account.
   cosmeticPack,
+
+  /// Bought once; removes the ad at the start of each story chapter. Restorable
+  /// from the store account. Gives nothing else.
+  premium,
 
   /// A thank-you. Bought as often as the player likes; unlocks nothing.
   tip,
@@ -59,6 +64,16 @@ class Patronage {
         'Looks only. It changes nothing about how the game plays.',
   );
 
+  static const premiumId = 'premium_no_ads';
+
+  static const premium = StoreProduct(
+    id: premiumId,
+    kind: ProductKind.premium,
+    name: 'Premium',
+    blurb: 'Removes the ad shown at the start of each story chapter, for good. '
+        'Every chapter is free either way. It changes nothing about how the game plays.',
+  );
+
   static const tipSmall = StoreProduct(
     id: 'tip_shake',
     kind: ProductKind.tip,
@@ -83,7 +98,7 @@ class Patronage {
   static const tips = <StoreProduct>[tipSmall, tipMedium, tipLarge];
 
   /// Everything the stores are asked about, in the order it is shown.
-  static const all = <StoreProduct>[patronPack, ...tips];
+  static const all = <StoreProduct>[patronPack, premium, ...tips];
 
   static final Map<String, StoreProduct> _byId = {for (final p in all) p.id: p};
 
@@ -108,8 +123,12 @@ class Patronage {
 class PatronDialogue {
   const PatronDialogue._();
 
-  static const welcome = 'This game is free, and it stays free. No ads, no account, nothing watching you. '
-      'If you want to support it, here are two optional ways. Nobody has to, and nothing here makes you stronger.';
+  static const welcome = 'This game is free, and it stays free. The only ad is one at the start of each story '
+      'chapter, and every chapter is free. If you want to support it, there are three optional ways. '
+      'Nobody has to, and nothing here makes you stronger.';
+
+  static const thanksPremium = 'Done! The chapter ads are gone for good. Thank you, hero. The stories were '
+      'always free, and now they are quiet, too.';
 
   static const thanksPack = 'Now that is generous! Your mantles and dyes are ready, and the hall just got a lot '
       'brighter. Thank you, hero. Truly.';
@@ -137,12 +156,14 @@ class PatronDialogue {
   static const parentNote = 'Purchases go through Google Play or the App Store, so any parental controls you have '
       'set there apply. If you are under 18, please ask a grown-up first. Refunds are handled by the store.';
 
-  static const privacyNote = 'The store handles the payment. This game never sees your card, name or address, '
-      'and sends nothing anywhere.';
+  static const privacyNote = 'The store handles the payment. This game never sees your card, name or address. '
+      'Your workouts and progress stay on your phone. Only the chapter ad, which Premium removes, is '
+      'served by Google AdMob, and it asks for your choices first where the law requires.';
 
   static const all = <String>[
     welcome,
     thanksPack,
+    thanksPremium,
     thanksTip,
     restored,
     nothingToRestore,
@@ -170,6 +191,9 @@ class Entitlements {
   final int tipCount;
 
   bool get hasPatronPack => ownedPacks.contains(Patronage.patronPackId);
+
+  /// Whether the chapter ads are switched off.
+  bool get hasPremium => ownedPacks.contains(Patronage.premiumId);
 
   /// Builds entitlements from the stored receipts, ignoring unknown products.
   /// Each receipt is `(key, productId)`; a pack counts once however many

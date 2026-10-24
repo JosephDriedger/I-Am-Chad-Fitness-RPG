@@ -29,20 +29,28 @@ class ChronicleScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
         children: [
-          Text(Story.seasonTitle, style: gameTitle(28)),
-          const SizedBox(height: 4),
-          Text(
-            'Season One. Chapters open as you level up, and every one stays open to read again. '
-            'No timers, nothing to miss.',
-            style: const TextStyle(
+          const Text(
+            'Chapters open as you level up, and every one stays open to read again. '
+            'No timers, nothing to miss, and every chapter is free.',
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               color: GameColors.inkSoft,
             ),
           ),
           const SizedBox(height: 14),
-          for (final c in Story.chapters) ...[
-            _ChapterCard(chapter: c, status: status),
+          for (final season in Story.seasons) ...[
+            Text(season.title, style: gameTitle(28)),
+            const SizedBox(height: 2),
+            Text(
+              '${season.name}. ${season.blurb}',
+              style: const TextStyle(fontWeight: FontWeight.w700, color: GameColors.inkSoft),
+            ),
             const SizedBox(height: 12),
+            for (final c in Story.inSeason(season.number)) ...[
+              _ChapterCard(chapter: c, status: status),
+              const SizedBox(height: 12),
+            ],
+            const SizedBox(height: 8),
           ],
         ],
       ),
@@ -143,7 +151,7 @@ class ChroniclePanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${Story.seasonTitle}, ${status.read.length} of ${Story.chapters.length} chapters read',
+            '${Story.seasonOf(status.latest.season).title}, ${status.read.length} of ${Story.chapters.length} chapters read',
             style: gameTitle(17),
           ),
           const SizedBox(height: 6),

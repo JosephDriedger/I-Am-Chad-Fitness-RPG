@@ -123,3 +123,7 @@ Use short, imperative commit messages that describe the change ("Add reward expl
 `test/layout_tour_test.dart` opens every main screen and dialog (hall menu, Train and an exercise's log screen with its honesty check and saved dialog, Quests, Adventure with the shop and a duel, Hero with Customise, Journal, Settings and the Patron's Hall) on a 320 x 568 phone at 2x text, a 360 x 640 phone at 1.5x, and a wide screen, and fails on any overflow. `test/monkey_test.dart` also runs on those small, large-text setups. They found and fixed overflows in the hero header, records, exercise filter row, battle action buttons, journal chart, shop rows, exercise demo card, reward badges and streak reward card.
 
 `test/accessibility_test.dart` runs Flutter's own accessibility checks (tap targets at least 48 x 48, every control named for a screen reader, text contrast) on each main screen. The layout tour also covers a phone on its side.
+
+## Ads in development
+
+Real ads need an AdMob account, so the app ships Google's public **test** ids (in `lib/app/ads.dart`, `AndroidManifest.xml` and `Info.plist`). A non-Premium player opening an unread chapter on Android or iOS then sees Google's labelled test ad; web and desktop show none. Tests never reach Google: `bootApp` swaps in `TestAdGateway`, and `test/ads_promise_test.dart` keeps ad code out of everywhere except the story screen. See [Monetization](MONETIZATION.md#setting-it-up-in-the-stores) before release.
