@@ -17,13 +17,16 @@ import 'helpers.dart';
 /// the screens build or react fails the test, and the failing seed and step are
 /// printed so the run can be replayed.
 class _Screen {
-  const _Screen(this.name, this.width, this.height, this.textScale, this.seeds);
+  const _Screen(this.name, this.width, this.height, this.textScale, this.seeds, {this.motion = false});
 
   final String name;
   final double width;
   final double height;
   final double textScale;
   final int seeds;
+
+  /// Run with the real animations instead of Reduce Motion, which nearly every other test uses.
+  final bool motion;
 }
 
 /// A normal phone, a small one, and a small one with the biggest text people
@@ -32,6 +35,8 @@ const _screens = [
   _Screen('normal phone', 450, 950, 1.0, 12),
   _Screen('small phone', 320, 568, 1.0, 6),
   _Screen('small phone, large text', 360, 640, 2.0, 6),
+  _Screen('normal phone, motion on', 450, 950, 1.0, 5, motion: true),
+  _Screen('small phone, large text, motion on', 360, 640, 2.0, 3, motion: true),
 ];
 
 void main() {
@@ -80,7 +85,7 @@ void main() {
             );
           }
         });
-        await bootApp(tester, db, now: now);
+        await bootApp(tester, db, now: now, reducedMotion: !screen.motion);
 
         final steps = <String>[];
         final visited = <String>{};

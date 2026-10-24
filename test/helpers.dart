@@ -38,6 +38,10 @@ Future<void> bootApp(
   /// Show the title screen a returning player sees on launch. Off by default so
   /// tests go straight to the hall.
   bool showTitle = false,
+
+  /// Turn the in-app Reduce Motion setting on (the default, so scenes finish each
+  /// animation in one frame) or off, to run the real animations.
+  bool reducedMotion = true,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -45,7 +49,7 @@ Future<void> bootApp(
       databaseProvider.overrideWithValue(db),
       clockProvider.overrideWithValue(() => clock),
       if (!liveFeedback) feedbackProvider.overrideWithValue(GameFeedback.silent()),
-      if (!liveFeedback) prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
+      if (!liveFeedback) prefsProvider.overrideWithValue(AppPrefs(reducedMotion: reducedMotion)),
       showTitleOnLaunchProvider.overrideWithValue(showTitle),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),
