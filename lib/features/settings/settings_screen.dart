@@ -7,7 +7,9 @@ import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../game/core.dart' show Haptic, Sfx;
+import '../../domain/guide.dart';
 import '../patron/patron_screen.dart';
+import 'guide_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -22,6 +24,19 @@ class SettingsScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
         children: [
+          GamePanel(
+            title: 'Help',
+            child: GameButton(
+              key: const Key('open_guide'),
+              label: Guide.title,
+              icon: Icons.menu_book_rounded,
+              kind: GameButtonKind.secondary,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const GuideScreen()),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           GamePanel(
             title: 'Units',
             child: SegmentedButton<bool>(

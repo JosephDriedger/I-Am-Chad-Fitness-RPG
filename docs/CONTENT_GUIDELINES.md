@@ -58,7 +58,7 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 - Rewards never depend on weight lifted, pace, body measurements or "perceived effort".
 - Everything that affects play is paid for with coins earned through play, never with real money. No gacha, loot boxes or random purchases, no paid XP or energy, and nothing is sold that makes the game easier to win by spending rather than exercising (potions and gear are small, bounded and priced in coins).
 - Real money buys only looks and thanks, and only in the Patron's Hall (see [Monetization](MONETIZATION.md)). The only ad is one at the start of a story chapter (Premium removes it), and story is never sold. No other ads, no analytics or tracking SDK, no subscriptions, no countdowns or limited-time offers, no "best value" or strike-through prices, no purchase prompts after a workout, win, loss or level-up, and no text that makes someone feel lesser for not buying. Cosmetics have no stat, bonus or reward fields, free and earned looks always sit beside paid ones, and the words in the Patron's Hall are linted like the rest of Chad's.
-- Any number the player sees (XP, energy, damage) should be explainable.
+- Any number the player sees (XP, energy, damage) should be explainable, and any new term or rule belongs in the in-game guide (`lib/domain/guide.dart`, shown from Settings as "How the Game Works"). The guide reads its numbers from the rules, and its tests fail if a region or an enemy move is missing from it.
 
 ## Accessibility checklist for new UI
 

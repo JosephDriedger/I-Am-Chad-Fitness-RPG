@@ -31,7 +31,7 @@ Roughly in priority order.
 8. **Interactive Chad intro.** Built: the "brief optional introductory activity" from the GDD, as a one-minute guided warm-up with Chad (four standing moves with animated demonstrations, a countdown, pause and skip, no rewards, nothing saved), offered at the top of the Train screen. Still open: offering it automatically after onboarding, and first-use tooltips.
 9. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
 10. **Accessibility pass.** Large text and small screens are now covered by automated layout tests (see [Development](DEVELOPMENT.md#random-play-tests)). Still open: TalkBack and VoiceOver, high contrast and reduced motion on real devices.
-11. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging.
+11. **Usability test with fitness beginners.** Check terminology ("effort minutes", "energy") and that no message reads as discouraging. A plain-words guide to every term, "How the Game Works", is now in Settings (see [Content guidelines](CONTENT_GUIDELINES.md)), so the test can also ask whether it answers their questions.
 
 ### Camera rep checking
 

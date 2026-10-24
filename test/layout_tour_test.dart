@@ -162,6 +162,11 @@ void main() {
       // Settings and the Patron's Hall.
       await tester.tap(find.byTooltip('Settings'));
       await settle(tester, frames: 30);
+      await _tap(tester, find.byKey(const Key('open_guide')));
+      for (final s in ['Moving and Rewards', 'Adventures', 'Coins, Gear and Looks', 'Story', 'Your Data']) {
+        await _reveal(tester, find.text(s));
+      }
+      await _back(tester);
       await _tap(tester, find.text("Open the Patron's Hall"));
       await _back(tester);
       await _back(tester);
