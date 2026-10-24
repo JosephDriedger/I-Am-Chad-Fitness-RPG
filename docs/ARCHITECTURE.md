@@ -29,6 +29,8 @@ The story follows the same split: the script, the unlock rules and the condition
 
 Money follows the same split. What may be sold, and the wording of the promise, is pure Dart in `domain/patronage.dart`; the looks themselves (capes, hair dyes, hall pennants and decorations, each with a way to unlock it and no stats) are in `domain/cosmetics.dart`. `app/store.dart` is the only code that talks to the platform store (behind a `StoreGateway` that tests replace with a pretend store) and turns a finished purchase into a saved receipt before confirming it. `heroLookProvider` combines the hero, worn gear and unlocked cosmetics into the one `HeroLook` every scene draws. See [Monetization](MONETIZATION.md).
 
+Words and numbers the player reads are content, and content follows the same pattern: pure data in `domain/`, tests that check it, drawing in `game/`. The map of regions and how tough each is lives in `domain/difficulty.dart`; enemies, bosses, camps and forks in `domain/expedition.dart`; gear in `domain/items.dart` and prices in `domain/shop.dart`; Chad's lines and region tips in `domain/chad.dart`; daily quest pools in `domain/quests.dart`; the one-minute warm-up in `domain/warmup.dart`; first-use guidance in `domain/first_steps.dart`; and the in-game guide in `domain/guide.dart`, which reads its numbers from the rules so it cannot drift. Each has tests that lint the wording against [Content guidelines](CONTENT_GUIDELINES.md) and check the facts against the code.
+
 If a rule decides how the game plays (rewards, damage, quests, level curves), it lives in `domain/`. If you find yourself writing it in a widget, move it.
 
 ## Source of truth
@@ -78,8 +80,8 @@ Combat and expeditions must be reproducible from a seed:
 
 - `GameRng` (`lib/domain/rng.dart`) is a hand-written mulberry32 PRNG rather than `dart:math` `Random`, so a seed gives the same result on every platform and Dart version.
 - `BattleEngine.act` is a pure function of `(state, action, rng)`. It returns structured `BattleEvent`s alongside the text log so a scene can animate each beat without being able to change the result.
-- `Expedition.generate(seed, heroLevel)` always returns the same expedition.
-- Tests replay seeds, including a 200-seed balance check per level.
+- `Expedition.generate(seed, heroLevel, tier)` always returns the same expedition, for a region chosen by the player or, by default, the toughest one open at their level.
+- Tests replay seeds, including `test/domain/balance_test.dart`, which plays 250 seeded expeditions per case in every region with a scripted sensible player and fails if a region is a wall or not harder than the one before.
 
 ## Navigation and app start
 
@@ -101,6 +103,8 @@ Combat and expeditions must be reproducible from a seed:
 | Repository tests | `test/data` | Real Drift queries against an in-memory SQLite database |
 | Widget flow tests | `test/app_flow_test.dart`, `test/adventure_flow_test.dart` | Onboarding to the guild hall and a first logged workout, and earning energy to finishing an expedition through the Flame battle scene. Shared setup is in `test/helpers.dart` (fixed clock, silent feedback, reduced motion) |
 | Migration test | `test/data/migration_test.dart` | A schema v1 database with real rows upgrades to v2 intact |
+| Content tests | `test/domain/guide_test.dart`, `events_test.dart`, `quests_test.dart`, `warmup_test.dart`, `story_test.dart`, `balance_test.dart` | The words are kind and well formed, every region has what it needs (tips, camps, a fork, guide entry), numbers in the guide match the rules, and the difficulty curve holds |
+| Layout and accessibility | `test/layout_tour_test.dart`, `accessibility_test.dart`, `monkey_test.dart` | Every screen, including the warm-up, the guide and the first-time guidance, on the smallest phone at the largest text |
 
 ## Planned extensions
 
