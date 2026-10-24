@@ -1,12 +1,16 @@
 # Story
 
-Season One, **The Dawn Bell**: a comedic, warm story told in a prologue and seven chapters. It is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Two seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One) and **The Lantern Coast** (Season Two). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
-## The premise
+**Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
+
+## Season One: The Dawn Bell
+
+### The premise
 
 The Guild Hall's great bell has been silent for a long time, and nobody can quite remember why. You arrive as a new hero, and Chad, who is certain he is in charge, enlists you to find out. Along the way you meet the people and creatures of the valley, learn what really happened to the bell, and ring it at dawn.
 
-## Cast
+### Cast
 
 | Name | Who they are |
 | --- | --- |
@@ -19,7 +23,7 @@ The Guild Hall's great bell has been silent for a long time, and nobody can quit
 | Murmur | A small, sorry creature in the fog. Fears tomorrow, learns it is fine. |
 | You | Called by the hero's name wherever a line says `{hero}`. |
 
-## Chapters
+### Chapters
 
 Chapters open at hero levels, which only ever go up. The spacing follows the level curve: the first few arrive quickly, and the last ones take a few months of regular movement.
 
@@ -34,34 +38,71 @@ Chapters open at hero levels, which only ever go up. The spacing follows the lev
 | 6 | The Night Before the Bell | Level 13 | A campfire on the hill, and the true story of Level 2. |
 | 7 | The Dawn Bell | Level 16 | The bell rings, the fog lifts, and the hall fills up. |
 
+## Season Two: The Lantern Coast
+
+### The premise
+
+The bell has rung, the valley is awake, and the hall has never been busier. But at the end of Season One a single lantern glowed far to the west, where the valley meets the sea, and now fishing boats are turning up with news: the lighthouse at Gullhaven has gone dark, and the harbour is stuck in fog. You walk the coast road with a nervous newcomer, cross the slowest ferry in the world, and find a keeper who has been lighting a lantern alone for forty-one nights and forgot that she was allowed to rest. Together you gather the pieces of the broken lamp and light it again, and far away the Dawn Bell answers.
+
+The season is about **keeping going without burning out**: the tide goes out every day and comes back, nothing is behind, and a light is easier to keep when more than one person looks after it.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Pip | A newcomer to the guild, small, earnest, and sure everyone else knows what they are doing. You get to be the one who says "the wall counts". |
+| Wren | The keeper of the Gullhaven light. Brisk, kind, and in need of eleven hours of sleep. Wears a yellow sou'wester and carries a lantern that never quite goes out. |
+| Sedge | A very old tortoise who keeps the slowest ferry in the world. It leaves when it leaves. He has never been late, because he has never had an appointment. |
+
+Everyone from Season One comes back: Chad, Biscuit, Maple, Brad, Grit and Murmur (Oakhelm sends a very slow letter).
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Hall Full of Strangers | Level 18 | The hall is busier than ever, Pip arrives, and a light is calling from the west. |
+| 1 | The Road West | Level 20 | A signpost with eleven arrows, a rival with a lot of energy, and a lesson about which way is behind. |
+| 2 | The Slowest Ferry in the World | Level 23 | The river between the road and the coast has a ferry, and the ferry has a tortoise. |
+| 3 | The Keeper Who Forgot to Rest | Level 26 | In the harbour, a keeper is carrying a lantern with the last of her strength. |
+| 4 | What the Tide Brings | Level 30 | At low tide the shards of the lamp are waiting, and so is someone very worried about tomorrow. |
+| 5 | A Letter from Oakhelm | Level 34 | The lamp needs a new frame, and help arrives by cart, very slowly written. |
+| 6 | The Night Before the Light | Level 38 | Under the stars at the foot of the tower, everyone is a little nervous, and someone walks a very long way. |
+| 7 | The Answering Light | Level 42 | The lamp is lit, the fleet comes home, and something far away answers. |
+
 ## Choices
 
-A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it: your reason for coming to the hall, whether you offered to help, how you asked Grit for the clapper, what you said to Brad, Oakhelm and Murmur, what you told Chad, and how you ring the Dawn Bell. Nothing is a wrong answer and nothing changes what you earn. The last chapter's farewell changes with your first answer.
+A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
+
+- **Season One** remembers your reason for coming to the hall, whether you offered to help, how you asked Grit for the clapper, what you said to Brad, Oakhelm and Murmur, what you told Chad, and how you ring the Dawn Bell. The last chapter's farewell changes with your first answer.
+- **Season Two** asks how you welcome Pip, how you walk the road, how you spend the ferry crossing, what you say to Wren, to Murmur and to Pip, what you write back to Oakhelm, and how you light the lamp. It also remembers your Season One answers: Brad, Grit, Murmur and Oakhelm each greet you differently depending on what you said to them, and the final farewell again follows your very first answer.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
 
 ## How it works
 
 - **Unlocking:** a chapter is open when the hero's level reaches its unlock level. Nothing is timed, nothing can be missed, and nothing is lost if you stop exercising for a while.
+- **The ad:** before a chapter's first line, the first time you read it, there is one full-screen ad unless you have Premium. The story shows "One moment..." while it waits and will not begin underneath it. If there is no ad or no connection, the story just begins. Re-reading a chapter never shows one. See [Monetization](MONETIZATION.md).
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
-- **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. See [Data model](DATA_MODEL.md).
+- **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 15 across both seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
 | What | Where |
 | --- | --- |
-| Script, cast, unlock rules, conditions | `lib/domain/story.dart` (pure Dart) |
-| Backdrops and the new characters (Maple, Biscuit) | `lib/game/art/story_art.dart` |
+| Seasons, cast, unlock rules, conditions, Season One's script | `lib/domain/story.dart` (pure Dart) |
+| Season Two's script | `lib/domain/story_season_two.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
+| The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |
 | Offer in the hall | `lib/features/home/hub_screen.dart` |
 | Rules enforced by tests | `test/domain/story_test.dart` |
-| Looking at the scenes | `STORY_SHEET=<folder> flutter test test/tool/story_sheet_test.dart` renders a contact sheet of every scene |
+| Looking at the scenes | `STORY_SHEET=<folder> flutter test test/tool/story_sheet_test.dart` renders a contact sheet of every scene in both seasons |
 
 ## Writing more
 
-Add a `StoryChapter` to `Story.chapters` in order, with an unlock level that is higher than the last one. Every line is checked by `story_test.dart`: no shaming or pressure words, no body talk, the season must say that rest, your own pace and no deadlines are welcome, conditions must refer to choices that exist, and the numbering and levels must stay in order. Read the [content guidelines](CONTENT_GUIDELINES.md) first.
+Add a `StoryChapter` in order, with the next free `number` (chapter numbers are what is saved, so they must never be reused or renumbered), the right `season`, and an unlock level that is higher than the last one. A new season also needs an entry in `Story.seasons`. Every line is checked by `story_test.dart`: no shaming or pressure words, no body talk, each season must say that rest, your own pace and no deadlines are welcome, conditions must refer to choices that exist, and the numbering and levels must stay in order. Read the [content guidelines](CONTENT_GUIDELINES.md) first. New places need a `StoryBackdrop` and a painter in `story_art.dart`, and new characters a `StorySpeaker` and a painter.
 
-Ideas for Season Two live in the [roadmap](ROADMAP.md).
+Ideas for what comes next live in the [roadmap](ROADMAP.md).

@@ -46,7 +46,7 @@ class Unlock {
         UnlockKind.free => 'Free',
         UnlockKind.patron => 'Patron Pack',
         UnlockKind.level => 'Earned at Level $n',
-        UnlockKind.chapter => n == Story.chapters.last.number
+        UnlockKind.chapter => n == Story.inSeason(1).last.number
             ? 'Earned by finishing the Season One story'
             : 'Earned by reading chapter $n',
         UnlockKind.victories => n == 1 ? 'Earned by winning an expedition' : 'Earned by winning $n expeditions',

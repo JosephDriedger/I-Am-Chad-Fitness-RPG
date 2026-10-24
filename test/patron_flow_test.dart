@@ -193,6 +193,9 @@ void main() {
     await _tap(tester, _button('Restore Purchases'));
     await settle(tester, frames: 20);
     expect((await tester.runAsync(() => repo2.entitlements()))!.hasPatronPack, isTrue);
+    // Back to the top, where the pack is (the page is long enough to have scrolled).
+    await tester.drag(find.byType(Scrollable).first, const Offset(0, 3000));
+    await settle(tester);
     expect(_button('Owned. Thank You!'), findsOneWidget);
     await shutDown(tester, db2);
   });

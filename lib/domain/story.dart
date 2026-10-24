@@ -1,4 +1,5 @@
-/// The story: Season One, "The Dawn Bell". See docs/STORY.md for the cast,
+/// The story: Season One, "The Dawn Bell", and Season Two, "The Lantern Coast".
+/// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
 /// The story is told in chapters that unlock as the hero levels up. Level only
@@ -6,6 +7,8 @@
 /// never pressures anyone: it simply waits. Every chapter can be skipped and
 /// read again. A few choices are remembered and echoed later.
 library;
+
+import 'story_season_two.dart';
 
 /// Who is talking. [hero] is the player, who speaks only through choices.
 enum StorySpeaker {
@@ -17,6 +20,11 @@ enum StorySpeaker {
   oakhelm('Oakhelm'),
   grit('Grit'),
   murmur('Murmur'),
+
+  // Season Two, "The Lantern Coast".
+  pip('Pip'),
+  wren('Wren'),
+  sedge('Sedge'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -35,6 +43,14 @@ enum StoryBackdrop {
   mistHollow,
   hillCamp,
   dawn,
+
+  // Season Two, "The Lantern Coast".
+  coastRoad,
+  estuary,
+  harbour,
+  tidePools,
+  lighthouse,
+  lighthouseNight,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -97,9 +113,14 @@ class StoryChapter {
     required this.unlockLevel,
     required this.summary,
     required this.scenes,
+    this.season = 1,
   });
 
-  /// 0 is the prologue.
+  /// Which season this chapter belongs to.
+  final int season;
+
+  /// Unique across every season, because it is what is saved when a chapter is
+  /// read. Each season's first chapter is its prologue.
   final int number;
   final String title;
 
@@ -110,7 +131,31 @@ class StoryChapter {
   final String summary;
   final List<StoryScene> scenes;
 
-  String get label => number == 0 ? 'Prologue' : 'Chapter $number';
+  /// Where this chapter sits in its own season: 0 is the prologue.
+  int get numberInSeason => number - Story.seasonOf(season).firstChapter;
+
+  String get label => numberInSeason == 0 ? 'Prologue' : 'Chapter $numberInSeason';
+}
+
+/// A run of chapters with its own title, place and problem.
+class StorySeason {
+  const StorySeason({
+    required this.number,
+    required this.title,
+    required this.blurb,
+    required this.firstChapter,
+  });
+
+  final int number;
+  final String title;
+
+  /// One sentence for the top of the Chronicle, with no spoilers.
+  final String blurb;
+
+  /// The [StoryChapter.number] of this season's prologue.
+  final int firstChapter;
+
+  String get name => number == 1 ? 'Season One' : 'Season Two';
 }
 
 class StoryText {
@@ -179,7 +224,28 @@ class StoryRules {
 class Story {
   const Story._();
 
-  static const seasonTitle = 'The Dawn Bell';
+  static const seasons = <StorySeason>[
+    StorySeason(
+      number: 1,
+      title: 'The Dawn Bell',
+      blurb: 'A silent bell, a foggy valley, and a hall waiting for a hero.',
+      firstChapter: 0,
+    ),
+    StorySeason(
+      number: 2,
+      title: 'The Lantern Coast',
+      blurb: 'A light in the west, a long road to the sea, and a keeper who forgot to rest.',
+      firstChapter: 8,
+    ),
+  ];
+
+  static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
+
+  /// The chapters of one season, in order.
+  static List<StoryChapter> inSeason(int season) => [
+        for (final c in chapters)
+          if (c.season == season) c,
+      ];
 
   static StoryChapter? byNumber(int n) {
     for (final c in chapters) {
@@ -188,7 +254,10 @@ class Story {
     return null;
   }
 
-  static const chapters = <StoryChapter>[
+  /// Every chapter of every season, in the order they open.
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters];
+
+  static const seasonOne = <StoryChapter>[
     // ---------------------------------------------------------------------------
     StoryChapter(
       number: 0,

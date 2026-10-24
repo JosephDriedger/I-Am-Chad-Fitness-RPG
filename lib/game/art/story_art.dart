@@ -79,6 +79,80 @@ void paintBiscuit(Canvas c, ActorState s) {
   c.restore();
 }
 
+/// Wren Halloway, keeper of the Gullhaven light: navy oilskin coat, a yellow
+/// sou'wester, and a lantern that never quite goes out.
+void paintWren(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 1.7) * 0.8;
+  final glow = 0.85 + math.sin(s.time * 5) * 0.1;
+  const coat = Color(0xFF1F3A5F);
+  const skin = Color(0xFFD9A77A);
+  shadow(c, 16);
+  c.save();
+  c.translate(0, bob);
+  // Boots and legs.
+  rrect(c, -8, -10, 7, 10, 2, const Color(0xFF3E4A3A));
+  rrect(c, 1, -10, 7, 10, 2, const Color(0xFF3E4A3A));
+  rrect(c, -6.5, -22, 5, 14, 2, const Color(0xFF37474F));
+  rrect(c, 1.5, -22, 5, 14, 2, const Color(0xFF37474F));
+  // Long coat, with a seam and two brass buttons.
+  rrect(c, -15, -62, 30, 46, 9, coat);
+  rrect(c, -1.5, -62, 3, 46, 1, const Color(0xFF152A45));
+  circle(c, 5, -50, 1.7, const Color(0xFFE6B83C));
+  circle(c, 5, -40, 1.7, const Color(0xFFE6B83C));
+  // Arms.
+  rrect(c, -20, -58, 7, 26, 3.5, coat);
+  rrect(c, 13, -58, 7, 26, 3.5, coat);
+  circle(c, -16.5, -31, 4, skin);
+  // The lantern, held out at the end of the right arm.
+  circle(c, 17, -42, 4, skin);
+  line(c, 17, -42, 17, -35, 1.3, const Color(0xFF5D4037));
+  circle(c, 17, -28, 15 * glow, const Color(0x33FFD36B));
+  rrect(c, 12.5, -36, 9, 12, 2.5, const Color(0xFF5D4037));
+  rrect(c, 14, -34.5, 6, 9, 2, const Color(0xFFFFE9A8));
+  circle(c, 17, -29.5, 2.8 * glow, const Color(0xFFFFB02E));
+  // Head, a short braid and the yellow sou'wester.
+  circle(c, 0, -74, 12.5, skin);
+  line(c, -9, -70, -13, -58, 3.2, const Color(0xFF6D4326));
+  oval(c, 0, -81, 16, 5.5, const Color(0xFFF2C94C));
+  rrect(c, -10, -96, 20, 16, 7, const Color(0xFFF2C94C));
+  rrect(c, -15, -82, 7, 12, 3, const Color(0xFFE0B23A));
+  circle(c, -4.5, -73, 1.5, const Color(0xFF2B1D14));
+  circle(c, 4.5, -73, 1.5, const Color(0xFF2B1D14));
+  line(c, -3, -67.5, 3, -67.5, 1.2, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
+/// Sedge, who keeps the slowest ferry in the world: a very old tortoise in a
+/// small red cap, facing right.
+void paintSedge(Canvas c, ActorState s) {
+  final nod = math.sin(s.time * 0.9) * 1.2;
+  shadow(c, 26);
+  // Legs and tail.
+  rrect(c, -20, -9, 9, 9, 3.5, const Color(0xFF9DAA66));
+  rrect(c, 10, -9, 9, 9, 3.5, const Color(0xFF9DAA66));
+  oval(c, -25, -9, 5, 3, const Color(0xFF9DAA66));
+  // Body under the shell.
+  oval(c, 0, -10, 24, 7, const Color(0xFFB7C27A));
+  // The shell: a dome with its plates.
+  oval(c, 0, -23, 25, 17, const Color(0xFF5E7F43));
+  oval(c, 0, -26, 20, 12, const Color(0xFF6B8E4E));
+  for (final p in const [Offset(-12, -26), Offset(0, -29), Offset(12, -26), Offset(-6, -18), Offset(7, -18)]) {
+    oval(c, p.dx, p.dy, 6.5, 4.5, const Color(0xFF7BA05A));
+    oval(c, p.dx, p.dy, 6.5, 4.5, const Color(0x22000000));
+  }
+  // Neck, head, a patient eye, and the cap.
+  oval(c, 24, -19 + nod * 0.4, 8, 6, const Color(0xFFB7C27A));
+  circle(c, 31, -23 + nod, 7.5, const Color(0xFFB7C27A));
+  circle(c, 33.5, -24.5 + nod, 1.5, const Color(0xFF2B1D14));
+  line(c, 32, -19.5 + nod, 37, -20 + nod, 1.1, const Color(0xFF7C8A4A));
+  rrect(c, 26, -32 + nod, 11, 5, 2, const Color(0xFFB23A3A));
+  rrect(c, 31, -33.5 + nod, 8, 2.5, 1, const Color(0xFF8E2B2B));
+}
+
+/// Pip, a newcomer to the guild: drawn as a smaller hero with a look of their own.
+void paintPip(Canvas c, ActorState s) =>
+    paintHero(c, const HeroLook(style: 4, color: 2, skin: 3), s);
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -101,6 +175,12 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintGremlin(c, s);
     case StorySpeaker.murmur:
       paintImp(c, s);
+    case StorySpeaker.pip:
+      paintPip(c, s);
+    case StorySpeaker.wren:
+      paintWren(c, s);
+    case StorySpeaker.sedge:
+      paintSedge(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -117,6 +197,9 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.biscuit => 1.1,
       StorySpeaker.maple => 1.0,
       StorySpeaker.brad => 1.05,
+      StorySpeaker.pip => 0.82,
+      StorySpeaker.wren => 1.0,
+      StorySpeaker.sedge => 1.2,
       _ => 1.0,
     };
 
@@ -237,6 +320,117 @@ void _tree(Canvas c, double x, double groundY, double trunkW, double h, Color tr
   circle(c, x, groundY - h, trunkW * 2.4, leaf);
   circle(c, x - trunkW * 1.5, groundY - h + trunkW, trunkW * 1.7, leaf);
   circle(c, x + trunkW * 1.5, groundY - h + trunkW, trunkW * 1.7, leaf);
+}
+
+/// A band of sea from [top] down to [bottom], with soft moving ripples.
+void _sea(Canvas c, Size s, double top, double bottom, List<Color> colors, double time, {Color ripple = const Color(0x33FFFFFF)}) {
+  _gradient(c, Rect.fromLTRB(0, top, s.width, bottom), colors);
+  for (var i = 0; i < 9; i++) {
+    final y = top + (bottom - top) * (0.1 + i * 0.1);
+    final x = (s.width * (i * 0.23 + time * 0.012)) % (s.width + 60) - 30;
+    line(c, x, y, x + 26 + i * 3, y, 1.6, ripple);
+  }
+}
+
+void _gull(Canvas c, double x, double y, double size, double time) {
+  final flap = math.sin(time * 4 + x) * size * 0.25;
+  final p = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 1.6
+    ..strokeCap = StrokeCap.round
+    ..color = const Color(0xFFF7F7F2);
+  c.drawPath(
+    Path()
+      ..moveTo(x - size, y + flap)
+      ..quadraticBezierTo(x - size * 0.4, y - size * 0.3, x, y)
+      ..quadraticBezierTo(x + size * 0.4, y - size * 0.3, x + size, y + flap),
+    p,
+  );
+}
+
+void _boat(Canvas c, double x, double y, double size, double time, Color sail) {
+  c.save();
+  c.translate(x, y + math.sin(time * 1.3 + x) * 1.6);
+  c.rotate(math.sin(time * 1.1 + x) * 0.03);
+  c.drawPath(
+    Path()
+      ..moveTo(-size, 0)
+      ..lineTo(size, 0)
+      ..lineTo(size * 0.7, size * 0.42)
+      ..lineTo(-size * 0.7, size * 0.42)
+      ..close(),
+    Paint()..color = const Color(0xFF5D4037),
+  );
+  line(c, 0, 0, 0, -size * 1.6, 2, const Color(0xFF4E342E));
+  c.drawPath(
+    Path()
+      ..moveTo(1.5, -size * 1.5)
+      ..lineTo(size * 0.95, -size * 0.15)
+      ..lineTo(1.5, -size * 0.15)
+      ..close(),
+    Paint()..color = sail,
+  );
+  c.restore();
+}
+
+/// The Gullhaven lighthouse: a white tower with red bands, a gallery and a lamp
+/// room. [lit] turns the lamp on and sweeps a beam across the sky.
+void _lighthouse(Canvas c, double cx, double baseY, double height, double time, {required bool lit}) {
+  final half = height * 0.1;
+  final tower = Path()
+    ..moveTo(cx - half, baseY)
+    ..lineTo(cx + half, baseY)
+    ..lineTo(cx + half * 0.62, baseY - height)
+    ..lineTo(cx - half * 0.62, baseY - height)
+    ..close();
+  c.drawPath(tower, Paint()..color = const Color(0xFFF1EEE4));
+  c.save();
+  c.clipPath(tower);
+  for (var i = 0; i < 4; i++) {
+    if (i.isOdd) continue;
+    _fill(c, Rect.fromLTWH(cx - half * 2, baseY - height * (0.28 + i * 0.22), half * 4, height * 0.12), const Color(0xFFB23A3A));
+  }
+  c.restore();
+  rrect(c, cx - half * 0.3, baseY - height * 0.18, half * 0.6, height * 0.12, half * 0.2, const Color(0xFF5D4037));
+  // The gallery and the lamp room.
+  final top = baseY - height;
+  rrect(c, cx - half * 1.05, top - 4, half * 2.1, 6, 2, const Color(0xFF4E342E));
+  final lampRoom = Rect.fromLTWH(cx - half * 0.55, top - height * 0.2, half * 1.1, height * 0.2 - 4);
+  c.drawRRect(
+    RRect.fromRectAndRadius(lampRoom, Radius.circular(half * 0.2)),
+    Paint()..color = lit ? const Color(0xFFFFE9A8) : const Color(0xFF3B4658),
+  );
+  if (!lit) {
+    // A crack across the glass.
+    line(c, lampRoom.left + 2, lampRoom.top + lampRoom.height * 0.2, lampRoom.right - 2, lampRoom.bottom - 2, 1.2, const Color(0xFF8FA0B8));
+  }
+  c.drawPath(
+    Path()
+      ..moveTo(cx - half * 0.8, top - height * 0.2)
+      ..lineTo(cx, top - height * 0.32)
+      ..lineTo(cx + half * 0.8, top - height * 0.2)
+      ..close(),
+    Paint()..color = const Color(0xFFB23A3A),
+  );
+  if (lit) {
+    final lamp = Offset(cx, top - height * 0.1);
+    circle(c, lamp.dx, lamp.dy, height * 0.2, const Color(0x33FFE9A8));
+    circle(c, lamp.dx, lamp.dy, height * 0.09, const Color(0x66FFE9A8));
+    // A slow beam, swinging a little to either side of the sea.
+    final swing = math.sin(time * 0.5) * 0.18;
+    for (final dir in const [1.0, -1.0]) {
+      final reach = height * 5.5;
+      final a = (dir > 0 ? 0.0 : math.pi) + swing * dir;
+      c.drawPath(
+        Path()
+          ..moveTo(lamp.dx, lamp.dy)
+          ..lineTo(lamp.dx + math.cos(a - 0.07) * reach, lamp.dy + math.sin(a - 0.07) * reach)
+          ..lineTo(lamp.dx + math.cos(a + 0.07) * reach, lamp.dy + math.sin(a + 0.07) * reach)
+          ..close(),
+        Paint()..color = const Color(0x22FFF3C4),
+      );
+    }
+  }
 }
 
 void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
@@ -390,6 +584,113 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
       _bell(c, w * 0.77, h * 0.24, w * 0.025, sway: math.sin(time * 3) * 0.12);
       for (var i = 0; i < 3; i++) {
         circle(c, w * (0.68 + i * 0.09), h * 0.52, 4, const Color(0xFFFFD36B));
+      }
+    case StoryBackdrop.coastRoad:
+      // A bright afternoon on the cliff road, the sea beyond and a far light.
+      _gradient(c, full, const [Color(0xFF8EC8EE), Color(0xFFEAF5FA)]);
+      _cloud(c, w * 0.3, h * 0.16, w * 0.12, const Color(0xE6FFFFFF));
+      _cloud(c, w * 0.7, h * 0.24, w * 0.09, const Color(0xCCFFFFFF));
+      _sea(c, s, h * 0.42, h * 0.62, const [Color(0xFF6DB3D6), Color(0xFF3F8DB8)], time);
+      _gull(c, w * 0.22 + math.sin(time * 0.4) * 8, h * 0.3, 8, time);
+      _gull(c, w * 0.34 + math.sin(time * 0.35 + 1) * 8, h * 0.36, 6, time);
+      _hill(c, s, h * 0.62, h * 0.03, 0.8, const Color(0xFF8DBB6A));
+      _lighthouse(c, w * 0.8, h * 0.62, h * 0.2, time, lit: false);
+      // A small, stubborn glow in the lamp room: the lantern in the west.
+      circle(c, w * 0.8, h * 0.62 - h * 0.22, 3 + math.sin(time * 3) * 0.6, const Color(0xFFFFC857));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF6FA55A));
+      c.drawPath(
+        Path()
+          ..moveTo(w * 0.4, h * 0.68)
+          ..lineTo(w * 0.6, h * 0.68)
+          ..lineTo(w * 1.1, h)
+          ..lineTo(-w * 0.1, h)
+          ..close(),
+        Paint()..color = const Color(0xFFDCC9A0),
+      );
+    case StoryBackdrop.estuary:
+      // A wide, calm river mouth in low gold light, with reeds and a jetty.
+      _gradient(c, full, const [Color(0xFFF4C791), Color(0xFFFBE9CC), Color(0xFFDCEBF0)]);
+      circle(c, w * 0.3, h * 0.38, w * 0.07, const Color(0xCCFFF3D0));
+      _hill(c, s, h * 0.5, h * 0.025, 1.4, const Color(0xFF9DB78A));
+      _sea(c, s, h * 0.52, ground, const [Color(0xFFB7D4E0), Color(0xFF7FA9BE)], time, ripple: const Color(0x55FFF3D0));
+      for (var i = 0; i < 10; i++) {
+        final x = (i < 5 ? w * 0.01 + i * 7.0 : w * 0.9 + (i - 5) * 9.0);
+        final sway = math.sin(time * 1.1 + i) * 3;
+        line(c, x, ground, x + sway, h * 0.62 - (i % 3) * 8, 2.2, const Color(0xFF7A8F4C));
+        oval(c, x + sway, h * 0.62 - (i % 3) * 8, 2.4, 6, const Color(0xFF8B5E3C));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF8D6E4A));
+      for (var x = 0.0; x < w; x += 34) {
+        line(c, x, ground, x, h, 1.4, const Color(0x33000000));
+      }
+    case StoryBackdrop.harbour:
+      // Evening in the harbour, boats at rest and a fog bank rolling in.
+      _gradient(c, full, const [Color(0xFF7C8FA6), Color(0xFFD4C9BB)]);
+      _sea(c, s, h * 0.46, ground, const [Color(0xFF6C8499), Color(0xFF46627A)], time);
+      _boat(c, w * 0.18, h * 0.58, w * 0.05, time, const Color(0xFFF1E3C6));
+      _boat(c, w * 0.42, h * 0.5, w * 0.04, time, const Color(0xFFD9A441));
+      _boat(c, w * 0.64, h * 0.6, w * 0.055, time, const Color(0xFFE8E2D6));
+      _gull(c, w * 0.5 + math.sin(time * 0.5) * 10, h * 0.2, 7, time);
+      // Lamp posts along the quay.
+      for (final x in [w * 0.12, w * 0.5, w * 0.88]) {
+        line(c, x, ground, x, h * 0.62, 3, const Color(0xFF3E2F26));
+        circle(c, x, h * 0.62, 12 + math.sin(time * 4 + x) * 1, const Color(0x33FFC46B));
+        circle(c, x, h * 0.62, 4.5, const Color(0xFFFFD36B));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF6B5339));
+      for (var x = 0.0; x < w; x += 40) {
+        line(c, x, ground, x, h, 1.4, const Color(0x33000000));
+      }
+      for (var i = 0; i < 4; i++) {
+        final y = h * (0.5 + i * 0.1) + math.sin(time * 0.5 + i) * 4;
+        oval(c, w * (0.15 + i * 0.25) + math.sin(time * 0.3 + i) * 14, y, w * 0.34, h * 0.04, const Color(0x55EEF0F2));
+      }
+    case StoryBackdrop.tidePools:
+      // Low tide on a sunny beach: rocks, bright pools, and sand underfoot.
+      _gradient(c, full, const [Color(0xFF86C5EC), Color(0xFFE6F3F8)]);
+      _sea(c, s, h * 0.4, h * 0.56, const [Color(0xFF62AFD3), Color(0xFF3D8FBA)], time);
+      _cloud(c, w * 0.72, h * 0.18, w * 0.1, const Color(0xE6FFFFFF));
+      _fill(c, Rect.fromLTWH(0, h * 0.56, w, h - h * 0.56), const Color(0xFFE6D3A8));
+      for (final r in [(0.1, 0.62, 0.12, 0.07), (0.85, 0.6, 0.14, 0.08), (0.55, 0.58, 0.07, 0.04)]) {
+        oval(c, w * r.$1, h * r.$2, w * r.$3, h * r.$4, const Color(0xFF6D6A66));
+        oval(c, w * r.$1 - 4, h * r.$2 - 4, w * r.$3 * 0.8, h * r.$4 * 0.6, const Color(0xFF85817C));
+      }
+      for (final p in [(0.3, 0.7, 0.1), (0.62, 0.78, 0.13), (0.8, 0.72, 0.08)]) {
+        oval(c, w * p.$1, h * p.$2, w * p.$3, h * 0.03, const Color(0xFF8FD0E0));
+        oval(c, w * p.$1 - 6, h * p.$2 - 2, w * p.$3 * 0.5, h * 0.01, const Color(0x66FFFFFF));
+        final tw = 0.5 + 0.5 * math.sin(time * 3 + p.$1 * 9);
+        circle(c, w * p.$1 + 8, h * p.$2 - 1, 1.8, Color.fromRGBO(255, 255, 255, tw));
+      }
+      // A starfish and a shell.
+      circle(c, w * 0.46, h * 0.82, 4.5, const Color(0xFFE2703A));
+      for (var i = 0; i < 5; i++) {
+        final a = i * math.pi * 2 / 5 - math.pi / 2;
+        line(c, w * 0.46, h * 0.82, w * 0.46 + math.cos(a) * 9, h * 0.82 + math.sin(a) * 9, 3.4, const Color(0xFFE2703A));
+      }
+      oval(c, w * 0.22, h * 0.86, 7, 5, const Color(0xFFF2E1C7));
+    case StoryBackdrop.lighthouse:
+      // Dusk on the headland, the great lamp dark and its glass cracked.
+      _gradient(c, full, const [Color(0xFF3B4A7A), Color(0xFFE59A68)]);
+      _stars(c, s, time, count: 20);
+      _sea(c, s, h * 0.6, ground, const [Color(0xFF3A4E73), Color(0xFF223250)], time, ripple: const Color(0x33F2B07A));
+      _fill(c, Rect.fromLTWH(0, ground - h * 0.06, w, h), const Color(0xFF4A4036));
+      _lighthouse(c, w * 0.12, ground - h * 0.06, h * 0.62, time, lit: false);
+      // The small emergency lantern, glowing by the door.
+      circle(c, w * 0.2, ground - h * 0.1, 7 + math.sin(time * 4) * 0.8, const Color(0x33FFC857));
+      circle(c, w * 0.2, ground - h * 0.1, 3, const Color(0xFFFFC857));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3F4F33));
+    case StoryBackdrop.lighthouseNight:
+      // The same headland at night, the great lamp lit and sweeping the sea.
+      _gradient(c, full, const [Color(0xFF0E1330), Color(0xFF2A3B6E)]);
+      _stars(c, s, time, count: 55);
+      circle(c, w * 0.84, h * 0.14, w * 0.05, const Color(0xFFF7F0D5));
+      _sea(c, s, h * 0.6, ground, const [Color(0xFF1B2A52), Color(0xFF111B38)], time, ripple: const Color(0x44F7F0D5));
+      _fill(c, Rect.fromLTWH(0, ground - h * 0.06, w, h), const Color(0xFF2E2A28));
+      _lighthouse(c, w * 0.12, ground - h * 0.06, h * 0.62, time, lit: true);
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF26331F));
+      // Far out, a little fleet coming home by the light.
+      for (var i = 0; i < 3; i++) {
+        _boat(c, w * (0.6 + i * 0.12), h * (0.66 + (i % 2) * 0.04), w * 0.025, time, const Color(0xFFE8E2D6));
       }
   }
 }

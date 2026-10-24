@@ -5,10 +5,10 @@ import 'package:i_am_chad/domain/story.dart';
 
 void main() {
   group('what money can buy', () {
-    test('there is one pack and a few tips, each with a unique id', () {
+    test('there is one pack, Premium and a few tips, each with a unique id', () {
       final ids = Patronage.all.map((p) => p.id).toList();
       expect(ids.toSet(), hasLength(ids.length));
-      expect(Patronage.all.where((p) => !p.isTip), [Patronage.patronPack]);
+      expect(Patronage.all.where((p) => !p.isTip), [Patronage.patronPack, Patronage.premium]);
       expect(Patronage.tips, hasLength(3));
       for (final p in Patronage.all) {
         expect(Patronage.byId(p.id), same(p));
@@ -31,8 +31,9 @@ void main() {
       }
     });
 
-    test('the pack is one-time and the tips are the only repeatable purchases', () {
+    test('the pack and Premium are one-time and the tips are the only repeatable purchases', () {
       expect(Patronage.patronPack.kind, ProductKind.cosmeticPack);
+      expect(Patronage.premium.kind, ProductKind.premium);
       expect(Patronage.tips.every((t) => t.kind == ProductKind.tip), isTrue);
       expect(Patronage.tipPerk, contains('nothing'));
     });
@@ -137,7 +138,7 @@ void main() {
       expect(Cosmetics.wornDye('sunrise', const CosmeticContext(level: 5))!.id, 'sunrise');
       expect(Cosmetics.wornDye('moonlit', const CosmeticContext(level: 10))!.id, 'moonlit');
 
-      final finale = Story.chapters.last.number;
+      final finale = Story.inSeason(1).last.number;
       expect(Cosmetics.wornCape('dawn', const CosmeticContext()).id, Cosmetics.classicCapeId);
       expect(Cosmetics.wornCape('dawn', CosmeticContext(chaptersRead: {finale})).id, 'dawn');
     });
@@ -145,7 +146,7 @@ void main() {
     test('the Dawn Mantle really is tied to the last chapter of Season One', () {
       final dawn = Cosmetics.capeById('dawn');
       expect(dawn.unlock.kind, UnlockKind.chapter);
-      expect(dawn.unlock.n, Story.chapters.last.number);
+      expect(dawn.unlock.n, Story.inSeason(1).last.number);
     });
 
     test('pennants hang in a fixed order and only for what was earned', () {

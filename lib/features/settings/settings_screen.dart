@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/ads.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
@@ -103,7 +104,9 @@ class SettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Everything is stored only on this device. There is no account and nothing is uploaded.',
+                  'Your workouts, progress and story choices are stored only on this device, and there is no account. '
+                  'The only things that use the internet are the store, and the one ad at the start of a story chapter, '
+                  'which Premium removes.',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
@@ -138,9 +141,9 @@ class SettingsScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'The whole game is free, with no ads and no tracking, and it always will be. '
-                  'If you would like to help it grow, there are optional cosmetic extras and a tip jar. '
-                  'Nothing there makes the game easier.',
+                  'The whole game is free, every story chapter included, and it always will be. The only ad is one at '
+                  'the start of each chapter, and Premium removes it. There are also optional cosmetic extras and a '
+                  'tip jar. Nothing there makes the game easier.',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
@@ -150,6 +153,7 @@ class SettingsScreen extends ConsumerWidget {
                   kind: GameButtonKind.secondary,
                   onPressed: () => Navigator.of(context).push(gameRoute<void>(const PatronScreen())),
                 ),
+                const _AdPrivacyChoices(),
               ],
             ),
           ),
@@ -203,3 +207,29 @@ GameFeedback _preview(WidgetRef ref) => GameFeedback(
       player: ref.read(sfxPlayerProvider),
       hapticPlayer: ref.read(hapticPlayerProvider),
     );
+
+/// Lets the player revisit their ad-privacy choices, shown only where the law
+/// makes that choice available.
+class _AdPrivacyChoices extends ConsumerWidget {
+  const _AdPrivacyChoices();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ads = ref.watch(adGatewayProvider);
+    return FutureBuilder<bool>(
+      future: ads.privacyOptionsRequired(),
+      builder: (context, snapshot) {
+        if (snapshot.data != true) return const SizedBox.shrink();
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: GameButton(
+            label: 'Ad Privacy Choices',
+            icon: Icons.privacy_tip_rounded,
+            kind: GameButtonKind.secondary,
+            onPressed: ads.showPrivacyOptions,
+          ),
+        );
+      },
+    );
+  }
+}

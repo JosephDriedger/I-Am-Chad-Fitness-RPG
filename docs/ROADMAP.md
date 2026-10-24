@@ -25,7 +25,7 @@ Roughly in priority order.
 2. **Playtest the feel and the numbers.** Combat is probably too easy (a scripted player wins about 90% of level-1 expeditions and 98% or more later), and the animation timings were written blind to a real device. Get human feedback before changing anything.
 3. **First-use guidance in the hall.** Built: until the first workout is logged, the training dummy glows softly (steady if motion is reduced) and Chad's welcome line is shown. It never blocks anything and disappears for good after the first workout. Still open: first-use tooltips on the Train and log screens, and the interactive intro (item 8).
 4. **Try camera rep counting on real people.** The first version is built (push-ups and squats; see below) and runs on an emulator, but it has never counted a real rep. It needs testing on physical phones with different body types, clothing, light and angles, then the thresholds in `rep_counter.dart` tuned, an iOS build, and a decision on sit-ups and planks.
-5. **More story.** Season One is written and playable. Season Two needs new places, a new problem for the guild and chapters further up the level curve; hand-made portraits and scene art would lift it a lot. Watch whether people read the chapters or skip them, and whether the choices are noticed.
+5. **More story.** Seasons One and Two are written and playable (Season Two is [The Lantern Coast](STORY.md)). Season Three, hand-made portraits and scene art would lift it a lot, and so would a read-aloud or audio option. Watch whether people read the chapters or skip them, and whether the choices are noticed. Stories are always free.
 6. **More to look at.** More enemies and biomes, and more hall decoration. The first step is done: ten pennants on the hall's bunting appear as milestones are earned (see [Monetization](MONETIZATION.md#free-looks-sit-beside-the-paid-ones)). More earned decoration, such as trophies on the shelf, would fit. A hand-made art pass can replace procedural painters one at a time.
 7. **Music.** Built: a calm loop for the hall and a livelier one for battles, synthesized in code, off by default, quiet, and mixed under other apps' audio (see [Game scenes](GAME_SCENES.md#sound-and-haptics)). Still open: hearing it on a real phone, and deciding whether synthesized tunes are good enough or a composer is wanted.
 8. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
@@ -56,8 +56,8 @@ The original thinking, still the guide for what comes next: use the phone camera
 - Reminder notifications that are opt-in, kind and never guilt-based.
 - Recovery-friendly mini-games beyond the practice duel.
 - Weightlifting progression beyond personal bests (which are built: see [Reward rules](REWARD_RULES.md#personal-bests)), such as charts over time.
-- Release preparation: real application id, icons, store listings, privacy disclosures (declare only store-handled purchases, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), age rating.
-- Season Two as an optional one-time expansion sold through the Patron's Hall, with Season One staying free (see [Monetization](MONETIZATION.md#changing-this-later)). More cosmetics, free and earned first.
+- Release preparation: real application id, icons, store listings, privacy policy and disclosures (store purchases **and** the ad SDK, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), a real AdMob account with the test ids replaced, and the age rating, which must be settled before real ads are switched on because of the rules on advertising to children.
+- More cosmetics, free and earned first. Stories are never sold (see [Monetization](MONETIZATION.md#changing-this-later)). Ideas for Premium extras that are not gameplay.
 - Asset licence register if any third-party asset is ever added.
 
 ## Later (post-MVP, per the GDD)

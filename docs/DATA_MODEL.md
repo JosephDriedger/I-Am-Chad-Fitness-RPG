@@ -1,6 +1,6 @@
 # Data model
 
-Everything is stored locally in a single SQLite database through [Drift](https://drift.simonbinder.eu/). There is no network access. Table definitions are in [`lib/data/database.dart`](../lib/data/database.dart).
+Everything is stored locally in a single SQLite database through [Drift](https://drift.simonbinder.eu/). The game data never leaves the device: the only network use is the platform store and the one ad at the start of a story chapter (see [Monetization](MONETIZATION.md)). Table definitions are in [`lib/data/database.dart`](../lib/data/database.dart).
 
 Dates are stored by Drift as UTC Unix seconds and read back as local `DateTime`s. Distances and weights are stored **metric** (metres, kilograms) and converted for display according to the units setting.
 
@@ -108,7 +108,7 @@ Keeping these derived means editing or deleting a workout automatically keeps th
 - **Export:** `GameRepository.exportJson()` produces a JSON document with workouts, reward grants and basic hero info. The Settings screen copies it to the clipboard.
 - **Delete:** `GameRepository.deleteEverything()` empties every table in one transaction. Settings asks for confirmation first.
 
-No account, analytics or network calls exist in the app.
+No account and no analytics exist in the app. The only network calls are the store and the chapter ad, and neither is sent any of the data above.
 
 ## Migrations
 

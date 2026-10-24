@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/ads.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import '../../domain/patronage.dart';
 import '../../domain/story.dart';
 import '../../game/art/story_art.dart';
 import '../../game/core.dart' show Haptic, Sfx;
@@ -39,6 +41,10 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
   late List<StoryNode> _nodes;
 
   bool _title = true;
+
+  /// True while the chapter-start ad is on its way, so the story cannot begin
+  /// underneath it. An ad only ever comes before the first line.
+  bool _adPending = false;
   bool _done = false;
 
   static const _msPerChar = 20;
@@ -55,6 +61,34 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1),
     );
+    _startWithAd();
+  }
+
+  /// The one ad in the game: before a chapter's first line, unless the player
+  /// has Premium or has read this chapter before. Anything that goes wrong (no
+  /// network, no ad, a slow answer) just means no ad, and the story begins.
+  Future<void> _startWithAd() async {
+    final alreadyRead = ref.read(storyReadProvider).value?.contains(widget.chapter.number) ?? false;
+    var entitlements = ref.read(entitlementsProvider).value;
+    if (entitlements?.hasPremium == true || (alreadyRead && !AdPolicy.showOnReread)) return;
+    _adPending = true; // read by the first build, so no setState yet
+    try {
+      entitlements ??= await ref
+          .read(entitlementsProvider.future)
+          .then<Entitlements?>((e) => e)
+          .timeout(AdPolicy.entitlementWait, onTimeout: () => null);
+      if (!mounted) return;
+      final show = AdPolicy.shouldShowChapterAd(
+        premiumKnown: entitlements != null,
+        premium: entitlements?.hasPremium ?? false,
+        chapterAlreadyRead: alreadyRead,
+      );
+      if (show) await ref.read(adGatewayProvider).showChapterAd();
+    } catch (_) {
+      // No ad is better than a stuck story.
+    } finally {
+      if (mounted) setState(() => _adPending = false);
+    }
   }
 
   @override
@@ -105,6 +139,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
   bool get _typingNow => _typing.isAnimating;
 
   void _tap() {
+    if (_adPending) return;
     if (_title) {
       setState(() => _title = false);
       _begin();
@@ -172,6 +207,9 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     StorySpeaker.oakhelm => const Color(0xFF4F7D3A),
     StorySpeaker.grit => const Color(0xFF7CB342),
     StorySpeaker.murmur => const Color(0xFF8E5BB5),
+    StorySpeaker.pip => const Color(0xFFD9822B),
+    StorySpeaker.wren => const Color(0xFF2F5F9E),
+    StorySpeaker.sedge => const Color(0xFF6B8E4E),
     _ => GameColors.wood,
   };
 
@@ -276,16 +314,16 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
               ),
               const SizedBox(height: 20),
               Text(
-                Story.seasonTitle,
+                Story.seasonOf(widget.chapter.season).title,
                 style: const TextStyle(
                   color: Color(0xFFCDB68C),
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 28),
-              const Text(
-                'Tap to begin',
-                style: TextStyle(color: Color(0xFFCDB68C)),
+              Text(
+                _adPending ? 'One moment...' : 'Tap to begin',
+                style: const TextStyle(color: Color(0xFFCDB68C)),
               ),
             ],
           ),
