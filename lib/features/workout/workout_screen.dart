@@ -6,10 +6,12 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
+import '../../domain/warmup.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/demo/exercise_demo.dart';
 import '../../game/look.dart';
 import 'log_workout_screen.dart';
+import 'warmup_screen.dart';
 
 /// The training yard: pick an exercise card. Every card shows the exercise
 /// itself, and free-form logging is always available (quests from the hall
@@ -74,6 +76,29 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         const ChadBubble(
           text:
               'Pick what you did. Any version counts, and you can edit or delete it later.',
+        ),
+        const SizedBox(height: 12),
+        GamePanel(
+          title: WarmUp.title,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'One minute, four gentle moves. Stop any time. No rewards, just a nice start.',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 10),
+              GameButton(
+                key: const Key('warmup_start'),
+                label: 'Start Warm-Up',
+                icon: Icons.self_improvement_rounded,
+                kind: GameButtonKind.secondary,
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const WarmUpScreen()),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         TextField(

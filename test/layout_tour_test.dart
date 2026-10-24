@@ -128,6 +128,14 @@ void main() {
           await _tap(tester, find.text('Save'));
         }
         if (label == 'Train') {
+          // Chad's warm-up: its intro, every move, the end, and back out.
+          await _tap(tester, find.byKey(const Key('warmup_start')));
+          await _tap(tester, find.text('Begin'));
+          for (var i = 0; i < 3; i++) {
+            await _tap(tester, find.text('Next Move'));
+          }
+          await _tap(tester, find.text('Finish'));
+          await _tap(tester, find.text('Back to the Yard'));
           // An exercise with every kind of field, its saved dialog and the honesty check.
           await _reveal(tester, find.byType(TextField));
           await tester.enterText(find.byType(TextField).first, 'Dumbbell Shoulder Press');
