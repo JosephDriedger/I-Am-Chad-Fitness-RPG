@@ -47,6 +47,16 @@ The story ([STORY.md](STORY.md)) follows the same rules as everything else, and 
 - Rest, a slow pace and saying "not today" are shown as ordinary and sensible, including by the characters who were once sure otherwise.
 - The player can always skip, leave, or read it again.
 
+## Daily quests
+
+The quest board suggests three quests a day, rotated from a pool for the player's experience level (`QuestBoard` in `lib/domain/quests.dart`, 17 to 18 each). They are suggestions, never obligations, and nothing is lost for ignoring them. When adding one, `test/domain/quests_test.dart` requires that:
+
+- it asks only for what its activity measures (sets, reps or time), with a variant that exists;
+- it needs nothing beyond what most homes have (a chair, a wall), or is flagged as needing dumbbells and skipped for players without them;
+- the order keeps any three neighbours in different categories, so a day is never three of the same thing;
+- beginner quests stay gentle (at most two sets, ten reps and ten minutes);
+- the words are kind and each description is one finished sentence.
+
 ## Enemies
 
 Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They must not personify the player's struggles with their body, weight, laziness or failure.

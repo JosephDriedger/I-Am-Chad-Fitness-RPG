@@ -83,6 +83,97 @@ void main() {
     });
   });
 
+  group('quest pools', () {
+    final every = [
+      for (final l in ExperienceLevel.values) ...QuestBoard.poolFor(l),
+    ];
+
+    test('each level has plenty to rotate through, with or without dumbbells', () {
+      for (final l in ExperienceLevel.values) {
+        expect(QuestBoard.poolFor(l).length, greaterThanOrEqualTo(15), reason: '$l');
+        expect(QuestBoard.poolFor(l, hasDumbbells: false).length, greaterThanOrEqualTo(14), reason: '$l without dumbbells');
+      }
+    });
+
+    test('ids are unique across every pool, and titles within a pool', () {
+      expect({for (final q in every) q.id}.length, every.length);
+      for (final l in ExperienceLevel.values) {
+        final titles = [for (final q in QuestBoard.poolFor(l)) q.title];
+        expect(titles.toSet().length, titles.length, reason: '$l');
+      }
+    });
+
+    test('every quest asks only for what its activity measures, with a real variant', () {
+      for (final q in every) {
+        final a = q.activity;
+        if (q.sets != null) expect(a.metrics, contains(Metric.sets), reason: q.id);
+        if (q.reps != null) expect(a.metrics, contains(Metric.reps), reason: q.id);
+        if (q.durationSeconds != null) expect(a.metrics, contains(Metric.duration), reason: q.id);
+        expect(q.reps != null || q.durationSeconds != null, isTrue, reason: '${q.id} has something to do');
+        if (q.variant != null) expect(a.variants, contains(q.variant), reason: q.id);
+      }
+    });
+
+    test('equipment is honest: dumbbell quests are flagged, and nothing needs gym kit', () {
+      for (final q in every) {
+        expect(q.needsDumbbells, q.activity.equipment == Equipment.dumbbells, reason: q.id);
+        expect(q.activity.equipment.atHome || q.activity.equipment == Equipment.dumbbells, isTrue, reason: q.id);
+      }
+    });
+
+    test('any three neighbours on a rotation mix categories, so no day is all one thing', () {
+      for (final l in ExperienceLevel.values) {
+        for (final dumbbells in [true, false]) {
+          final pool = QuestBoard.poolFor(l, hasDumbbells: dumbbells);
+          for (var i = 0; i < pool.length; i++) {
+            final three = {for (var j = 0; j < 3; j++) pool[(i + j) % pool.length].activity.category};
+            expect(three.length, greaterThanOrEqualTo(2), reason: '$l from ${pool[i].id}, dumbbells: $dumbbells');
+          }
+        }
+      }
+    });
+
+    test('over a fortnight a beginner sees most of their pool, not the same few', () {
+      final seen = <String>{};
+      for (var d = 0; d < 14; d++) {
+        for (final q in QuestBoard.dailySuggestions(
+          level: ExperienceLevel.starting,
+          day: DateTime(2026, 10, 1).add(Duration(days: d)),
+          preferred: const {},
+          hasDumbbells: false,
+        )) {
+          seen.add(q.id);
+        }
+      }
+      expect(seen.length, greaterThanOrEqualTo(12));
+    });
+
+    test('the words are kind and every description is a finished sentence', () {
+      const banned = ['lazy', 'weak', 'failure', 'failed', 'excuse', 'burn off', 'in shape', 'hurry', 'must ', 'no pain', 'deadline'];
+      for (final q in every) {
+        final t = '${q.title} ${q.description}'.toLowerCase();
+        for (final b in banned) {
+          expect(t.contains(b), isFalse, reason: '"$b" in ${q.id}');
+        }
+        expect(RegExp(r'[.!?]$').hasMatch(q.description), isTrue, reason: q.id);
+        expect(q.description.length, lessThan(110), reason: q.id);
+      }
+    });
+
+    test('beginner quests stay gentle, and the harder levels are not silly', () {
+      for (final q in QuestBoard.poolFor(ExperienceLevel.starting)) {
+        expect(q.durationSeconds ?? 0, lessThanOrEqualTo(600), reason: q.id);
+        expect(q.sets ?? 0, lessThanOrEqualTo(2), reason: q.id);
+        expect(q.reps ?? 0, lessThanOrEqualTo(10), reason: q.id);
+      }
+      for (final q in every) {
+        // Never more than the daily full-value range, so no quest asks for more than is rewarded.
+        expect(q.durationSeconds ?? 0, lessThanOrEqualTo(2400), reason: q.id);
+        expect(q.sets ?? 0, lessThanOrEqualTo(5), reason: q.id);
+      }
+    });
+  });
+
   group('weeklyGoal', () {
     test('counts distinct active days Monday to Sunday, not entries', () {
       final goal = QuestBoard.weeklyGoal(
