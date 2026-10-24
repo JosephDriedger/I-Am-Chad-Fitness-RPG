@@ -1,5 +1,5 @@
 /// The Guild Shop: what coins buy. Coins are earned only through play (exercise
-/// streaks, expeditions, practice duels), never with real money, and nothing
+/// streaks and expeditions), never with real money, and nothing
 /// here is random. See docs/REWARD_RULES.md ("Coins and the shop").
 library;
 
@@ -32,6 +32,26 @@ class Shop {
     'wayfarer_cap': 220,
     'trail_vest': 220,
     'stopwatch_charm': 240,
+    // The Gullhaven Coast.
+    'sailor_cap': 460,
+    'oilskin_coat': 480,
+    'coral_cutlass': 520,
+    'sea_glass_charm': 520,
+    // The Glimmer Caverns.
+    'miner_helm': 780,
+    'stonestitch_vest': 820,
+    'crystal_blade': 880,
+    'glowcap_lantern': 880,
+    // Frostpeak Pass.
+    'snow_hood': 1200,
+    'yeti_mantle': 1300,
+    'frostbrand': 1350,
+    'summit_compass': 1350,
+    // Thunder Heights.
+    'thunder_crown': 1900,
+    'gale_cloak': 2000,
+    'storm_edge': 2100,
+    'lightning_bottle': 2100,
   };
 
   /// The coin price of an item, or null if it is not sold.

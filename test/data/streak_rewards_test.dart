@@ -186,6 +186,12 @@ void main() {
           sound_on INTEGER NOT NULL DEFAULT 1,
           haptics_on INTEGER NOT NULL DEFAULT 1
         );
+        CREATE TABLE active_expeditions (
+          id INTEGER NOT NULL PRIMARY KEY,
+          seed INTEGER NOT NULL, hero_level INTEGER NOT NULL, step_index INTEGER NOT NULL,
+          hero_hp INTEGER NOT NULL, potions INTEGER NOT NULL, battles_won INTEGER NOT NULL,
+          xp INTEGER NOT NULL, coins INTEGER NOT NULL
+        );
         PRAGMA user_version = 4;
       ''');
     }));

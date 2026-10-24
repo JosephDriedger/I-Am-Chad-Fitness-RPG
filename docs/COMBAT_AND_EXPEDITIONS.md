@@ -1,6 +1,6 @@
 # Combat and expeditions
 
-Combat is short, turn-based and readable on a phone. The rules are in [`lib/domain/combat.dart`](../lib/domain/combat.dart) and [`lib/domain/expedition.dart`](../lib/domain/expedition.dart); the UI is [`expedition_screen.dart`](../lib/features/adventure/expedition_screen.dart).
+Combat is short, turn-based and readable on a phone. The rules are in [`lib/domain/combat.dart`](../lib/domain/combat.dart), [`lib/domain/expedition.dart`](../lib/domain/expedition.dart) and [`lib/domain/difficulty.dart`](../lib/domain/difficulty.dart); the UI is [`expedition_screen.dart`](../lib/features/adventure/expedition_screen.dart).
 
 ## Hero stats
 
@@ -36,83 +36,123 @@ Each turn the player picks one action, then the enemy answers. **The enemy's nex
 | Attack | Strike for normal damage. +1 focus. |
 | Guard | Halve (rounded up) the damage taken this turn. +1 focus. |
 | Power Strike | Costs 2 focus. About double damage, plus 1. |
-| Potion | Heal one third of max HP. Uses a potion (2 per expedition). Only usable when hurt. |
+| Potion | Heal one third of max HP. Uses a potion (2 per expedition, plus up to 3 from the pouch). Only usable when hurt. |
 
-- Focus is capped at 5 and resets between battles.
-- Damage: `max(1, attack − defense ÷ 2) + random(0..2)`, then multiplied (Power Strike ×2, enemy heavy blow ×1.6), minimum 1.
-- Enemy intent each turn: a regular strike (75%) or a **heavy blow** (25%) announced as "winding up". Guarding on a wind-up is the intended counter.
+- Focus is capped at 5 and resets between battles (a bard's tune starts the next one with 2).
+- Damage: `max(1, attack − defense ÷ 2) + random(0..2)`, then multiplied, minimum 1.
 - A battle ends when either side reaches 0 HP.
+
+### Enemy moves
+
+Every enemy has a **behaviour**: the chance of each move it can pick, out of 1. Whatever is left over is a plain strike. The first region's enemies only strike or wind up; the later regions add the rest, one idea at a time.
+
+| Move | What it does | The answer |
+| --- | --- | --- |
+| Strike | A normal blow. | Anything. |
+| Heavy blow ("winding up") | ×1.6 damage. | Guard. |
+| Flurry ("getting ready to strike twice") | Two blows at ×0.65 each. Guarding halves both. | Guard when hurt. |
+| Brace | The player's next blow lands at half strength, and the enemy answers with a light counter (×0.5). | Don't spend a Power Strike. Build focus, guard or heal. |
+| Mend | Heals 15% of max HP instead of attacking. Only picked when it is hurt. | Hit hard first. |
+
+A **boss** can also get **fired up**: once it drops below a set share of its health (35 to 45%) it hits 25% harder for the rest of the fight. The log and the scene both say so.
+
+## Regions
+
+The world is five regions, defined in `difficulty.dart`. Each opens at a hero level, has its own enemies, bosses, scenery, camp events and loot, and is a little tougher than the one before. **A region stays open for good**, so the player can always go back to an easier one, and a picker on the Adventure screen chooses where to set out. The toughest open region is the default.
+
+| # | Region | Opens at | Steps | Scenery | Bonus per battle (XP / coins) |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Meadowmere | Level 1 | 4 | Meadow, forest | none |
+| 2 | The Gullhaven Coast | Level 5 | 4 | Coast | +2 / +1 |
+| 3 | The Glimmer Caverns | Level 10 | 5 | Crystal caves | +4 / +2 |
+| 4 | Frostpeak Pass | Level 16 | 5 | Snowy peak, cave | +6 / +3 |
+| 5 | Thunder Heights | Level 24 | 6 | Storm, peak | +8 / +4 |
+
+An enemy's HP, attack and defense are the hero's stats at that level, times the enemy's own build, times the region's three dials (`hpScale`, `attackScale`, `defenseScale`). The later regions' attack dials are below 1 on purpose: enemies hit a little less, but fights last longer and the tactics matter more. A boss's bonus is doubled. Difficulty is meant to come from enemy variety and tactics, not from stat inflation.
 
 ## Expeditions
 
-A reward-bearing expedition costs **2 adventure energy** (spent when you set out) and has this fixed shape:
+A reward-bearing expedition costs **2 adventure energy** (spent when you set out). Its shape depends on the region (`b` battle, `e` camp, `B` boss):
 
-```
-Battle (regular) → Event → Battle (regular) → Battle (boss)
-```
+| Region | Shape |
+| --- | --- |
+| 1 and 2 | `b e b B` |
+| 3 | `b e b b B` |
+| 4 | `b b e b B` |
+| 5 | `b b e b e B` |
 
-`Expedition.generate(seed, heroLevel)` builds it deterministically:
+`Expedition.generate(seed, heroLevel, tier)` builds it deterministically:
 
-- Two different regular enemies drawn from a pool of 6 (shuffled by the seed).
-- One boss from a pool of 2.
-- One event from a pool of 3.
-- A loot item from the 8-item catalog, awarded on victory.
+- Regular enemies drawn without repeats from the region's own pool plus the region before it (never a tougher one).
+- One of the region's two bosses.
+- Camp events drawn from the pool (the first region only meets the first three).
+- A loot item: 65% from the region's own gear, otherwise from an earlier region, so nothing is ever out of reach.
 
-Enemies scale with the hero's level using the same soft-capped curve as the hero, multiplied by a per-enemy template (for example Snooze Slime has 0.55× HP). Difficulty is meant to come from enemy variety and tactics, not from stat inflation.
+A saved run remembers its region. A run saved before regions existed resumes in the toughest region open at its level.
 
 ### Events
 
-| Event | Effect |
-| --- | --- |
-| A traveling apothecary | +1 potion |
-| A quiet campfire | Recover 40% of max HP |
-| Chad's "secret" stash | +8 coins |
+| Event | Effect | Where |
+| --- | --- | --- |
+| A traveling apothecary | +1 potion | All |
+| A quiet campfire | Recover 40% of max HP | All |
+| Chad's "secret" stash | 8 coins, plus 4 per region above the first | All |
+| A wandering bard | The next fight starts with 2 focus | Region 2 and up |
+| A quiet spring | Recover 25% of max HP | Region 2 and up |
 
 ### Rewards
 
 | Source | XP | Coins |
 | --- | --- | --- |
-| Regular battle won | 15 | 5 |
-| Boss battle won | 30 | 12 |
-| Full clear (2 regular + boss) | 60 | 22 (+8 with the stash event) |
-| Loot (on full clear) | One item, or **10 coins** if already owned | |
-| Practice duel win | 0 | 3 |
+| Regular battle won | 15 + region bonus | 5 + region bonus |
+| Boss battle won | 30 + double the region bonus | 12 + double the region bonus |
+| Loot (on full clear) | One item, or **10 × region** coins if already owned | |
+| Practice duel win | 0 | 0 |
 
 ### Failure is gentle
 
 - Being knocked out ends the run but **keeps the XP and coins from battles already won**. There is no loss of progress, gear or energy beyond the 2 energy already spent.
 - Retreating from the pause dialog behaves the same way: rewards so far are kept, no loot.
-- The **practice duel** is always free. It exists so rest days still have something to play (GDD pillar: progress without punishment).
+- The **practice duel** is always free, always against the first region's gentle enemies, and pays nothing. It exists so rest days still have something to play (GDD pillar: progress without punishment).
 
 ## Presentation
 
-Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGuarded`, `EnemyAttacked`, `EnemyDefeated`, ...). The animated Flame battle scene plays them back in order; see [Game scenes](GAME_SCENES.md). The scene can only display results, never change them.
+Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGuarded`, `EnemyAttacked`, `EnemyBraced`, `EnemyMended`, `EnemyEnraged`, `EnemyDefeated`, ...). The animated Flame battle scene plays them back in order; see [Game scenes](GAME_SCENES.md). The scene can only display results, never change them.
 
 ## Roster
 
-Regular enemies: Snooze Slime, Fog Imp, Rusty Gear Golem, Cobweb Wisp, Pebble Gremlin, Mist Wisp.
-Bosses: Grumbling Treant, Chad's Old Rival Brad.
+| Region | Regular enemies | Bosses |
+| --- | --- | --- |
+| Meadowmere | Snooze Slime, Fog Imp, Rusty Gear Golem, Cobweb Wisp, Pebble Gremlin, Mist Wisp | Grumbling Treant, Chad's Old Rival, Brad |
+| The Gullhaven Coast | Sand Crab (braces), Tide Jelly (mends), Gull Bandit (flurries) | Captain Barnacle, The Gull King |
+| The Glimmer Caverns | Crystal Beetle (braces), Glowcap Shroom (mends), Echo Bat (flurries) | Crystal Colossus, Mother Glowcap |
+| Frostpeak Pass | Frost Sprite (flurries), Snow Yeti (heavy blows), Icicle Golem (braces) | The Avalanche Matron, Old Man Winter |
+| Thunder Heights | Thunder Cloud (flurries), Gale Hawk (flurries), Static Imp (braces and mends) | The Thunderhead, Stormcaller Skarn |
 
-Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md).
+Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md). The enemy art is in [`enemy_art.dart`](../lib/game/art/enemy_art.dart); several bosses are a recoloured or crowned version of a regular enemy's drawing.
 
 ## Equipment
 
-Eight pieces across four slots (head, body, weapon, trinket), one worn per slot. Bonuses are tiny (+1 to +6) and there is no way to buy them. Duplicates convert to coins.
+Twenty-four pieces across four slots (head, body, weapon, trinket), one worn per slot: the original eight, and four from each later region. Bonuses stay small, from +1 on the first pieces to +6 at the top, and each region's pieces are a little stronger than the last one's. Gear is found as loot and also sold in the Guild Shop for coins (see [Reward rules](REWARD_RULES.md#coins-and-the-shop)), at prices that rise with the region. Duplicates convert to coins. The pieces from later regions have no hand-drawn art of their own and are drawn on the hero in the colour in their `accent` field.
 
 ## Balance status
 
-A scripted "sensible player" (guards against heavy blows when hurt, uses Power Strike when available, drinks a potion below 35% HP) clears 500 seeded expeditions at these rates:
+`test/domain/balance_test.dart` plays 250 seeded expeditions per case with a scripted "sensible" player: no gear, drinks a potion below 35% HP, guards against heavy blows and flurries when hurt, guards instead of wasting a Power Strike on a brace, and uses Power Strike otherwise. Win rates at three levels in each region (where it opens, a little later, and well past):
 
-| Hero level | Win rate |
+| Region | Win rate at those levels |
 | --- | --- |
-| 1 | about 90% |
-| 3 to 40 | about 98 to 99% |
+| 1 | 84%, 93%, 98% |
+| 2 | 84%, 88%, 80% |
+| 3 | 68%, 81%, 82% |
+| 4 | 58%, 73%, 76% |
+| 5 | 68%, 62%, 66% |
 
-That is deliberately friendly for a first prototype, and probably too easy at higher levels. It is a regression guard, not proof of fun: the test only requires 75% or better. Real playtesting should drive the next tuning pass (see the [roadmap](ROADMAP.md)).
+Real players will have gear (a few points of attack, defense and HP), can read the intent line better than a script, and can drop back to an easier region. The tests only guard the shape: the first region is gentle, no region is a wall (every case above 45%), each region is harder than the one before on average, each step is a noticeable but small drop, and no battle runs past 30 turns. They are a regression guard, not proof of fun. Real playtesting should drive the next tuning pass (see the [roadmap](ROADMAP.md)).
 
 ## Extending
 
-- **New enemy:** add an `EnemyTemplate` to `EnemyPool.regular` or `bosses`. Existing seeds will map to different enemies afterwards, which is fine because expeditions are not stored, only their results.
+- **New enemy:** add an `EnemyTemplate` to `EnemyPool.regular` or `bosses` with the `tier` of its region and a `behavior`, then draw it in `enemy_art.dart` and register the painter. Existing seeds will map to different enemies afterwards, which is fine because only the results of expeditions are stored.
+- **New region:** add a `Region` to `Difficulty.regions` (and a `Terrain` and `Biome` if it needs new scenery), give it two bosses, at least three regular enemies and four pieces of gear, a shape in `_shapeFor`, and a shop price for each piece. Check `balance_test.dart` still passes, or extend its table.
 - **New item:** add to `ItemCatalog.all`. Never rename or reuse an `id`; it is persisted in the inventory.
 - **New action or status effect:** extend `BattleAction` and `BattleEngine.act`, then add tests alongside the existing ones in `test/domain/combat_test.dart`.
 - **New visual for an action:** add a `BattleEvent` type in the engine, emit it from `act`, and handle it in `BattleScene.play`. Add a test next to the existing event tests.

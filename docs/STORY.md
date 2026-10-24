@@ -1,6 +1,6 @@
 # Story
 
-Two seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One) and **The Lantern Coast** (Season Two). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Three seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two) and **The Weather Chime** (Season Three). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -69,12 +69,46 @@ Everyone from Season One comes back: Chad, Biscuit, Maple, Brad, Grit and Murmur
 | 6 | The Night Before the Light | Level 38 | Under the stars at the foot of the tower, everyone is a little nervous, and someone walks a very long way. |
 | 7 | The Answering Light | Level 42 | The lamp is lit, the fleet comes home, and something far away answers. |
 
+## Season Three: The Weather Chime
+
+### The premise
+
+Snow has reached the Guild Hall for the first time, and with it comes Fennel, a courier from Thunder Heights, carrying the first letter to come down the pass in two winters. The Weather Chime, a ring of seven bells that sings the day's weather to the high farms, has not sounded in all that time, and the storms have been loud ever since. The guild climbs the pass, stops for soup at a hut with one rule, shouts into an ice cave that answers kindly, and finds a Weatherkeeper sitting at the bottom of her own stair and a very small wizard under a very large storm. At the top, the Chime is rung again, and the Dawn Bell and the Gullhaven lamp answer it.
+
+The season is about **coming back**: stopping is part of any path, starting again after a break is a smaller thing than it looks from the bottom of the stairs, and one step counts. Nobody is behind and nobody is late. The higher regions of the game (Frostpeak Pass and Thunder Heights) are the scenery.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Fennel | A courier with one speed, "fast, then fall over", who learns that stopping is also a way of arriving. Red scarf, satchel, a letter always poking out. |
+| Hush | A huge, soft-spoken yeti who keeps the hut at the snow line. There is always soup. He has been leaving mugs on the step for two winters. |
+| Tamsin Vale | The Weatherkeeper. Climbed her own 412 steps two at a time until she stopped, and then the stair got taller. Takes it one landing at a time. |
+| Skarn | Tamsin's apprentice, a very small wizard whose feelings come out as weather. He thinks one wrong note was his fault. It was not. |
+
+Chad, Maple, Biscuit, Pip, Brad and Grit come back (Biscuit arrives at the summit by post, and nobody asks how). Pip, who was the newcomer in Season Two, is now the one who knows where the next bend is.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Letter from Above | Level 45 | Snow in the hall, a courier on a wet floor, and a letter that asks nothing but says the kettle is on. |
+| 1 | The Foot of the Pass | Level 47 | A courier with one speed, a rival with two flags, and a climb that can be taken any way you like. |
+| 2 | Soup at the Snow Line | Level 50 | A hut whose sign says STOP HERE, a very large host, and a pot of soup that has been waiting. |
+| 3 | The Echo in the Ice | Level 54 | A cave of blue ice gives back whatever is said to it, only slower and kinder. Grit has found buttons. |
+| 4 | The Weatherkeeper's Stair | Level 58 | A tower, 412 steps, and someone sitting at the bottom. One step counts. |
+| 5 | A Very Small Storm | Level 62 | At the top, a small wizard is doing his best with a large thundercloud. |
+| 6 | The Night Before the Chime | Level 66 | Above the clouds, round a small fire, everyone says what they came back with. Chad's two push-ups. |
+| 7 | The Weather Chime | Level 70 | Seven bells, seven kinds of weather, and three sounds across the map answering each other. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
 
 - **Season One** remembers your reason for coming to the hall, whether you offered to help, how you asked Grit for the clapper, what you said to Brad, Oakhelm and Murmur, what you told Chad, and how you ring the Dawn Bell. The last chapter's farewell changes with your first answer.
 - **Season Two** asks how you welcome Pip, how you walk the road, how you spend the ferry crossing, what you say to Wren, to Murmur and to Pip, what you write back to Oakhelm, and how you light the lamp. It also remembers your Season One answers: Brad, Grit, Murmur and Oakhelm each greet you differently depending on what you said to them, and the final farewell again follows your very first answer.
+
+- **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
 
@@ -85,7 +119,7 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 15 across both seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 23 across all three seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -93,13 +127,14 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | --- | --- |
 | Seasons, cast, unlock rules, conditions, Season One's script | `lib/domain/story.dart` (pure Dart) |
 | Season Two's script | `lib/domain/story_season_two.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip) | `lib/game/art/story_art.dart` |
+| Season Three's script | `lib/domain/story_season_three.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |
 | Offer in the hall | `lib/features/home/hub_screen.dart` |
 | Rules enforced by tests | `test/domain/story_test.dart` |
-| Looking at the scenes | `STORY_SHEET=<folder> flutter test test/tool/story_sheet_test.dart` renders a contact sheet of every scene in both seasons |
+| Looking at the scenes | `STORY_SHEET=<folder> flutter test test/tool/story_sheet_test.dart` renders a contact sheet of every scene in every season |
 
 ## Writing more
 

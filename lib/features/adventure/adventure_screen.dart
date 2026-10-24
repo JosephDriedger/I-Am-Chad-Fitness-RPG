@@ -5,6 +5,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/chad.dart';
+import '../../domain/difficulty.dart';
 import '../../domain/expedition.dart';
 import '../../domain/shop.dart';
 import '../shop/shop_screen.dart';
@@ -23,8 +24,10 @@ class AdventureScreen extends ConsumerWidget {
       return const Center(child: CircularProgressIndicator());
     }
     final canGo = player.energy >= Expedition.energyCost;
+    final tier = regionFor(ref.watch(selectedRegionProvider), player.level);
+    final region = Difficulty.region(tier);
     final expedition = (active?.expedition) ??
-        Expedition.generate(seed: 1, heroLevel: player.level);
+        Expedition.generate(seed: 1, heroLevel: player.level, tier: tier);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
@@ -59,20 +62,25 @@ class AdventureScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Three short battles with a camp on the way. Earn XP, coins and a piece of equipment.',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      Text(region.name, style: gameTitle(21)),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${region.blurb} Win its battles for XP and coins, and a boss for a piece of equipment.',
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
-                      const Wrap(spacing: 8, runSpacing: 8, children: [
-                        GameChip(text: 'Costs ${Expedition.energyCost} Energy', icon: Icons.bolt_rounded, color: GameColors.teal),
-                        GameChip(text: 'About 3 Min', icon: Icons.timer_outlined, color: GameColors.cream),
+                      _RegionPicker(level: player.level, selected: tier),
+                      const SizedBox(height: 10),
+                      Wrap(spacing: 8, runSpacing: 8, children: [
+                        const GameChip(text: 'Costs ${Expedition.energyCost} Energy', icon: Icons.bolt_rounded, color: GameColors.teal),
+                        GameChip(text: 'About ${expedition.steps.length - 1} Min', icon: Icons.timer_outlined, color: GameColors.cream),
+                        GameChip(text: '${expedition.battleCount} Battles', icon: Icons.shield_rounded, color: GameColors.cream),
                       ]),
                       const SizedBox(height: 14),
                       GameButton(
                         label: canGo ? 'Set Out' : 'Need ${Expedition.energyCost} Energy',
                         icon: canGo ? Icons.explore : Icons.lock_outline,
-                        onPressed: canGo ? () => _start(context, ref, player.level, player.maxHp) : null,
+                        onPressed: canGo ? () => _start(context, ref, player.level, player.maxHp, tier) : null,
                       ),
                       if (!canGo) ...[
                         const SizedBox(height: 8),
@@ -123,7 +131,7 @@ class AdventureScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'A relaxed duel that is always free. No XP, just a few coins. Perfect for rest days.',
+                'A relaxed duel that is always free. No rewards, just practice. Perfect for rest days.',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
@@ -147,7 +155,7 @@ class AdventureScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _start(BuildContext context, WidgetRef ref, int level, int maxHp) async {
+  Future<void> _start(BuildContext context, WidgetRef ref, int level, int maxHp, int tier) async {
     final seed = ref.read(clockProvider)().millisecondsSinceEpoch & 0x7FFFFFFF;
     // Potions from the pouch come along, up to a limit, on top of the free ones.
     final bring = Shop.potionsToBring(ref.read(heroProvider).value?.potionStock ?? 0);
@@ -156,6 +164,7 @@ class AdventureScreen extends ConsumerWidget {
       heroLevel: level,
       heroMaxHp: maxHp,
       potions: Shop.basePotions + bring,
+      tier: tier,
     );
     // Energy, the pouch potions and the saved starting point are written together.
     final started = await ref.read(repositoryProvider).startExpedition(
@@ -292,8 +301,9 @@ class _MapArt extends StatelessWidget {
   /// The step the hero is on, or -1 for a map that hasn't been started.
   final int current;
 
-  static const _xs = [0.12, 0.37, 0.63, 0.88];
-  static const _ys = [0.66, 0.34, 0.66, 0.34];
+  // Spread the stops evenly along a wandering path, however many there are.
+  double _x(int i) => steps.length < 2 ? 0.5 : 0.1 + 0.8 * i / (steps.length - 1);
+  double _y(int i) => i.isEven ? 0.66 : 0.34;
 
   @override
   Widget build(BuildContext context) {
@@ -304,7 +314,7 @@ class _MapArt extends StatelessWidget {
           aspectRatio: 2.4,
           child: LayoutBuilder(builder: (context, box) {
             final w = box.maxWidth, h = box.maxHeight;
-            Offset at(int i) => Offset(_xs[i] * w, _ys[i] * h);
+            Offset at(int i) => Offset(_x(i) * w, _y(i) * h);
             return Stack(
               children: [
                 Positioned.fill(child: CustomPaint(painter: _MapPainter([for (var i = 0; i < steps.length; i++) at(i)], current))),
@@ -410,4 +420,40 @@ class _MapPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_MapPainter old) => old.current != current || old.points != points;
+}
+
+/// Picks which open region to set out for. Regions that are not open yet say
+/// which level opens them; nothing is ever lost by choosing an easier one.
+class _RegionPicker extends ConsumerWidget {
+  const _RegionPicker({required this.level, required this.selected});
+
+  final int level;
+  final int selected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: [
+        for (final r in Difficulty.regions)
+          Semantics(
+            label: Difficulty.isOpen(r.tier, level)
+                ? '${r.name}. ${r.tier == selected ? 'Chosen.' : 'Tap to choose.'}'
+                : '${r.name}. Opens at level ${r.minLevel}.',
+            child: ExcludeSemantics(
+              child: ChoiceChip(
+                key: Key('region_${r.tier}'),
+                label: Text(
+                  Difficulty.isOpen(r.tier, level) ? '${r.tier}' : '${r.tier}  Lv ${r.minLevel}',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                selected: r.tier == selected,
+                onSelected: Difficulty.isOpen(r.tier, level) ? (_) => ref.read(selectedRegionProvider.notifier).select(r.tier) : null,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/database.dart';
 import '../data/repository.dart';
 import '../domain/cosmetics.dart';
+import '../domain/difficulty.dart';
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/patronage.dart';
@@ -107,6 +108,21 @@ final heroLookProvider = Provider<HeroLook?>((ref) {
     dye: ctx == null ? null : Cosmetics.wornDye(h.hairDye, ctx),
   );
 });
+
+/// Which region the player has picked on the Adventure screen, or null for the
+/// toughest one that is open. A region that is not open yet is never used.
+class SelectedRegionNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void select(int tier) => state = tier;
+}
+
+final selectedRegionProvider = NotifierProvider<SelectedRegionNotifier, int?>(SelectedRegionNotifier.new);
+
+/// The region an expedition would set out for at [heroLevel].
+int regionFor(int? selected, int heroLevel) =>
+    selected != null && Difficulty.isOpen(selected, heroLevel) ? selected : Difficulty.tierFor(heroLevel);
 
 final activeExpeditionProvider = StreamProvider<ExpeditionProgress?>(
     (ref) => ref.watch(repositoryProvider).watchActiveExpedition());

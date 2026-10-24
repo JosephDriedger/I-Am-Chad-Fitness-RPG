@@ -1,7 +1,9 @@
-/// Seeded expeditions: a short sequence of battles and events.
+/// Seeded expeditions: a short sequence of battles and events in one of five
+/// regions, each tougher than the last. See docs/COMBAT_AND_EXPEDITIONS.md.
 library;
 
 import 'combat.dart';
+import 'difficulty.dart';
 import 'hero.dart';
 import 'items.dart';
 import 'rng.dart';
@@ -14,6 +16,8 @@ class EnemyTemplate {
     required this.attack,
     required this.defense,
     this.boss = false,
+    this.tier = 1,
+    this.behavior = EnemyBehavior.standard,
   });
 
   final String name;
@@ -25,18 +29,32 @@ class EnemyTemplate {
   final double defense;
   final bool boss;
 
-  Combatant build(int heroLevel) => Combatant.fresh(
-        name: name,
-        maxHp: (Progression.maxHp(heroLevel) * hp).round(),
-        attack: (Progression.attack(heroLevel) * attack).round(),
-        defense: (Progression.defense(heroLevel) * defense).round(),
-      );
+  /// The region this enemy belongs to (1 to 5).
+  final int tier;
+
+  /// How it picks its moves: whether it braces, mends, strikes twice, or gets
+  /// fired up. The move it picks is always shown first.
+  final EnemyBehavior behavior;
+
+  /// The enemy as met in a region of [tier]: its own build, scaled by the
+  /// hero's level and then by how tough that region is.
+  Combatant build(int heroLevel, {int? tier}) {
+    final r = Difficulty.region(tier ?? this.tier);
+    return Combatant.fresh(
+      name: name,
+      maxHp: (Progression.maxHp(heroLevel) * hp * r.hpScale).round(),
+      attack: (Progression.attack(heroLevel) * attack * r.attackScale).round(),
+      defense: (Progression.defense(heroLevel) * defense * r.defenseScale).round(),
+      behavior: behavior,
+    );
+  }
 }
 
 class EnemyPool {
   const EnemyPool._();
 
   static const regular = <EnemyTemplate>[
+    // ---- Meadowmere (region 1) ------------------------------------------------
     EnemyTemplate(
       name: 'Snooze Slime',
       blurb: 'Soft, sleepy, and very bouncy.',
@@ -79,9 +97,126 @@ class EnemyPool {
       attack: 0.65,
       defense: 0.6,
     ),
+
+    // ---- The Gullhaven Coast (region 2) ---------------------------------------
+    EnemyTemplate(
+      name: 'Sand Crab',
+      blurb: 'Walks sideways, argues forwards.',
+      hp: 0.7,
+      attack: 0.7,
+      defense: 1.0,
+      tier: 2,
+      behavior: EnemyBehavior(heavy: 0.15, brace: 0.25),
+    ),
+    EnemyTemplate(
+      name: 'Tide Jelly',
+      blurb: 'Wobbles. Glows. Heals when nobody is looking.',
+      hp: 0.8,
+      attack: 0.6,
+      defense: 0.6,
+      tier: 2,
+      behavior: EnemyBehavior(heavy: 0.15, mend: 0.25),
+    ),
+    EnemyTemplate(
+      name: 'Gull Bandit',
+      blurb: 'Steals chips. Has never once been caught.',
+      hp: 0.55,
+      attack: 0.8,
+      defense: 0.6,
+      tier: 2,
+      behavior: EnemyBehavior(heavy: 0.1, flurry: 0.3),
+    ),
+
+    // ---- The Glimmer Caverns (region 3) ---------------------------------------
+    EnemyTemplate(
+      name: 'Crystal Beetle',
+      blurb: 'Polishes its shell. Sparkles at you aggressively.',
+      hp: 0.85,
+      attack: 0.75,
+      defense: 1.05,
+      tier: 3,
+      behavior: EnemyBehavior(heavy: 0.15, brace: 0.3),
+    ),
+    EnemyTemplate(
+      name: 'Glowcap Shroom',
+      blurb: 'Lights up when it is feeling better.',
+      hp: 0.9,
+      attack: 0.65,
+      defense: 0.7,
+      tier: 3,
+      behavior: EnemyBehavior(heavy: 0.15, mend: 0.3),
+    ),
+    EnemyTemplate(
+      name: 'Echo Bat',
+      blurb: 'Says everything twice. Hits twice, too.',
+      hp: 0.6,
+      attack: 0.85,
+      defense: 0.65,
+      tier: 3,
+      behavior: EnemyBehavior(heavy: 0.1, flurry: 0.4),
+    ),
+
+    // ---- Frostpeak Pass (region 4) ---------------------------------------------
+    EnemyTemplate(
+      name: 'Frost Sprite',
+      blurb: 'Tiny, fast, and delighted with itself.',
+      hp: 0.65,
+      attack: 0.95,
+      defense: 0.7,
+      tier: 4,
+      behavior: EnemyBehavior(heavy: 0.15, flurry: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Snow Yeti',
+      blurb: 'Big, fluffy and hits very hard when it means it.',
+      hp: 1.0,
+      attack: 0.9,
+      defense: 0.85,
+      tier: 4,
+      behavior: EnemyBehavior(heavy: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Icicle Golem',
+      blurb: 'Cold, stubborn and surprisingly polite.',
+      hp: 1.0,
+      attack: 0.8,
+      defense: 1.15,
+      tier: 4,
+      behavior: EnemyBehavior(heavy: 0.2, brace: 0.3),
+    ),
+
+    // ---- Thunder Heights (region 5) --------------------------------------------
+    EnemyTemplate(
+      name: 'Thunder Cloud',
+      blurb: 'Rumbles twice before it strikes. Sometimes thrice.',
+      hp: 0.9,
+      attack: 1.0,
+      defense: 0.8,
+      tier: 5,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.35),
+    ),
+    EnemyTemplate(
+      name: 'Gale Hawk',
+      blurb: 'Rides the wind and does not wait for you.',
+      hp: 0.75,
+      attack: 1.05,
+      defense: 0.8,
+      tier: 5,
+      behavior: EnemyBehavior(heavy: 0.15, flurry: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Static Imp',
+      blurb: 'Crackles. Fizzes. Recovers faster than it should.',
+      hp: 0.8,
+      attack: 0.95,
+      defense: 0.9,
+      tier: 5,
+      behavior: EnemyBehavior(heavy: 0.2, brace: 0.2, mend: 0.2),
+    ),
   ];
 
   static const bosses = <EnemyTemplate>[
+    // ---- Meadowmere -------------------------------------------------------------
     EnemyTemplate(
       name: 'Grumbling Treant',
       blurb: 'An ancient tree with strong opinions.',
@@ -98,10 +233,114 @@ class EnemyPool {
       defense: 0.9,
       boss: true,
     ),
+
+    // ---- The Gullhaven Coast ----------------------------------------------------
+    EnemyTemplate(
+      name: 'Captain Barnacle',
+      blurb: 'A very old crab in a very large hat.',
+      hp: 1.15,
+      attack: 0.8,
+      defense: 1.05,
+      boss: true,
+      tier: 2,
+      behavior: EnemyBehavior(heavy: 0.25, brace: 0.2, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'The Gull King',
+      blurb: 'Rules the harbour mostly by volume.',
+      hp: 1.0,
+      attack: 0.9,
+      defense: 0.85,
+      boss: true,
+      tier: 2,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.35, enrageBelow: 0.35),
+    ),
+
+    // ---- The Glimmer Caverns ----------------------------------------------------
+    EnemyTemplate(
+      name: 'Crystal Colossus',
+      blurb: 'Has been standing here since before it was cool.',
+      hp: 1.3,
+      attack: 0.85,
+      defense: 1.15,
+      boss: true,
+      tier: 3,
+      behavior: EnemyBehavior(heavy: 0.25, brace: 0.2, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Mother Glowcap',
+      blurb: 'Looks after every mushroom in the cave. Fiercely.',
+      hp: 1.25,
+      attack: 0.8,
+      defense: 0.9,
+      boss: true,
+      tier: 3,
+      behavior: EnemyBehavior(heavy: 0.2, mend: 0.3, enrageBelow: 0.35),
+    ),
+
+    // ---- Frostpeak Pass -----------------------------------------------------------
+    EnemyTemplate(
+      name: 'The Avalanche Matron',
+      blurb: 'Large, loud, and deeply fond of her mountain.',
+      hp: 1.4,
+      attack: 0.95,
+      defense: 1.0,
+      boss: true,
+      tier: 4,
+      behavior: EnemyBehavior(heavy: 0.35, brace: 0.15, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Old Man Winter',
+      blurb: 'Has been grumpy since before the mountains.',
+      hp: 1.3,
+      attack: 1.0,
+      defense: 0.95,
+      boss: true,
+      tier: 4,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.25, mend: 0.15, enrageBelow: 0.4),
+    ),
+
+    // ---- Thunder Heights ------------------------------------------------------------
+    EnemyTemplate(
+      name: 'The Thunderhead',
+      blurb: 'The weather, but with opinions.',
+      hp: 1.5,
+      attack: 1.05,
+      defense: 1.0,
+      boss: true,
+      tier: 5,
+      behavior: EnemyBehavior(heavy: 0.3, flurry: 0.2, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Stormcaller Skarn',
+      blurb: 'A very small wizard with a very large storm.',
+      hp: 1.4,
+      attack: 1.1,
+      defense: 1.05,
+      boss: true,
+      tier: 5,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.25, brace: 0.15, mend: 0.1, enrageBelow: 0.45),
+    ),
   ];
+
+  /// The ordinary enemies met in a region of [tier]: its own, plus the ones from
+  /// the region before, for variety. Never an enemy from a tougher region.
+  static List<EnemyTemplate> regularFor(int tier) => [
+        for (final e in regular)
+          if (e.tier == tier || (tier > 1 && e.tier == tier - 1)) e,
+      ];
+
+  /// The bosses of a region of [tier].
+  static List<EnemyTemplate> bossesFor(int tier) => [
+        for (final e in bosses)
+          if (e.tier == tier) e,
+      ];
+
+  /// Every enemy there is.
+  static List<EnemyTemplate> get everyone => [...regular, ...bosses];
 }
 
-enum EventKind { restock, rest, treasure }
+enum EventKind { restock, rest, treasure, bard, spring }
 
 class ExpeditionEvent {
   const ExpeditionEvent(this.kind, this.title, this.text);
@@ -127,7 +366,21 @@ class ExpeditionEvent {
       'Chad\'s "Secret" Stash',
       'Chad insists he buried this here years ago. There are coins inside.',
     ),
+    ExpeditionEvent(
+      EventKind.bard,
+      'A Wandering Bard',
+      'A cheerful bard plays a tune that gets your blood pumping. You start the '
+          'next fight with focus to spare.',
+    ),
+    ExpeditionEvent(
+      EventKind.spring,
+      'A Quiet Spring',
+      'Cool, clear water. You sit by it a while and feel a good deal better.',
+    ),
   ];
+
+  /// The first region only meets the original three; later ones add the rest.
+  static List<ExpeditionEvent> poolFor(int tier) => tier <= 1 ? all.sublist(0, 3) : all;
 }
 
 enum StepKind { battle, event }
@@ -145,53 +398,71 @@ class ExpeditionStep {
   final ExpeditionEvent? event;
 }
 
+/// The order of an expedition's steps: `b` a battle, `e` a camp, `B` the boss.
+/// Later regions add a battle or two, but never more than six steps.
+String _shapeFor(int tier) => switch (tier) {
+      <= 2 => 'beb' 'B',
+      3 => 'bebb' 'B',
+      4 => 'bbeb' 'B',
+      _ => 'bbebe' 'B',
+    };
+
 class Expedition {
   const Expedition({
     required this.seed,
     required this.heroLevel,
     required this.steps,
     required this.lootItemId,
+    this.tier = 1,
   });
 
   /// Energy cost to start a reward-bearing expedition.
   static const int energyCost = 2;
 
-  /// Coins from the free practice battle (no XP, no energy).
-  static const int practiceCoins = 3;
-
   final int seed;
   final int heroLevel;
   final List<ExpeditionStep> steps;
+
+  /// The region, 1 to 5. Decides the enemies, the scenery, the loot and how
+  /// tough everything is.
+  final int tier;
 
   /// Item granted on victory (a duplicate converts to coins in the UI layer).
   final String lootItemId;
 
   int get battleCount => steps.where((s) => s.kind == StepKind.battle).length;
 
-  /// Same seed + level always yields the same expedition.
-  factory Expedition.generate({required int seed, required int heroLevel}) {
+  Region get region => Difficulty.region(tier);
+
+  /// Same seed + level + region always yields the same expedition. With no
+  /// [tier] it is the toughest region open at [heroLevel].
+  factory Expedition.generate({required int seed, required int heroLevel, int? tier}) {
+    final t = (tier ?? Difficulty.tierFor(heroLevel)).clamp(1, Difficulty.maxTier);
     final rng = GameRng(seed);
-    final regular = rng.shuffle([...EnemyPool.regular]);
-    final boss = EnemyPool.bosses[rng.nextInt(EnemyPool.bosses.length)];
-    final event = ExpeditionEvent.all[rng.nextInt(ExpeditionEvent.all.length)];
-    final loot = ItemCatalog.all[rng.nextInt(ItemCatalog.all.length)];
-    return Expedition(
-      seed: seed,
-      heroLevel: heroLevel,
-      lootItemId: loot.id,
-      steps: [
-        ExpeditionStep.battle(regular[0]),
-        ExpeditionStep.event(event),
-        ExpeditionStep.battle(regular[1]),
-        ExpeditionStep.battle(boss),
-      ],
-    );
+    final regulars = rng.shuffle([...EnemyPool.regularFor(t)]);
+    final bosses = EnemyPool.bossesFor(t);
+    final boss = bosses[rng.nextInt(bosses.length)];
+    final events = rng.shuffle([...ExpeditionEvent.poolFor(t)]);
+    final loot = ItemCatalog.lootFor(t, rng);
+
+    var nextRegular = 0, nextEvent = 0;
+    final steps = <ExpeditionStep>[];
+    for (final c in _shapeFor(t).split('')) {
+      steps.add(switch (c) {
+        'b' => ExpeditionStep.battle(regulars[nextRegular++]),
+        'e' => ExpeditionStep.event(events[nextEvent++]),
+        _ => ExpeditionStep.battle(boss),
+      });
+    }
+    return Expedition(seed: seed, heroLevel: heroLevel, lootItemId: loot.id, steps: steps, tier: t);
   }
 
-  /// A single relaxed duel in the guild yard: free, no XP, pocket change only.
+  /// A single relaxed duel in the guild yard: free, pays nothing, and always
+  /// against the gentle enemies of the first region.
   factory Expedition.practice({required int seed, required int heroLevel}) {
     final rng = GameRng(seed);
-    final foe = EnemyPool.regular[rng.nextInt(EnemyPool.regular.length)];
+    final pool = EnemyPool.regularFor(1);
+    final foe = pool[rng.nextInt(pool.length)];
     return Expedition(
       seed: seed,
       heroLevel: heroLevel,
@@ -200,13 +471,25 @@ class Expedition {
     );
   }
 
-  static int xpForBattle(EnemyTemplate e) => e.boss ? 30 : 15;
-  static int coinsForBattle(EnemyTemplate e) => e.boss ? 12 : 5;
+  /// XP for a won battle: the usual 15 (30 for a boss), plus a bonus that grows
+  /// with the region.
+  static int xpForBattle(EnemyTemplate e, {int tier = 1}) =>
+      (e.boss ? 30 : 15) + Difficulty.region(tier).xpBonus * (e.boss ? 2 : 1);
+
+  static int coinsForBattle(EnemyTemplate e, {int tier = 1}) =>
+      (e.boss ? 12 : 5) + Difficulty.region(tier).coinBonus * (e.boss ? 2 : 1);
+
+  /// What a duplicate piece of gear is worth in coins.
+  static int duplicateCoins(int tier) => 10 * tier.clamp(1, Difficulty.maxTier);
+
+  /// What the camp's hidden stash holds.
+  static int stashCoins(int tier) => 8 + 4 * (tier.clamp(1, Difficulty.maxTier) - 1);
 }
 
 /// Everything needed to put an expedition back exactly where the player left
-/// it. The expedition itself is regenerated from [seed] and [heroLevel], so
-/// only the run's state is stored. It is saved at the start of every step.
+/// it. The expedition itself is regenerated from [seed], [heroLevel] and the
+/// region, so only the run's state is stored. It is saved at the start of every
+/// step.
 class ExpeditionProgress {
   const ExpeditionProgress({
     required this.seed,
@@ -217,6 +500,8 @@ class ExpeditionProgress {
     required this.battlesWon,
     required this.xp,
     required this.coins,
+    this.tier = 0,
+    this.focus = 0,
   });
 
   final int seed;
@@ -228,14 +513,23 @@ class ExpeditionProgress {
   final int xp;
   final int coins;
 
-  Expedition get expedition => Expedition.generate(seed: seed, heroLevel: heroLevel);
+  /// The region, or 0 for a run saved before regions existed, which was the
+  /// toughest region open at its level.
+  final int tier;
 
-  /// The very start of a new expedition.
+  /// Focus the hero starts the next battle with (a bard's gift).
+  final int focus;
+
+  Expedition get expedition =>
+      Expedition.generate(seed: seed, heroLevel: heroLevel, tier: tier == 0 ? null : tier);
+
+  /// The very start of a new expedition in [tier].
   factory ExpeditionProgress.fresh({
     required int seed,
     required int heroLevel,
     required int heroMaxHp,
     int potions = 2,
+    int? tier,
   }) =>
       ExpeditionProgress(
         seed: seed,
@@ -246,6 +540,7 @@ class ExpeditionProgress {
         battlesWon: 0,
         xp: 0,
         coins: 0,
+        tier: tier ?? Difficulty.tierFor(heroLevel),
       );
 }
 
@@ -272,6 +567,7 @@ class ExpeditionRun {
       rng: rng,
     )
       ..potions = progress.potions
+      ..focus = progress.focus
       ..stepIndex = progress.stepIndex
       ..battlesWon = progress.battlesWon
       ..xp = progress.xp
@@ -290,6 +586,8 @@ class ExpeditionRun {
         battlesWon: battlesWon,
         xp: xp,
         coins: coins,
+        tier: expedition.tier,
+        focus: focus,
       );
 
   Combatant hero;
@@ -308,7 +606,7 @@ class ExpeditionRun {
 
   /// Starts the battle for the current step.
   BattleState startBattle() {
-    final enemy = current!.enemy!.build(expedition.heroLevel);
+    final enemy = current!.enemy!.build(expedition.heroLevel, tier: expedition.tier);
     return BattleEngine.start(
       player: hero,
       enemy: enemy,
@@ -326,8 +624,8 @@ class ExpeditionRun {
     if (end.phase == BattlePhase.victory) {
       final e = current!.enemy!;
       battlesWon++;
-      xp += Expedition.xpForBattle(e);
-      coins += Expedition.coinsForBattle(e);
+      xp += Expedition.xpForBattle(e, tier: expedition.tier);
+      coins += Expedition.coinsForBattle(e, tier: expedition.tier);
       stepIndex++;
     } else {
       defeated = true;
@@ -343,7 +641,11 @@ class ExpeditionRun {
       case EventKind.rest:
         hero = hero.withHp(hero.hp + (hero.maxHp * 0.4).round());
       case EventKind.treasure:
-        coins += 8;
+        coins += Expedition.stashCoins(expedition.tier);
+      case EventKind.bard:
+        focus = 2;
+      case EventKind.spring:
+        hero = hero.withHp(hero.hp + (hero.maxHp * 0.25).round());
     }
     stepIndex++;
   }

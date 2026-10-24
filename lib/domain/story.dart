@@ -1,4 +1,5 @@
-/// The story: Season One, "The Dawn Bell", and Season Two, "The Lantern Coast".
+/// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast", and
+/// Season Three, "The Weather Chime".
 /// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
@@ -8,6 +9,7 @@
 /// read again. A few choices are remembered and echoed later.
 library;
 
+import 'story_season_three.dart';
 import 'story_season_two.dart';
 
 /// Who is talking. [hero] is the player, who speaks only through choices.
@@ -25,6 +27,12 @@ enum StorySpeaker {
   pip('Pip'),
   wren('Wren'),
   sedge('Sedge'),
+
+  // Season Three, "The Weather Chime".
+  fennel('Fennel'),
+  hush('Hush'),
+  tamsin('Tamsin'),
+  skarn('Skarn'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -51,6 +59,15 @@ enum StoryBackdrop {
   tidePools,
   lighthouse,
   lighthouseNight,
+
+  // Season Three, "The Weather Chime".
+  snowRoad,
+  passHut,
+  iceCave,
+  observatory,
+  stormTop,
+  highCamp,
+  summit,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -155,7 +172,11 @@ class StorySeason {
   /// The [StoryChapter.number] of this season's prologue.
   final int firstChapter;
 
-  String get name => number == 1 ? 'Season One' : 'Season Two';
+  String get name => switch (number) {
+        1 => 'Season One',
+        2 => 'Season Two',
+        _ => 'Season Three',
+      };
 }
 
 class StoryText {
@@ -237,6 +258,12 @@ class Story {
       blurb: 'A light in the west, a long road to the sea, and a keeper who forgot to rest.',
       firstChapter: 8,
     ),
+    StorySeason(
+      number: 3,
+      title: 'The Weather Chime',
+      blurb: 'A pass full of snow, a silent chime, and a long way up that is allowed to take as long as it takes.',
+      firstChapter: 16,
+    ),
   ];
 
   static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
@@ -255,7 +282,7 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters, ...seasonThreeChapters];
 
   static const seasonOne = <StoryChapter>[
     // ---------------------------------------------------------------------------

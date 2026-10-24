@@ -234,6 +234,8 @@ class GameRepository {
             battlesWon: p.battlesWon,
             xp: p.xp,
             coins: p.coins,
+            tier: Value(p.tier),
+            focus: Value(p.focus),
           ),
         );
   }
@@ -247,6 +249,8 @@ class GameRepository {
         battlesWon: r.battlesWon,
         xp: r.xp,
         coins: r.coins,
+        tier: r.tier,
+        focus: r.focus,
       );
 
   /// Persists the result of an expedition, which also ends it (the saved
@@ -259,6 +263,7 @@ class GameRepository {
     required int coins,
     required String lootItemId,
     int potionsLeft = 0,
+    int duplicateCoins = 10,
   }) {
     return _db.transaction(() async {
       var newItem = false;
@@ -274,7 +279,7 @@ class GameRepository {
               ));
           newItem = true;
         } else {
-          bonusCoins = 10; // duplicates convert to coins
+          bonusCoins = duplicateCoins; // duplicates convert to coins
         }
       }
       await _db.into(_db.expeditionRuns).insert(ExpeditionRunsCompanion.insert(

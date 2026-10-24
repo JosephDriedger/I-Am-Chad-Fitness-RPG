@@ -8,6 +8,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/chad.dart';
 import '../../domain/combat.dart';
+import '../../domain/difficulty.dart';
 import '../../domain/expedition.dart';
 import '../../domain/items.dart';
 import '../../domain/rng.dart';
@@ -112,8 +113,17 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
   Biome _biomeFor(EnemyTemplate e) {
     if (widget.practice) return Biome.meadow;
     if (e.boss) return Biome.arena;
-    // Steps are battle, camp, battle, boss: the second battle is in the forest.
-    return _run.stepIndex == 0 ? Biome.meadow : Biome.forest;
+    // The first battle is in the region's opening scenery, later ones in its second.
+    final terrains = _run.expedition.region.terrains;
+    final terrain = terrains[_run.stepIndex <= 1 ? 0 : terrains.length - 1];
+    return switch (terrain) {
+      Terrain.meadow => Biome.meadow,
+      Terrain.forest => Biome.forest,
+      Terrain.coast => Biome.coast,
+      Terrain.cave => Biome.cave,
+      Terrain.peak => Biome.peak,
+      Terrain.storm => Biome.storm,
+    };
   }
 
   /// Starts whatever comes next in the run.
@@ -174,9 +184,8 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     if (_saved) return;
     _saved = true;
     final repo = ref.read(repositoryProvider);
-    if (widget.practice) {
-      if (_run.victory) await repo.addCoins(Expedition.practiceCoins);
-    } else {
+    // Practice duels pay nothing, so there is nothing to save for them.
+    if (!widget.practice) {
       _lootWasNew = await repo.recordExpedition(
         seed: widget.seed,
         victory: _run.victory,
@@ -184,6 +193,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
         xp: _run.xp,
         coins: _run.coins,
         lootItemId: _run.expedition.lootItemId,
+        duplicateCoins: Expedition.duplicateCoins(_run.expedition.tier),
         potionsLeft: _run.potions,
       );
     }
@@ -229,7 +239,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     final kind = _run.current!.event!.kind;
     setState(() => _busy = true);
     _run.resolveEvent();
-    await _scene.applyEvent(kind, heroHp: _run.hero.hp);
+    await _scene.applyEvent(
+      kind,
+      heroHp: _run.hero.hp,
+      stash: Expedition.stashCoins(_run.expedition.tier),
+    );
     if (mounted) await _beginStep();
   }
 
@@ -382,9 +396,13 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     );
   }
 
-  String _intentLine(BattleState b, bool heavy) => heavy
-      ? '${b.enemy.name} is winding up a heavy blow. Guarding will soften it.'
-      : '${b.enemy.name} is about to strike.';
+  String _intentLine(BattleState b, bool heavy) => switch (b.intent) {
+        EnemyMove.windUp => '${b.enemy.name} is winding up a heavy blow. Guarding will soften it.',
+        EnemyMove.flurry => '${b.enemy.name} is getting ready to strike twice. Guarding halves both blows.',
+        EnemyMove.brace => '${b.enemy.name} is bracing. A big hit will land softly, so build focus or guard.',
+        EnemyMove.mend => '${b.enemy.name} is about to mend. Hit it now while you can.',
+        EnemyMove.strike => '${b.enemy.name} is about to strike.',
+      };
 
   Widget _overPanel(BuildContext context) {
     final b = _battle!;
@@ -396,8 +414,8 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(won
-            ? 'Rewards from this battle: +${Expedition.xpForBattle(_foe!)} XP, '
-                '+${Expedition.coinsForBattle(_foe!)} Coins.'
+            ? 'Rewards from this battle: +${Expedition.xpForBattle(_foe!, tier: _run.expedition.tier)} XP, '
+                '+${Expedition.coinsForBattle(_foe!, tier: _run.expedition.tier)} Coins.'
             : 'Rewards from battles already won are kept.'),
         const SizedBox(height: 12),
         GameButton(
@@ -425,7 +443,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
           switch (ev.kind) {
             EventKind.restock => '+1 Potion',
             EventKind.rest => 'Recover 40% of your max HP',
-            EventKind.treasure => '+8 Coins',
+            EventKind.treasure => '+${Expedition.stashCoins(_run.expedition.tier)} Coins',
+            EventKind.bard => 'Start the next fight with 2 focus',
+            EventKind.spring => 'Recover 25% of your max HP',
           },
           style: t.labelLarge,
         ),
@@ -460,16 +480,14 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
         )),
         const SizedBox(height: 8),
         if (widget.practice)
-          Text(victory
-              ? '+${Expedition.practiceCoins} Coins'
-              : 'No coins this time. Practice is free, so try again whenever you like.')
+          const Text('Practice has no rewards. Try again whenever you like.')
         else ...[
           Text('Battles Won: ${_run.battlesWon}   +${_run.xp} XP   +${_run.coins} Coins'),
           if (victory && loot != null)
             Text(
               _lootWasNew
                   ? 'New Equipment: ${loot.name} (${loot.bonusLabel})'
-                  : 'You already own ${loot.name}, so it became 10 coins.',
+                  : 'You already own ${loot.name}, so it became ${Expedition.duplicateCoins(_run.expedition.tier)} coins.',
               style: t.titleSmall,
             ),
         ],

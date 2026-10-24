@@ -210,6 +210,10 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     StorySpeaker.pip => const Color(0xFFD9822B),
     StorySpeaker.wren => const Color(0xFF2F5F9E),
     StorySpeaker.sedge => const Color(0xFF6B8E4E),
+    StorySpeaker.fennel => const Color(0xFFC62828),
+    StorySpeaker.hush => const Color(0xFF8D6E63),
+    StorySpeaker.tamsin => const Color(0xFF4F6285),
+    StorySpeaker.skarn => const Color(0xFF5C5CB5),
     _ => GameColors.wood,
   };
 

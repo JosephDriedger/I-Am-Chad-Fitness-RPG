@@ -8,6 +8,7 @@ import 'dart:ui';
 
 import '../../domain/story.dart';
 import '../look.dart';
+import 'enemy_art.dart';
 import 'painters.dart';
 
 // ---------------------------------------------------------------------------
@@ -153,6 +154,175 @@ void paintSedge(Canvas c, ActorState s) {
 void paintPip(Canvas c, ActorState s) =>
     paintHero(c, const HeroLook(style: 4, color: 2, skin: 3), s);
 
+/// Fennel, the mountain courier: a teal jacket, a long red scarf that never
+/// quite stops moving, a satchel with a letter sticking out, and a bounce in
+/// the step even when standing still.
+void paintFennel(Canvas c, ActorState s) {
+  final bounce = math.sin(s.time * 5).abs() * 2.2;
+  final flutter = math.sin(s.time * 3.2) * 4;
+  const jacket = Color(0xFF2E8B83);
+  const skin = Color(0xFFD9A074);
+  shadow(c, 14);
+  c.save();
+  c.translate(0, -bounce);
+  // Legs and boots.
+  rrect(c, -7, -22, 5.5, 18, 2, const Color(0xFF4E5D78));
+  rrect(c, 1.5, -22, 5.5, 18, 2, const Color(0xFF4E5D78));
+  rrect(c, -9, -6, 9, 6, 2, const Color(0xFF3E2723));
+  rrect(c, 0, -6, 9, 6, 2, const Color(0xFF3E2723));
+  // Jacket, arms, and the satchel on its strap.
+  rrect(c, -13, -60, 26, 40, 8, jacket);
+  rrect(c, -18, -56, 6, 22, 3, jacket);
+  rrect(c, 12, -56, 6, 22, 3, jacket);
+  circle(c, -15, -32, 3.8, skin);
+  circle(c, 15, -32, 3.8, skin);
+  line(c, -11, -58, 10, -28, 3.2, const Color(0xFF6D4326));
+  rrect(c, 6, -36, 15, 12, 3, const Color(0xFF8D5E3C));
+  rrect(c, 6, -36, 15, 4, 2, const Color(0xFF6D4326));
+  rrect(c, 9, -41, 9, 7, 1, const Color(0xFFFFF3D6));
+  // The scarf, with its tail in the wind.
+  rrect(c, -11, -66, 22, 8, 4, const Color(0xFFC62828));
+  strokePath(c, Path()..moveTo(-8, -62)..quadraticBezierTo(-20, -58 + flutter, -30, -64 + flutter * 1.4), 5, const Color(0xFFC62828));
+  // Head, short dark hair and a cap with a feather.
+  circle(c, 0, -75, 12.5, skin);
+  oval(c, 0, -82, 13, 7, const Color(0xFF2B1D14));
+  rrect(c, -14, -86, 28, 7, 3.5, jacket);
+  rrect(c, 4, -81, 13, 3.5, 1.7, shade(jacket, -0.12));
+  strokePath(c, Path()..moveTo(-9, -86)..quadraticBezierTo(-12, -98, -4, -100), 2.2, const Color(0xFFF2C94C));
+  circle(c, -4.5, -74, 1.5, const Color(0xFF2B1D14));
+  circle(c, 4.5, -74, 1.5, const Color(0xFF2B1D14));
+  strokePath(c, Path()..moveTo(-4, -68)..quadraticBezierTo(0, -64.5, 4, -68), 1.4, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
+/// Hush, who keeps the hut at the snow line: a big, soft yeti in a knitted
+/// scarf, holding a steaming mug.
+void paintHush(Canvas c, ActorState s) {
+  paintYeti(c, s, fur: const Color(0xFFEFE6D8));
+  final breathe = math.sin(s.time * 1.8) * 1.4;
+  c.save();
+  c.translate(0, breathe);
+  // The scarf at the neck, striped.
+  rrect(c, -15, -56, 30, 8, 4, const Color(0xFFB23A3A));
+  for (var i = 0; i < 4; i++) {
+    rrect(c, -12 + i * 7.5, -56, 3.2, 8, 1.5, const Color(0xFFF2C94C));
+  }
+  // The mug, held in the right hand, with a thread of steam.
+  rrect(c, 29, -34, 11, 12, 2.5, const Color(0xFFFFF3D6));
+  rrect(c, 37, -31, 5, 6, 2.5, const Color(0xFFFFF3D6));
+  rrect(c, 31, -32, 7, 3, 1.5, const Color(0xFF6D4326));
+  final sway = math.sin(s.time * 2.2) * 2;
+  strokePath(c, Path()..moveTo(33, -38)..quadraticBezierTo(30 + sway, -46, 34, -52), 1.4, const Color(0x88FFFFFF));
+  strokePath(c, Path()..moveTo(37, -38)..quadraticBezierTo(41 - sway, -45, 37, -51), 1.4, const Color(0x66FFFFFF));
+  c.restore();
+}
+
+/// Tamsin Vale, the Weatherkeeper of Thunder Heights: a long storm-blue coat,
+/// round brass goggles pushed up into silver hair, and a walking staff.
+void paintTamsin(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 1.5) * 0.7;
+  const coat = Color(0xFF4F6285);
+  const skin = Color(0xFFC98F67);
+  shadow(c, 16);
+  c.save();
+  c.translate(0, bob);
+  // The staff.
+  line(c, 19, -4, 20, -86, 3.2, const Color(0xFF6D4326));
+  circle(c, 20, -88, 4, const Color(0xFFB87D2E));
+  // Boots and the long coat.
+  rrect(c, -9, -6, 8, 6, 2, const Color(0xFF3E2723));
+  rrect(c, 1, -6, 8, 6, 2, const Color(0xFF3E2723));
+  rrect(c, -15, -62, 30, 56, 9, coat);
+  rrect(c, -1.5, -62, 3, 56, 1, shade(coat, -0.1));
+  for (final y in const [-52.0, -42.0, -32.0]) {
+    circle(c, 6, y, 1.7, const Color(0xFFE6B83C));
+  }
+  // Arms, the near hand on the staff, a mustard scarf, and a thermos.
+  rrect(c, -20, -58, 7, 26, 3.5, coat);
+  rrect(c, 13, -58, 7, 26, 3.5, coat);
+  circle(c, -16.5, -31, 4, skin);
+  circle(c, 19, -40, 4, skin);
+  rrect(c, -24, -38, 7, 14, 3, const Color(0xFF90A4AE));
+  rrect(c, -24, -41, 7, 4, 2, const Color(0xFFB23A3A));
+  rrect(c, -13, -66, 26, 7, 3.5, const Color(0xFFD9A441));
+  // Head, silver hair in a braid, and the goggles up on the forehead.
+  circle(c, 0, -76, 12.5, skin);
+  oval(c, 0, -82, 13.5, 8, const Color(0xFFC9D0D8));
+  line(c, -10, -76, -13, -58, 3.4, const Color(0xFFC9D0D8));
+  rrect(c, -13, -88, 26, 4, 2, const Color(0xFF6D4326));
+  circle(c, -6, -86, 5, const Color(0xFFB87D2E));
+  circle(c, 6, -86, 5, const Color(0xFFB87D2E));
+  circle(c, -6, -86, 3.2, const Color(0xCCCFE6F5));
+  circle(c, 6, -86, 3.2, const Color(0xCCCFE6F5));
+  circle(c, -4.5, -75, 1.5, const Color(0xFF2B1D14));
+  circle(c, 4.5, -75, 1.5, const Color(0xFF2B1D14));
+  strokePath(c, Path()..moveTo(-4, -69)..quadraticBezierTo(0, -66, 4, -69), 1.4, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
+/// Skarn, a very small wizard with a very large storm: a pointed hat that
+/// droops, a robe of stars, and his own little thundercloud following him.
+void paintSkarn(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 2.1).abs() * 1.2;
+  final flash = (math.sin(s.time * 2.3) + math.sin(s.time * 3.9)) > 1.55;
+  shadow(c, 12);
+  c.save();
+  c.translate(0, -bob);
+  const robe = Color(0xFF3F3F8F);
+  // Boots, and the robe with a few stars on it.
+  rrect(c, -8, -5, 7, 5, 2, const Color(0xFF2B1D14));
+  rrect(c, 1, -5, 7, 5, 2, const Color(0xFF2B1D14));
+  c.drawPath(
+    Path()
+      ..moveTo(-9, -36)
+      ..quadraticBezierTo(-15, -8, -13, -4)
+      ..lineTo(13, -4)
+      ..quadraticBezierTo(15, -8, 9, -36)
+      ..close(),
+    Paint()..color = robe,
+  );
+  for (final p in const [Offset(-5, -18), Offset(4, -26), Offset(6, -12), Offset(-3, -30)]) {
+    circle(c, p.dx, p.dy, 1.4, const Color(0xFFFFE082));
+  }
+  rrect(c, -14, -32, 5, 14, 2.5, robe);
+  rrect(c, 9, -32, 5, 14, 2.5, robe);
+  circle(c, -11.5, -17, 3, const Color(0xFFE8B98E));
+  circle(c, 11.5, -17, 3, const Color(0xFFE8B98E));
+  // Head, a grey beard, and the drooping hat.
+  circle(c, 0, -43, 8.5, const Color(0xFFE8B98E));
+  c.drawPath(
+    Path()
+      ..moveTo(-7, -40)
+      ..quadraticBezierTo(0, -22, 7, -40)
+      ..quadraticBezierTo(0, -35, -7, -40)
+      ..close(),
+    Paint()..color = const Color(0xFFD7DCE2),
+  );
+  circle(c, -3, -44, 1.2, const Color(0xFF2B1D14));
+  circle(c, 3, -44, 1.2, const Color(0xFF2B1D14));
+  oval(c, 0, -49, 12, 3, robe);
+  c.drawPath(
+    Path()
+      ..moveTo(-7, -50)
+      ..quadraticBezierTo(0, -68, 9, -62)
+      ..quadraticBezierTo(2, -60, 7, -50)
+      ..close(),
+    Paint()..color = robe,
+  );
+  // His own small storm, hanging just over the hat.
+  final cx = 2 + math.sin(s.time * 1.1) * 3;
+  _cloud(c, cx, -72, 15, flash ? const Color(0xFF8D93B8) : const Color(0xFF4E5273));
+  if (flash) {
+    fillPath(c, poly([cx - 2, -68, cx + 4, -68, cx, -61, cx + 5, -61, cx - 3, -50, cx - 1, -58, cx - 5, -58]), const Color(0xFFFFEE58));
+  } else {
+    for (var i = 0; i < 3; i++) {
+      final fall = (s.time * 18 + i * 9) % 18;
+      line(c, cx - 7 + i * 7, -66 + fall, cx - 8 + i * 7, -62 + fall, 1.2, const Color(0x889FC3E8));
+    }
+  }
+  c.restore();
+}
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -181,6 +351,14 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintWren(c, s);
     case StorySpeaker.sedge:
       paintSedge(c, s);
+    case StorySpeaker.fennel:
+      paintFennel(c, s);
+    case StorySpeaker.hush:
+      paintHush(c, s);
+    case StorySpeaker.tamsin:
+      paintTamsin(c, s);
+    case StorySpeaker.skarn:
+      paintSkarn(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -200,6 +378,10 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.pip => 0.82,
       StorySpeaker.wren => 1.0,
       StorySpeaker.sedge => 1.2,
+      StorySpeaker.fennel => 1.0,
+      StorySpeaker.hush => 0.95,
+      StorySpeaker.tamsin => 1.0,
+      StorySpeaker.skarn => 1.35,
       _ => 1.0,
     };
 
@@ -430,6 +612,61 @@ void _lighthouse(Canvas c, double cx, double baseY, double height, double time, 
         Paint()..color = const Color(0x22FFF3C4),
       );
     }
+  }
+}
+
+/// A mountain: a triangle from [baseY] up to [h], with a ragged snow cap.
+void _peak(Canvas c, double cx, double baseY, double w, double h, Color rock, Color snow) {
+  fillPath(c, poly([cx - w / 2, baseY, cx, baseY - h, cx + w / 2, baseY]), rock);
+  final capY = baseY - h * 0.68;
+  final half = w / 2 * (1 - 0.68);
+  fillPath(
+    c,
+    poly([
+      cx - half, capY,
+      cx - half * 0.45, capY + h * 0.06,
+      cx - half * 0.1, capY - h * 0.01,
+      cx + half * 0.35, capY + h * 0.07,
+      cx + half, capY,
+      cx, baseY - h,
+    ]),
+    snow,
+  );
+}
+
+/// A snowy pine: stacked boughs on a short trunk.
+void _pine(Canvas c, double x, double groundY, double h, Color bough, Color snow) {
+  rrect(c, x - h * 0.05, groundY - h * 0.2, h * 0.1, h * 0.2, 1, const Color(0xFF4E342E));
+  for (var i = 0; i < 3; i++) {
+    final w = h * (0.34 - i * 0.07);
+    final y = groundY - h * (0.16 + i * 0.27);
+    fillPath(c, poly([x - w, y, x, y - h * 0.4, x + w, y]), bough);
+    fillPath(c, poly([x - w * 0.55, y - h * 0.14, x, y - h * 0.4, x + w * 0.55, y - h * 0.14]), snow);
+  }
+}
+
+/// The Weather Chime: an iron arch hung with seven bells of falling size. With
+/// [sway] at 0 they hang still, as they have for two winters.
+void _chimeRing(Canvas c, double cx, double topY, double span, double time, {double sway = 0}) {
+  final arch = Rect.fromCenter(center: Offset(cx, topY + span * 0.5), width: span * 2, height: span);
+  c.drawArc(
+    arch,
+    math.pi,
+    math.pi,
+    false,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 5
+      ..color = const Color(0xFF455A64),
+  );
+  line(c, cx - span, topY + span * 0.5, cx - span, topY + span * 1.7, 5, const Color(0xFF455A64));
+  line(c, cx + span, topY + span * 0.5, cx + span, topY + span * 1.7, 5, const Color(0xFF455A64));
+  for (var i = 0; i < 7; i++) {
+    final a = math.pi + math.pi * (i + 0.5) / 7;
+    final x = cx + math.cos(a) * span;
+    final y = topY + span * 0.5 + math.sin(a) * span * 0.5;
+    final r = span * (0.1 + 0.025 * (3 - (i - 3).abs()));
+    _bell(c, x, y, r, sway: sway == 0 ? math.sin(time * 0.7 + i) * 0.015 : math.sin(time * 2.4 + i * 0.9) * sway);
   }
 }
 
@@ -692,5 +929,184 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
       for (var i = 0; i < 3; i++) {
         _boat(c, w * (0.6 + i * 0.12), h * (0.66 + (i % 2) * 0.04), w * 0.025, time, const Color(0xFFE8E2D6));
       }
+    case StoryBackdrop.snowRoad:
+      // A bright, cold morning on the pass: far peaks, pines and a trodden road.
+      _gradient(c, full, const [Color(0xFF8CC3EA), Color(0xFFEAF4FB)]);
+      _cloud(c, w * 0.3, h * 0.15, w * 0.1, const Color(0xE6FFFFFF));
+      _cloud(c, w * 0.8, h * 0.24, w * 0.08, const Color(0xCCFFFFFF));
+      _peak(c, w * 0.18, h * 0.62, w * 0.5, h * 0.42, const Color(0xFF8C9DB5), const Color(0xFFF7FBFF));
+      _peak(c, w * 0.62, h * 0.62, w * 0.62, h * 0.52, const Color(0xFF7A8BA6), const Color(0xFFF7FBFF));
+      _peak(c, w * 0.95, h * 0.62, w * 0.4, h * 0.32, const Color(0xFF8C9DB5), const Color(0xFFF7FBFF));
+      _hill(c, s, h * 0.66, h * 0.025, 0.7, const Color(0xFFDCE8F2));
+      for (final p in const [(0.06, 0.72, 0.3), (0.2, 0.69, 0.22), (0.86, 0.7, 0.26), (0.96, 0.74, 0.34)]) {
+        _pine(c, w * p.$1, h * p.$2, h * p.$3, const Color(0xFF2F5F4A), const Color(0xFFF7FBFF));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFFF2F7FB));
+      c.drawPath(
+        Path()
+          ..moveTo(w * 0.44, h * 0.68)
+          ..lineTo(w * 0.56, h * 0.68)
+          ..lineTo(w * 1.05, h)
+          ..lineTo(-w * 0.05, h)
+          ..close(),
+        Paint()..color = const Color(0xFFD3C8B4),
+      );
+      for (var i = 0; i < 3; i++) {
+        // Drifting snow.
+        final x = (w * (i * 0.37 + time * 0.015)) % w;
+        oval(c, x, h * (0.78 + i * 0.05), w * 0.07, h * 0.012, const Color(0x66FFFFFF));
+      }
+    case StoryBackdrop.passHut:
+      // Inside the hut at the snow line: planks, a glowing stove and a snowy window.
+      _fill(c, full, const Color(0xFF7A5230));
+      for (var x = 0.0; x < w; x += 34) {
+        line(c, x, 0, x, ground, 1.2, const Color(0x22000000));
+      }
+      for (var y = 0.0; y < ground; y += 52) {
+        line(c, 0, y, w, y, 1, const Color(0x14000000));
+      }
+      _window(c, w * 0.62, h * 0.14, w * 0.2, h * 0.34, const Color(0xFFCFE6F5));
+      for (var i = 0; i < 14; i++) {
+        final fall = (time * 14 + i * 23) % (h * 0.34);
+        circle(c, w * 0.63 + (i * 17.0) % (w * 0.18), h * 0.14 + fall, 1.3, const Color(0xFFFFFFFF));
+      }
+      // A shelf of mugs.
+      rrect(c, w * 0.08, h * 0.3, w * 0.34, 6, 2, const Color(0xFF4E342E));
+      for (var i = 0; i < 5; i++) {
+        rrect(c, w * (0.1 + i * 0.065), h * 0.3 - 16, 14, 16, 3, i.isEven ? const Color(0xFFFFF3D6) : const Color(0xFFE6B83C));
+      }
+      // The stove, with its door glowing.
+      final glow = 1 + math.sin(time * 7) * 0.08;
+      rrect(c, w * 0.08, h * 0.5, w * 0.2, h * 0.4, 8, const Color(0xFF37474F));
+      rrect(c, w * 0.12, h * 0.6, w * 0.12, h * 0.14, 5, const Color(0xFFFF8F3A));
+      circle(c, w * 0.18, h * 0.67, w * 0.1 * glow, const Color(0x33FFB347));
+      line(c, w * 0.18, h * 0.5, w * 0.18, h * 0.12, 9, const Color(0xFF37474F));
+      // A banner for the hut's one rule.
+      rrect(c, w * 0.4, 0, w * 0.1, h * 0.28, 4, const Color(0xFFFFF3D6));
+      circle(c, w * 0.45, h * 0.11, w * 0.03, const Color(0xFFB23A3A));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF4E342E));
+      oval(c, w * 0.5, ground + 4, w * 0.34, h * 0.03, const Color(0xFF8E2B3B));
+    case StoryBackdrop.iceCave:
+      // A cave of blue ice, with a bright mouth and a voice that comes back.
+      _gradient(c, full, const [Color(0xFF16345A), Color(0xFF4F86AE)]);
+      oval(c, w * 0.5, h * 0.55, w * 0.34, h * 0.4, const Color(0xFF86BCDA));
+      oval(c, w * 0.5, h * 0.58, w * 0.22, h * 0.28, const Color(0xFFD8EEF8));
+      for (var i = 0; i < 13; i++) {
+        final x = w * (i + 0.5) / 13;
+        final len = h * (0.1 + 0.08 * ((i * 7) % 5) / 4);
+        fillPath(c, poly([x - w * 0.025, 0, x, len, x + w * 0.025, 0]), const Color(0xFFBFE3F5));
+      }
+      for (final p in const [(0.08, 0.86, 0.1), (0.2, 0.9, 0.07), (0.82, 0.88, 0.09), (0.94, 0.84, 0.12)]) {
+        final tw = 0.6 + 0.4 * math.sin(time * 2 + p.$1 * 20);
+        fillPath(
+          c,
+          poly([w * p.$1 - w * 0.025, h * p.$2, w * p.$1, h * (p.$2 - p.$3), w * p.$1 + w * 0.025, h * p.$2]),
+          Color.fromRGBO(154, 230, 255, tw),
+        );
+      }
+      // Rings, a voice travelling out and fading.
+      for (var k = 0; k < 3; k++) {
+        final t = ((time * 0.45) + k / 3) % 1.0;
+        c.drawCircle(
+          Offset(w * 0.3, h * 0.42),
+          t * w * 0.34,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+            ..color = Color.fromRGBO(255, 255, 255, (1 - t) * 0.5),
+        );
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF9FC8E0));
+      line(c, w * 0.1, ground + 8, w * 0.4, ground + 8, 1.6, const Color(0x55FFFFFF));
+      line(c, w * 0.55, ground + 14, w * 0.9, ground + 14, 1.6, const Color(0x55FFFFFF));
+    case StoryBackdrop.observatory:
+      // Late light at the foot of the Weatherkeeper's tower and its long stair.
+      _gradient(c, full, const [Color(0xFF6C7A99), Color(0xFFDCD0C2)]);
+      _peak(c, w * 0.85, h * 0.7, w * 0.6, h * 0.5, const Color(0xFF8493AB), const Color(0xFFF1F5FA));
+      _peak(c, w * 0.55, h * 0.7, w * 0.4, h * 0.34, const Color(0xFF93A1B8), const Color(0xFFF1F5FA));
+      // The tower, with a lit slit-window at each landing and a dome on top.
+      final tx = w * 0.26, tw = w * 0.2;
+      rrect(c, tx - tw / 2, h * 0.14, tw, ground - h * 0.14, 4, const Color(0xFF7D8696));
+      for (var y = h * 0.16; y < ground; y += 22) {
+        line(c, tx - tw / 2, y, tx + tw / 2, y, 1, const Color(0x22000000));
+      }
+      oval(c, tx, h * 0.14, tw * 0.62, h * 0.07, const Color(0xFF55627A));
+      for (var i = 0; i < 4; i++) {
+        rrect(c, tx - 3, h * (0.3 + i * 0.15), 6, 16, 2, const Color(0xFFFFD36B));
+      }
+      // The stair, zigzagging up the tower.
+      final stair = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFF9A9FA8);
+      final path = Path()..moveTo(w * 0.52, ground);
+      for (var i = 0; i < 6; i++) {
+        path.lineTo(i.isEven ? tx + tw * 0.4 : w * 0.52, ground - (i + 1) * (ground - h * 0.2) / 6);
+      }
+      c.drawPath(path, stair);
+      for (var i = 0; i < 18; i++) {
+        final fall = (time * 12 + i * 31) % h;
+        circle(c, (i * 53.0) % w, fall, 1.4, const Color(0xCCFFFFFF));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFFE9EFF5));
+    case StoryBackdrop.stormTop:
+      // The top of the heights in a storm, with the Weather Chime hanging silent.
+      _gradient(c, full, const [Color(0xFF1B1836), Color(0xFF4B3F73)]);
+      for (final p in const [(0.2, 0.12, 0.18), (0.55, 0.2, 0.22), (0.85, 0.1, 0.16), (0.4, 0.34, 0.14)]) {
+        _cloud(c, w * p.$1, h * p.$2, w * p.$3, const Color(0xCC2A2547));
+      }
+      final flash = (math.sin(time * 2.1) + math.sin(time * 3.7)) > 1.6;
+      if (flash) {
+        _fill(c, full, const Color(0x22FFF59D));
+        fillPath(c, poly([w * 0.78, h * 0.2, w * 0.82, h * 0.2, w * 0.79, h * 0.4, w * 0.84, h * 0.4, w * 0.74, h * 0.66, w * 0.77, h * 0.46, w * 0.73, h * 0.46]), const Color(0xFFFFF59D));
+      }
+      _chimeRing(c, w * 0.5, h * 0.2, w * 0.2, time);
+      for (var i = 0; i < 40; i++) {
+        final x = (i * 41.0 + time * 40) % (w + 40) - 20;
+        final y = (i * 67.0 + time * 220) % h;
+        line(c, x, y, x - 4, y + 11, 1.1, const Color(0x669FC3E8));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3A3550));
+      oval(c, w * 0.5, ground + 2, w * 0.3, h * 0.025, const Color(0xFF4A4568));
+    case StoryBackdrop.highCamp:
+      // Night above the clouds: a sea of cloud, a green aurora and a small fire.
+      _gradient(c, full, const [Color(0xFF0B1030), Color(0xFF2D3B6B)]);
+      _stars(c, s, time, count: 60);
+      for (var band = 0; band < 2; band++) {
+        final p = Path()..moveTo(0, h * (0.2 + band * 0.08));
+        for (var x = 0.0; x <= w; x += 8) {
+          p.lineTo(x, h * (0.2 + band * 0.08) + math.sin(x / w * 6 + time * 0.4 + band) * h * 0.04);
+        }
+        for (var x = w; x >= 0; x -= 8) {
+          p.lineTo(x, h * (0.3 + band * 0.08) + math.sin(x / w * 5 + time * 0.3 + band) * h * 0.05);
+        }
+        p.close();
+        c.drawPath(p, Paint()..color = band == 0 ? const Color(0x3369F0AE) : const Color(0x2640C4FF));
+      }
+      circle(c, w * 0.18, h * 0.16, w * 0.045, const Color(0xFFF7F0D5));
+      _peak(c, w * 0.1, h * 0.72, w * 0.3, h * 0.26, const Color(0xFF3C4A6B), const Color(0xFFC9D6EC));
+      _peak(c, w * 0.92, h * 0.72, w * 0.34, h * 0.3, const Color(0xFF3C4A6B), const Color(0xFFC9D6EC));
+      for (var i = 0; i < 6; i++) {
+        oval(c, w * (0.08 + i * 0.17) + math.sin(time * 0.2 + i) * 10, h * (0.72 + (i % 2) * 0.02), w * 0.2, h * 0.05, const Color(0xCC8E9CC4));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3A4458));
+      c.save();
+      c.translate(w * 0.5, ground - 2);
+      c.scale(h / 260, h / 260);
+      paintCampfire(c, time);
+      c.restore();
+    case StoryBackdrop.summit:
+      // Sunrise over a sea of cloud, and the Weather Chime ringing in the wind.
+      _gradient(c, full, const [Color(0xFFF3A66A), Color(0xFFFBE0A8), Color(0xFFBFE0F2)]);
+      circle(c, w * 0.5, h * 0.62, w * 0.13, const Color(0xCCFFF1C2));
+      _peak(c, w * 0.16, h * 0.7, w * 0.3, h * 0.2, const Color(0xFF9DB3D1), const Color(0xFFFFFFFF));
+      _peak(c, w * 0.86, h * 0.7, w * 0.36, h * 0.26, const Color(0xFF9DB3D1), const Color(0xFFFFFFFF));
+      for (var i = 0; i < 6; i++) {
+        oval(c, w * (0.06 + i * 0.18) + math.sin(time * 0.25 + i) * 12, h * (0.7 + (i % 2) * 0.025), w * 0.22, h * 0.05, const Color(0xF2FFF4E2));
+      }
+      _chimeRing(c, w * 0.5, h * 0.06, w * 0.2, time, sway: 0.1);
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFFCFD6E2));
+      oval(c, w * 0.5, ground + 2, w * 0.3, h * 0.025, const Color(0xFFE4E9F1));
   }
 }

@@ -139,7 +139,7 @@ A workout can be logged for a day that has already passed, so the journal stays 
 
 ## Coins and the shop
 
-Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), practice duels, and streak milestones. The **Guild Shop** (`lib/domain/shop.dart`) is where they are spent. Nothing in it is random, nothing costs real money, and there is no way to buy XP, energy or coins, with money or otherwise. Real money buys only cosmetics and thanks, in a separate place (see [Monetization](MONETIZATION.md)), and never changes a reward.
+Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and streak milestones. Practice duels pay nothing. The **Guild Shop** (`lib/domain/shop.dart`) is where they are spent. Nothing in it is random, nothing costs real money, and there is no way to buy XP, energy or coins, with money or otherwise. Real money buys only cosmetics and thanks, in a separate place (see [Monetization](MONETIZATION.md)), and never changes a reward.
 
 | For sale | Price | Notes |
 | --- | --- | --- |
@@ -147,6 +147,10 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), pra
 | Lucky Pebble | 70 | |
 | Upgrade gear: Wayfarer Cap, Trailblazer Vest | 220 | |
 | Upgrade gear: Iron Blade, Stopwatch Charm | 240 | |
+| Gullhaven Coast gear (4 pieces) | 460 to 520 | Found in region 2, or bought |
+| Glimmer Caverns gear (4 pieces) | 780 to 880 | Found in region 3, or bought |
+| Frostpeak Pass gear (4 pieces) | 1,200 to 1,350 | Found in region 4, or bought |
+| Thunder Heights gear (4 pieces) | 1,900 to 2,100 | Found in region 5, or bought |
 | Healing Potion | 25 each | Up to 5 in the pouch |
 
 - **Gear** is also found as expedition loot, so buying is never the only way, and a duplicate drop pays 10 coins back. The bonuses are deliberately small and unchanged.

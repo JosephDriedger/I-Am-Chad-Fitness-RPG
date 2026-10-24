@@ -11,7 +11,9 @@ import 'dart:ui';
 import 'package:flutter/painting.dart' show HSLColor;
 
 import '../../domain/cosmetics.dart' show Cape;
+import '../../domain/items.dart';
 import '../look.dart';
+import 'enemy_art.dart';
 
 final Paint _p = Paint();
 final Paint _stroke = Paint()
@@ -83,6 +85,16 @@ const _ink = Color(0xFF2B1D14);
 // ---------------------------------------------------------------------------
 
 /// Draws the adventurer. [s] supplies idle motion, walking, swing and guard.
+/// The colour of whatever is worn in [slot], if it is a piece without hand-drawn
+/// art of its own (see `EquipmentItem.accent`).
+Color? _worn(HeroLook look, EquipmentSlot slot) {
+  for (final id in look.equipped) {
+    final item = ItemCatalog.byId(id);
+    if (item != null && item.slot == slot && item.accent != null) return Color(item.accent!);
+  }
+  return null;
+}
+
 void paintHero(Canvas c, HeroLook look, ActorState s) {
   final bob = s.walking ? -(math.sin(s.walkPhase * 2)).abs() * 2.2 : math.sin(s.time * 2.6) * 1.1;
   final swing = s.walking ? math.sin(s.walkPhase) * 6 : 0.0;
@@ -134,6 +146,21 @@ void paintHero(Canvas c, HeroLook look, ActorState s) {
   }
   if (look.equipped.contains('lucky_pebble')) {
     oval(c, 8, -20, 2.6, 2, const Color(0xFF90A4AE));
+  }
+  final coat = _worn(look, EquipmentSlot.body);
+  if (coat != null) {
+    // A coloured coat over the tunic, with a lighter collar and buttons.
+    rrect(c, -10, -40, 20, 28, 6, coat);
+    rrect(c, -10, -40, 20, 6, 3, shade(coat, 0.12));
+    line(c, 0, -34, 0, -13, 1.2, shade(coat, -0.18));
+    circle(c, 3, -28, 1.2, const Color(0xFFF2C94C));
+    circle(c, 3, -20, 1.2, const Color(0xFFF2C94C));
+  }
+  final charm = _worn(look, EquipmentSlot.trinket);
+  if (charm != null) {
+    circle(c, 8, -19, 5, charm.withValues(alpha: 0.25));
+    circle(c, 8, -19, 2.8, charm);
+    circle(c, 7.2, -19.8, 0.9, const Color(0xCCFFFFFF));
   }
 
   // Head.
@@ -199,6 +226,15 @@ void _paintMantle(Canvas c, Cape cape, double bob, double sway) {
 }
 
 void _paintWeapon(Canvas c, HeroLook look) {
+  final blade = _worn(look, EquipmentSlot.weapon);
+  if (blade != null) {
+    // A longer blade edged in the weapon's own colour, with a matching guard.
+    rrect(c, -2.6, -38, 5.2, 36, 2.4, const Color(0xFFECEFF1));
+    rrect(c, -1, -37, 2, 33, 1, blade);
+    rrect(c, -6.5, -4.5, 13, 3.5, 1.5, blade);
+    circle(c, 0, -39, 2.4, shade(blade, 0.1));
+    return;
+  }
   if (look.equipped.contains('iron_blade')) {
     rrect(c, -2.2, -36, 4.4, 34, 2, const Color(0xFFCFD8DC));
     rrect(c, -0.6, -35, 1.2, 30, 0.6, const Color(0xFFFFFFFF));
@@ -261,6 +297,20 @@ void _paintHead(Canvas c, HeroLook look, ActorState s) {
   // Equipment on the head.
   if (look.equipped.contains('sweatband') && look.style % 6 != 4) {
     rrect(c, -10.5, cy - 6, 21, 3.2, 1, const Color(0xFFE53935));
+  }
+  final helm = _worn(look, EquipmentSlot.head);
+  if (helm != null) {
+    fillPath(
+      c,
+      Path()
+        ..moveTo(-11, cy - 3)
+        ..quadraticBezierTo(-11, cy - 16, 0, cy - 16)
+        ..quadraticBezierTo(11, cy - 16, 11, cy - 3)
+        ..close(),
+      helm,
+    );
+    rrect(c, -12, cy - 6, 24, 3.4, 1.5, shade(helm, -0.15));
+    circle(c, 0, cy - 12, 2, shade(helm, 0.2));
   }
   if (look.equipped.contains('wayfarer_cap')) {
     fillPath(
@@ -451,8 +501,37 @@ ActorPainter enemyPainter(String name) => switch (name) {
       'Mist Wisp' => paintMistWisp,
       'Grumbling Treant' => paintTreant,
       'Chad\'s Old Rival, Brad' => paintBrad,
+      // The Gullhaven Coast.
+      'Sand Crab' => paintCrab,
+      'Tide Jelly' => paintJelly,
+      'Gull Bandit' => paintGull,
+      'Captain Barnacle' => (c, s) => paintCrab(c, s, hat: true),
+      'The Gull King' => paintGullKing,
+      // The Glimmer Caverns.
+      'Crystal Beetle' => paintBeetle,
+      'Glowcap Shroom' => paintShroom,
+      'Echo Bat' => paintBat,
+      'Crystal Colossus' => _crystalColossus,
+      'Mother Glowcap' => paintMotherGlowcap,
+      // Frostpeak Pass.
+      'Frost Sprite' => paintFrostSprite,
+      'Snow Yeti' => paintYeti,
+      'Icicle Golem' => _icicleGolem,
+      'The Avalanche Matron' => paintAvalancheMatron,
+      'Old Man Winter' => paintOldManWinter,
+      // Thunder Heights.
+      'Thunder Cloud' => paintCloud,
+      'Gale Hawk' => paintGaleHawk,
+      'Static Imp' => _staticImp,
+      'The Thunderhead' => paintThunderhead,
+      'Stormcaller Skarn' => _stormcaller,
       _ => paintSlime,
     };
+
+final ActorPainter _crystalColossus = tinted(paintGolem, const Color(0x888E5BD9));
+final ActorPainter _icicleGolem = tinted(paintGolem, const Color(0x8890CAF9));
+final ActorPainter _staticImp = tinted(paintImp, const Color(0x88FFEB3B));
+final ActorPainter _stormcaller = tinted(paintImp, const Color(0x883F51B5));
 
 void paintSlime(Canvas c, ActorState s) {
   final squash = 1 + math.sin(s.time * 3) * 0.045 - s.windUp * 0.12;

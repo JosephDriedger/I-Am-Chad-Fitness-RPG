@@ -18,6 +18,12 @@ void main() {
         );
         INSERT INTO app_settings (id, use_metric, reduced_motion, sound_on, haptics_on)
           VALUES (1, 0, 1, 0, 1);
+        CREATE TABLE active_expeditions (
+          id INTEGER NOT NULL PRIMARY KEY,
+          seed INTEGER NOT NULL, hero_level INTEGER NOT NULL, step_index INTEGER NOT NULL,
+          hero_hp INTEGER NOT NULL, potions INTEGER NOT NULL, battles_won INTEGER NOT NULL,
+          xp INTEGER NOT NULL, coins INTEGER NOT NULL
+        );
         PRAGMA user_version = 9;
       ''');
     }));

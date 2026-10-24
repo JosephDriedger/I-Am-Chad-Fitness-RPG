@@ -29,9 +29,11 @@ void main() {
   final chapters = Story.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
-    expect(Story.seasons.map((s) => s.number), [1, 2]);
-    expect(chapters.length, 16);
-    expect([for (final c in chapters) c.number], [for (var i = 0; i < 16; i++) i]);
+    expect(Story.seasons.map((s) => s.number), [1, 2, 3]);
+    expect(chapters.length, 24);
+    expect([for (final c in chapters) c.number], [for (var i = 0; i < 24; i++) i]);
+    expect([for (final c in Story.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
+    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three']);
     expect([for (final c in Story.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
     expect([for (final c in Story.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
@@ -60,6 +62,9 @@ void main() {
     // Season Two starts after Season One is done and goes further up the curve.
     expect(Story.inSeason(2).first.unlockLevel, greaterThan(Story.inSeason(1).last.unlockLevel));
     expect(Story.inSeason(2).last.unlockLevel, inInclusiveRange(30, 60));
+    // Season Three starts after Season Two and reaches higher still.
+    expect(Story.inSeason(3).first.unlockLevel, greaterThan(Story.inSeason(2).last.unlockLevel));
+    expect(Story.inSeason(3).last.unlockLevel, inInclusiveRange(55, 90));
   });
 
   test('what is open depends only on level, and never shrinks as the hero levels up', () {
@@ -76,6 +81,7 @@ void main() {
     expect(StoryRules.next(1)!.number, 1);
     expect(StoryRules.next(15)!.number, 7);
     expect(StoryRules.next(16)!.number, 8, reason: 'Season Two opens once Season One is done');
+    expect(StoryRules.next(42)!.number, 16, reason: 'Season Three opens once Season Two is done');
     expect(StoryRules.next(Story.chapters.last.unlockLevel), isNull);
   });
 
@@ -259,7 +265,7 @@ void main() {
 
   test('the story is a decent length: rich, but each chapter is a few minutes', () {
     final total = chapters.fold(0, (a, c) => a + _lines(c).length);
-    expect(total, inInclusiveRange(120, 400));
+    expect(total, inInclusiveRange(120, 800));
     for (final c in chapters) {
       expect(_lines(c).length, inInclusiveRange(10, 60), reason: c.title);
     }
@@ -316,6 +322,68 @@ void main() {
           StoryBackdrop.lighthouseNight,
         ]),
       );
+    });
+  });
+
+  group('Season Three, The Weather Chime', () {
+    final three = Story.inSeason(3);
+
+    test('it picks up from the bell and the lamp and goes up into the mountains', () {
+      final seasonTwoEnd = [for (final l in _lines(Story.inSeason(2).last)) l.text].join(' ');
+      expect(seasonTwoEnd, contains('Dawn Bell'));
+      final all = [for (final c in three) for (final l in _lines(c)) l.text].join(' ');
+      expect(all, contains('Thunder Heights'));
+      expect(all, contains('Weather Chime'));
+      expect(all, contains('Dawn Bell'));
+    });
+
+    test('it brings in four new characters and every one of them speaks', () {
+      final speakers = {for (final c in three) for (final l in _lines(c)) l.speaker};
+      expect(speakers, containsAll([StorySpeaker.fennel, StorySpeaker.hush, StorySpeaker.tamsin, StorySpeaker.skarn]));
+    });
+
+    test('it remembers choices from the seasons before', () {
+      final keysUsed = {
+        for (final c in three) for (final s in c.scenes) for (final n in s.nodes) if (n.only != null) n.only!.key,
+      };
+      expect(keysUsed, containsAll(['light', 'pip', 'motivation']));
+    });
+
+    test('it asks its own questions, with fresh keys', () {
+      final earlier = {for (final c in [...Story.inSeason(1), ...Story.inSeason(2)]) for (final ch in _choices(c)) ch.key};
+      final keys = [for (final c in three) for (final ch in _choices(c)) ch.key];
+      expect(keys.length, greaterThanOrEqualTo(6));
+      expect(keys.toSet().intersection(earlier), isEmpty);
+    });
+
+    test('it says the same kind things as the others: rest, its own pace, no deadline', () {
+      final all = [for (final c in three) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('rest is training'), isTrue);
+      expect(all.contains('at your own pace'), isTrue);
+      expect(all.contains('nothing here has a deadline'), isTrue);
+    });
+
+    test('the mountain has its own places', () {
+      final used = {for (final c in three) for (final s in c.scenes) s.backdrop};
+      expect(
+        used,
+        containsAll([
+          StoryBackdrop.snowRoad,
+          StoryBackdrop.passHut,
+          StoryBackdrop.iceCave,
+          StoryBackdrop.observatory,
+          StoryBackdrop.stormTop,
+          StoryBackdrop.highCamp,
+          StoryBackdrop.summit,
+        ]),
+      );
+    });
+
+    test('its theme is coming back: stopping is welcome and starting again is small', () {
+      final all = [for (final c in three) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('stop here'), isTrue, reason: 'the hut with the one rule');
+      expect(all.contains('one counts'), isTrue);
+      expect(all.contains('picking up where'), isTrue);
     });
   });
 }

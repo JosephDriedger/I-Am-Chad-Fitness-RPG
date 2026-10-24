@@ -72,7 +72,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
         fx.haptic(Haptic.medium);
         _say(boughtLine);
       case PurchaseResult.notEnoughCoins:
-        _say('A little short on coins. Expeditions, practice duels and streak rewards will top you up.');
+        _say('A little short on coins. Expeditions and streak rewards will top you up.');
       case PurchaseResult.alreadyOwned:
         _say('You already have that one. Hero, you are well stocked.');
       case PurchaseResult.pouchFull:
@@ -163,7 +163,7 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
           ),
           const SizedBox(height: 4),
           const Text(
-            'Coins come from expeditions, practice duels and streak rewards. Gear also drops from expeditions, '
+            'Coins come from expeditions and streak rewards. Gear also drops from expeditions, '
             'and a duplicate drop pays coins back.',
             style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600),
           ),

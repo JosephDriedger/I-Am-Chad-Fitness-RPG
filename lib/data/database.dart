@@ -165,6 +165,13 @@ class ActiveExpeditions extends Table {
   IntColumn get xp => integer()();
   IntColumn get coins => integer()();
 
+  /// The region (1 to 5, schema v11). Zero is a run saved before regions, which
+  /// was the toughest region open at its level.
+  IntColumn get tier => integer().withDefault(const Constant(0))();
+
+  /// Focus the hero starts the next battle with, from a bard (schema v11).
+  IntColumn get focus => integer().withDefault(const Constant(0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -217,7 +224,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -257,6 +264,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 10) {
             await m.addColumn(appSettings, appSettings.musicOn);
+          }
+          // A save older than version 3 gets the whole table, columns and all, above.
+          if (from >= 3 && from < 11) {
+            await m.addColumn(activeExpeditions, activeExpeditions.tier);
+            await m.addColumn(activeExpeditions, activeExpeditions.focus);
           }
         },
         beforeOpen: (details) async {

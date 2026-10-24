@@ -14,6 +14,7 @@ import 'package:flutter/painting.dart'
 import '../domain/combat.dart';
 import '../domain/expedition.dart';
 import '../domain/items.dart';
+import 'art/enemy_art.dart' show paintBard, paintSpring;
 import 'art/painters.dart';
 import 'core.dart';
 import 'look.dart';
@@ -35,10 +36,35 @@ const _enemyArt = <String, _EnemyArt>{
   'Mist Wisp': _EnemyArt(2.0, 58),
   'Grumbling Treant': _EnemyArt(1.35, 112),
   'Chad\'s Old Rival, Brad': _EnemyArt(1.6, 74),
+  // The Gullhaven Coast.
+  'Sand Crab': _EnemyArt(1.7, 60),
+  'Tide Jelly': _EnemyArt(1.8, 70),
+  'Gull Bandit': _EnemyArt(1.8, 60),
+  'Captain Barnacle': _EnemyArt(1.9, 70),
+  'The Gull King': _EnemyArt(2.2, 66),
+  // The Glimmer Caverns.
+  'Crystal Beetle': _EnemyArt(1.75, 46),
+  'Glowcap Shroom': _EnemyArt(1.75, 64),
+  'Echo Bat': _EnemyArt(1.8, 64),
+  'Crystal Colossus': _EnemyArt(1.75, 82),
+  'Mother Glowcap': _EnemyArt(2.1, 64),
+  // Frostpeak Pass.
+  'Frost Sprite': _EnemyArt(1.9, 70),
+  'Snow Yeti': _EnemyArt(1.5, 84),
+  'Icicle Golem': _EnemyArt(1.7, 66),
+  'The Avalanche Matron': _EnemyArt(1.5, 96),
+  'Old Man Winter': _EnemyArt(1.55, 84),
+  // Thunder Heights.
+  'Thunder Cloud': _EnemyArt(1.8, 66),
+  'Gale Hawk': _EnemyArt(1.85, 62),
+  'Static Imp': _EnemyArt(1.8, 74),
+  'The Thunderhead': _EnemyArt(2.1, 70),
+  'Stormcaller Skarn': _EnemyArt(2.0, 74),
 };
 
-/// 0 meadow, 1 forest dusk, 2 boss arena, 3 night camp (events).
-enum Biome { meadow, forest, arena, night }
+/// The stages: meadow, forest dusk, boss arena, night camp (events), and the
+/// scenery of the later regions.
+enum Biome { meadow, forest, arena, night, coast, cave, peak, storm }
 
 class BattleScene extends GameScene {
   BattleScene({
@@ -197,7 +223,7 @@ class BattleScene extends GameScene {
     if (enemy == null) return;
     final heavy = move == EnemyMove.windUp;
     _badge
-      ..heavy = heavy
+      ..move = move
       ..visible = true
       ..position = Vector2(
         enemyHome.x,
@@ -205,13 +231,23 @@ class BattleScene extends GameScene {
       );
     final from = enemy.state.windUp;
     final to = heavy ? 1.0 : 0.0;
+    // Each move glows its own colour, so it can be read at a glance.
+    enemy.auraColor = switch (move) {
+      EnemyMove.windUp => const Color(0xFFFF5252),
+      EnemyMove.flurry => const Color(0xFFFFD740),
+      EnemyMove.brace => const Color(0xFF64B5F6),
+      EnemyMove.mend => const Color(0xFF81C784),
+      EnemyMove.strike => const Color(0xFFFF5252),
+    };
+    final glow = move == EnemyMove.strike ? 0.0 : (heavy ? 1.0 : 0.7);
+    final auraFrom = enemy.aura;
     tween(0.25, (t) {
       final v = from + (to - from) * t;
       enemy.state.windUp = v;
-      enemy.aura = v;
+      enemy.aura = auraFrom + (glow - auraFrom) * t;
       enemy.lean = 0.12 * v;
     });
-    if (heavy && announce) {
+    if (move != EnemyMove.strike && announce) {
       sfx(Sfx.whoosh);
       haptic(Haptic.light);
     }
@@ -237,6 +273,12 @@ class BattleScene extends GameScene {
           await _heal(amount);
         case EnemyAttacked():
           await _enemyStrike(e);
+        case EnemyBraced():
+          await _enemyBrace();
+        case EnemyMended(:final amount):
+          await _enemyMend(amount);
+        case EnemyEnraged():
+          await _enemyRage();
         case EnemyDefeated():
           await _enemyFalls();
         case PlayerDefeated():
@@ -420,6 +462,74 @@ class BattleScene extends GameScene {
     await pause(0.08);
   }
 
+  /// The enemy crouches behind its guard, so the blow about to land is a soft one.
+  Future<void> _enemyBrace() async {
+    final enemy = _enemy;
+    if (enemy == null) return;
+    sfx(Sfx.guard);
+    haptic(Haptic.light);
+    burst(Burst(
+      at: _enemyChest + Vector2(-18, 0),
+      count: 10,
+      colors: const [Color(0xFF90CAF9), Color(0xFFFFFFFF)],
+      shape: ParticleShape.spark,
+      speed: 90,
+      life: 0.4,
+      gravity: 0,
+    ));
+    enemy.auraColor = const Color(0xFF64B5F6);
+    await tween(0.2, (t) {
+      enemy.lean = 0.1 * t;
+      enemy.aura = 0.9;
+    });
+    enemy
+      ..lean = 0
+      ..aura = 0;
+  }
+
+  Future<void> _enemyMend(int amount) async {
+    final enemy = _enemy;
+    if (enemy == null) return;
+    sfx(Sfx.heal);
+    haptic(Haptic.light);
+    final at = _enemyChest;
+    burst(Burst.heal(at));
+    floatText('+$amount', at + Vector2(-8, -34), color: const Color(0xFFA5D6A7), size: 22);
+    _enemyHp += amount;
+    _enemyBar.setValue(_enemyHp);
+    await tween(0.4, (t) {
+      enemy.hop = 5 * math.sin(t * math.pi);
+      enemy.flash = 0.3 * math.sin(t * math.pi);
+    });
+    enemy
+      ..hop = 0
+      ..flash = 0
+      ..aura = 0;
+    await pause(0.1);
+  }
+
+  /// A boss gets fired up: a flash of red and a shake, and it hits harder from here.
+  Future<void> _enemyRage() async {
+    final enemy = _enemy;
+    if (enemy == null) return;
+    sfx(Sfx.skill);
+    haptic(Haptic.heavy);
+    final at = _enemyChest;
+    floatText('Fired Up!', at + Vector2(-20, -52), color: const Color(0xFFFF8A65), size: 24);
+    burst(Burst.stars(at, count: 14));
+    shakeCamera(amount: 6, seconds: 0.3);
+    enemy.auraColor = const Color(0xFFFF5252);
+    await tween(0.45, (t) {
+      enemy.aura = 1;
+      enemy.lean = 0.06 * math.sin(t * math.pi * 6);
+      enemy.flash = 0.35 * (1 - t);
+    });
+    enemy
+      ..lean = 0
+      ..flash = 0
+      ..aura = 0;
+  }
+
   Future<void> _enemyFalls() async {
     final enemy = _enemy;
     if (enemy == null) return;
@@ -478,7 +588,7 @@ class BattleScene extends GameScene {
   }
 
   /// Shows the benefit of the event just taken.
-  Future<void> applyEvent(EventKind kind, {required int heroHp}) async {
+  Future<void> applyEvent(EventKind kind, {required int heroHp, int stash = 8}) async {
     final at = Vector2(heroHome.x + 20, groundY - 70);
     switch (kind) {
       case EventKind.restock:
@@ -502,7 +612,19 @@ class BattleScene extends GameScene {
           speed: 140,
           life: 0.9,
         ));
-        floatText('+8 Coins', at + Vector2(0, -24), color: const Color(0xFFFFE082), size: 22);
+        floatText('+$stash Coins', at + Vector2(0, -24), color: const Color(0xFFFFE082), size: 22);
+      case EventKind.bard:
+        sfx(Sfx.heal);
+        burst(Burst.stars(at, count: 12));
+        floatText('+2 Focus', at + Vector2(0, -24), color: const Color(0xFFFFE082), size: 22);
+        _pips.value = 2;
+      case EventKind.spring:
+        sfx(Sfx.heal);
+        burst(Burst.heal(at));
+        final gain = heroHp - _heroHp;
+        floatText('+$gain HP', at + Vector2(0, -24), color: const Color(0xFFA5D6A7), size: 22);
+        _heroHp = heroHp;
+        _heroBar.setValue(heroHp);
     }
     await pause(0.6);
   }
@@ -603,6 +725,10 @@ class Backdrop extends Component {
         Biome.forest => (const Color(0xFF6D5A9C), const Color(0xFFF3B27A), const Color(0xFF3F6B4E), const Color(0xFF2F5A40), const Color(0xFF4C7A45)),
         Biome.arena => (const Color(0xFF2B1A3A), const Color(0xFFB5483A), const Color(0xFF4A3A55), const Color(0xFF3A2E44), const Color(0xFF5B4651)),
         Biome.night => (const Color(0xFF0F1B3D), const Color(0xFF2D3F6B), const Color(0xFF1F3A3A), const Color(0xFF18302F), const Color(0xFF2F4A3A)),
+        Biome.coast => (const Color(0xFF7FC4EC), const Color(0xFFF7E7C4), const Color(0xFF4F9BC4), const Color(0xFF3F8DB8), const Color(0xFFE6D3A8)),
+        Biome.cave => (const Color(0xFF1B1530), const Color(0xFF3B2F5C), const Color(0xFF2E2547), const Color(0xFF241C3A), const Color(0xFF4A3F66)),
+        Biome.peak => (const Color(0xFF9CC9EC), const Color(0xFFEAF4FB), const Color(0xFFB8CCDD), const Color(0xFFD5E4EF), const Color(0xFFEAF2F8)),
+        Biome.storm => (const Color(0xFF2B2F45), const Color(0xFF6B6F8F), const Color(0xFF3F4660), const Color(0xFF343A52), const Color(0xFF55607A)),
       };
 
   @override
@@ -664,6 +790,99 @@ class Backdrop extends Component {
           ..close();
         canvas.drawPath(p, _paint);
         canvas.drawPath(p.shift(const Offset(0, -26)), _paint);
+      }
+    }
+    if (biome == Biome.coast) {
+      // A band of sea along the horizon, with little white wave crests.
+      _paint.color = const Color(0xFF4F9BC4);
+      canvas.drawRect(Rect.fromLTWH(left, groundY - 70, width, 54), _paint);
+      for (var i = 0; i < 14; i++) {
+        final x = ((_t * 14 + i * 97) % 1000) - 300;
+        _paint.color = const Color(0x66FFFFFF);
+        canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(x, groundY - 62 + (i % 4) * 11, 26, 2.4), const Radius.circular(2)), _paint);
+      }
+    }
+    if (biome == Biome.cave) {
+      // Dripping stalactites above, glowing crystals below.
+      for (var i = 0; i < 9; i++) {
+        final x = -280 + i * 105 + _trees[i % _trees.length] * 30;
+        final h = 40 + _trees[(i + 2) % _trees.length] * 60;
+        _paint.color = const Color(0xFF2A2142);
+        canvas.drawPath(
+          Path()
+            ..moveTo(x - 16, -60)
+            ..lineTo(x + 16, -60)
+            ..lineTo(x, -60 + h)
+            ..close(),
+          _paint,
+        );
+      }
+      for (var i = 0; i < 7; i++) {
+        final x = -250 + i * 120 + _trees[i % _trees.length] * 40;
+        final h = 26 + _trees[(i + 1) % _trees.length] * 34;
+        final glow = 0.55 + 0.35 * math.sin(_t * 2 + i);
+        _paint.color = Color.fromRGBO(179, 136, 255, glow);
+        canvas.drawPath(
+          Path()
+            ..moveTo(x - 7, groundY - 6)
+            ..lineTo(x, groundY - 6 - h)
+            ..lineTo(x + 7, groundY - 6)
+            ..close(),
+          _paint,
+        );
+      }
+    }
+    if (biome == Biome.peak) {
+      // Snowy mountains behind, and snow drifting down.
+      for (final m in const [[-100.0, 150.0, 120.0], [120.0, 190.0, 140.0], [330.0, 150.0, 110.0], [520.0, 170.0, 130.0]]) {
+        _paint.color = const Color(0xFFB0C4D8);
+        canvas.drawPath(
+          Path()
+            ..moveTo(m[0] - m[2], groundY - 10)
+            ..lineTo(m[0], groundY - 10 - m[1])
+            ..lineTo(m[0] + m[2], groundY - 10)
+            ..close(),
+          _paint,
+        );
+        _paint.color = const Color(0xFFFFFFFF);
+        canvas.drawPath(
+          Path()
+            ..moveTo(m[0] - m[2] * 0.28, groundY - 10 - m[1] * 0.72)
+            ..lineTo(m[0], groundY - 10 - m[1])
+            ..lineTo(m[0] + m[2] * 0.28, groundY - 10 - m[1] * 0.72)
+            ..lineTo(m[0] + m[2] * 0.1, groundY - 10 - m[1] * 0.64)
+            ..lineTo(m[0] - m[2] * 0.08, groundY - 10 - m[1] * 0.7)
+            ..close(),
+          _paint,
+        );
+      }
+      for (var i = 0; i < 40; i++) {
+        final p = ((_t * 0.12 + i * 0.137) % 1);
+        _paint.color = Color.fromRGBO(255, 255, 255, 0.85 * (1 - p * 0.3));
+        canvas.drawCircle(Offset(-80 + (i * 47) % 520 + math.sin(_t * 1.4 + i) * 10, -20 + p * (groundY + 20)), 1.3 + (i % 3) * 0.5, _paint);
+      }
+    }
+    if (biome == Biome.storm) {
+      // Heavy clouds, slanting rain and the odd flash of lightning.
+      for (var i = 0; i < 5; i++) {
+        final x = ((_t * (6 + i * 2) + i * 210) % 1200) - 400;
+        _paint.color = const Color(0xCC1F2236);
+        canvas.drawOval(Rect.fromCenter(center: Offset(x, 40 + i * 20), width: 170, height: 42), _paint);
+        canvas.drawOval(Rect.fromCenter(center: Offset(x + 40, 28 + i * 20), width: 100, height: 38), _paint);
+      }
+      for (var i = 0; i < 46; i++) {
+        final p = ((_t * 0.9 + i * 0.071) % 1);
+        final x = -100 + (i * 53) % 560 - p * 30;
+        final y = -10 + p * (groundY + 10);
+        _paint
+          ..color = const Color(0x6690CAF9)
+          ..strokeWidth = 1.2;
+        canvas.drawLine(Offset(x, y), Offset(x - 4, y + 10), _paint);
+      }
+      final flash = math.sin(_t * 0.9) > 0.985 ? 1.0 : 0.0;
+      if (flash > 0) {
+        _paint.color = const Color(0x33FFFFFF);
+        canvas.drawRect(Rect.fromLTWH(left, -400, width, groundY + 400), _paint);
       }
     }
     if (biome == Biome.arena) {
@@ -761,27 +980,36 @@ class _Pips extends PositionComponent {
   }
 }
 
-/// "What will the enemy do next" marker above the enemy's head.
+/// "What will the enemy do next" marker above the enemy's head. Each move has
+/// its own colour and its own mark, so it can be read at a glance.
 class _IntentBadge extends PositionComponent {
-  bool heavy = false;
+  EnemyMove move = EnemyMove.strike;
   bool visible = false;
   double _t = 0;
 
   @override
   void update(double dt) => _t += dt;
 
+  Color get _base => switch (move) {
+        EnemyMove.windUp => const Color(0xFFE65100),
+        EnemyMove.flurry => const Color(0xFFF9A825),
+        EnemyMove.brace => const Color(0xFF1E88E5),
+        EnemyMove.mend => const Color(0xFF43A047),
+        EnemyMove.strike => const Color(0xFF546E7A),
+      };
+
   @override
   void render(Canvas canvas) {
     if (!visible) return;
-    final pulse = heavy ? 1 + math.sin(_t * 10) * 0.1 : 1.0;
+    final lively = move != EnemyMove.strike;
+    final pulse = lively ? 1 + math.sin(_t * 10) * 0.1 : 1.0;
     final bob = math.sin(_t * 3) * 2;
     canvas.save();
     canvas.translate(0, bob);
     canvas.scale(pulse, pulse);
-    final base = heavy ? const Color(0xFFE65100) : const Color(0xFF546E7A);
     final p = Paint()..color = const Color(0x55000000);
     canvas.drawCircle(const Offset(1.5, 2.5), 15, p);
-    p.color = base;
+    p.color = _base;
     canvas.drawCircle(Offset.zero, 15, p);
     canvas.drawPath(Path()..moveTo(-5, 12)..lineTo(0, 22)..lineTo(5, 12)..close(), p);
     p
@@ -793,15 +1021,40 @@ class _IntentBadge extends PositionComponent {
     p
       ..style = PaintingStyle.fill
       ..strokeWidth = 3;
-    if (heavy) {
-      canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-2, -9, 4, 11), const Radius.circular(2)), p);
-      canvas.drawCircle(const Offset(0, 6), 2.4, p);
-    } else {
-      p
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3;
-      canvas.drawLine(const Offset(-6, 6), const Offset(6, -6), p);
-      canvas.drawLine(const Offset(-6, -6), const Offset(6, 6), p);
+    switch (move) {
+      case EnemyMove.windUp:
+        // An exclamation mark: a heavy blow.
+        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-2, -9, 4, 11), const Radius.circular(2)), p);
+        canvas.drawCircle(const Offset(0, 6), 2.4, p);
+      case EnemyMove.strike:
+        // Crossed lines: a plain strike.
+        p
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3;
+        canvas.drawLine(const Offset(-6, 6), const Offset(6, -6), p);
+        canvas.drawLine(const Offset(-6, -6), const Offset(6, 6), p);
+      case EnemyMove.flurry:
+        // Two slashes: two blows.
+        p
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.6;
+        canvas.drawLine(const Offset(-7, 6), const Offset(-1, -7), p);
+        canvas.drawLine(const Offset(1, 6), const Offset(7, -7), p);
+      case EnemyMove.brace:
+        // A shield.
+        canvas.drawPath(
+          Path()
+            ..moveTo(0, -8)
+            ..lineTo(7, -5)
+            ..quadraticBezierTo(7, 4, 0, 9)
+            ..quadraticBezierTo(-7, 4, -7, -5)
+            ..close(),
+          p,
+        );
+      case EnemyMove.mend:
+        // A plus: it is about to heal.
+        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-2, -8, 4, 16), const Radius.circular(1.5)), p);
+        canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(-8, -2, 16, 4), const Radius.circular(1.5)), p);
     }
     canvas.restore();
   }
@@ -863,6 +1116,10 @@ class _Prop extends PositionComponent {
         paintMerchantCart(canvas, _t);
       case EventKind.treasure:
         paintChest(canvas, 0.0, 0);
+      case EventKind.bard:
+        paintBard(canvas, _t);
+      case EventKind.spring:
+        paintSpring(canvas, _t);
     }
     canvas.restore();
   }
@@ -887,29 +1144,29 @@ class _Chest extends PositionComponent {
     final it = item;
     if (it != null) {
       canvas.translate(0, -34 - 12 * open);
-      paintItemIcon(canvas, it.slot, _t);
+      paintItemIcon(canvas, it.slot, _t, accent: it.accent == null ? null : Color(it.accent!));
     }
     canvas.restore();
   }
 }
 
 /// Little icon for a piece of equipment, bobbing above an opened chest.
-void paintItemIcon(Canvas c, EquipmentSlot slot, double t) {
+void paintItemIcon(Canvas c, EquipmentSlot slot, double t, {Color? accent}) {
   c.save();
   c.translate(0, math.sin(t * 3) * 2);
   switch (slot) {
     case EquipmentSlot.weapon:
       c.rotate(0.6);
-      line(c, 0, 8, 0, -12, 4, const Color(0xFFECEFF1));
+      line(c, 0, 8, 0, -12, 4, accent ?? const Color(0xFFECEFF1));
       line(c, -5, 6, 5, 6, 3, const Color(0xFFF2C94C));
     case EquipmentSlot.head:
-      fillPath(c, Path()..moveTo(-9, 4)..quadraticBezierTo(-9, -10, 0, -10)..quadraticBezierTo(9, -10, 9, 4)..close(), const Color(0xFF66BB6A));
-      rrect(c, -3, 1, 14, 3, 1.5, const Color(0xFF2E7D32));
+      fillPath(c, Path()..moveTo(-9, 4)..quadraticBezierTo(-9, -10, 0, -10)..quadraticBezierTo(9, -10, 9, 4)..close(), accent ?? const Color(0xFF66BB6A));
+      rrect(c, -3, 1, 14, 3, 1.5, accent == null ? const Color(0xFF2E7D32) : shade(accent, -0.15));
     case EquipmentSlot.body:
-      fillPath(c, poly([-10, -8, -5, -10, 5, -10, 10, -8, 7, 0, 5, 0, 5, 9, -5, 9, -5, 0, -7, 0]), const Color(0xFF8D6E63));
+      fillPath(c, poly([-10, -8, -5, -10, 5, -10, 10, -8, 7, 0, 5, 0, 5, 9, -5, 9, -5, 0, -7, 0]), accent ?? const Color(0xFF8D6E63));
     case EquipmentSlot.trinket:
-      fillPath(c, poly([0, -10, 8, -2, 0, 9, -8, -2]), const Color(0xFF4FC3F7));
-      fillPath(c, poly([0, -10, 8, -2, 0, -2]), const Color(0xFFB3E5FC));
+      fillPath(c, poly([0, -10, 8, -2, 0, 9, -8, -2]), accent ?? const Color(0xFF4FC3F7));
+      fillPath(c, poly([0, -10, 8, -2, 0, -2]), accent == null ? const Color(0xFFB3E5FC) : shade(accent, 0.2));
   }
   c.restore();
 }
