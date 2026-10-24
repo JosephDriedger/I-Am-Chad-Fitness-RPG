@@ -214,6 +214,9 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
     StorySpeaker.hush => const Color(0xFF8D6E63),
     StorySpeaker.tamsin => const Color(0xFF4F6285),
     StorySpeaker.skarn => const Color(0xFF5C5CB5),
+    StorySpeaker.bertram => const Color(0xFF8E5A5A),
+    StorySpeaker.sphinx => const Color(0xFFC08F4B),
+    StorySpeaker.worm => const Color(0xFFB07A55),
     _ => GameColors.wood,
   };
 
@@ -387,7 +390,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
           const SizedBox(height: 14),
           Text(
             next == null
-                ? 'That is the end of this season. More is coming.'
+                ? 'That is the end of the story for now. The hall is always open, and every chapter can be read again.'
                 : 'The next chapter opens at Level ${next.unlockLevel}. There is no rush.',
             textAlign: TextAlign.center,
             style: const TextStyle(

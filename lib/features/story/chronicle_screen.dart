@@ -166,7 +166,7 @@ class ChroniclePanel extends ConsumerWidget {
             unread.isNotEmpty
                 ? 'A new chapter is waiting: ${unread.first.title}.'
                 : next == null
-                ? 'You have read everything so far. More is coming.'
+                ? 'You have read everything there is, and every chapter can be read again whenever you like.'
                 : 'You are all caught up. The next chapter opens at Level ${next.unlockLevel}.',
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),

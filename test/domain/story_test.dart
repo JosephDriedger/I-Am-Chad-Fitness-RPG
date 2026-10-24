@@ -29,11 +29,12 @@ void main() {
   final chapters = Story.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
-    expect(Story.seasons.map((s) => s.number), [1, 2, 3]);
-    expect(chapters.length, 24);
-    expect([for (final c in chapters) c.number], [for (var i = 0; i < 24; i++) i]);
+    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4]);
+    expect(chapters.length, 32);
+    expect([for (final c in chapters) c.number], [for (var i = 0; i < 32; i++) i]);
     expect([for (final c in Story.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
-    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three']);
+    expect([for (final c in Story.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
+    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four']);
     expect([for (final c in Story.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
     expect([for (final c in Story.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
@@ -65,6 +66,9 @@ void main() {
     // Season Three starts after Season Two and reaches higher still.
     expect(Story.inSeason(3).first.unlockLevel, greaterThan(Story.inSeason(2).last.unlockLevel));
     expect(Story.inSeason(3).last.unlockLevel, inInclusiveRange(55, 90));
+    // Season Four starts after Season Three and ends by the level cap.
+    expect(Story.inSeason(4).first.unlockLevel, greaterThan(Story.inSeason(3).last.unlockLevel));
+    expect(Story.inSeason(4).last.unlockLevel, inInclusiveRange(80, 99));
   });
 
   test('what is open depends only on level, and never shrinks as the hero levels up', () {
@@ -82,6 +86,7 @@ void main() {
     expect(StoryRules.next(15)!.number, 7);
     expect(StoryRules.next(16)!.number, 8, reason: 'Season Two opens once Season One is done');
     expect(StoryRules.next(42)!.number, 16, reason: 'Season Three opens once Season Two is done');
+    expect(StoryRules.next(Story.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
     expect(StoryRules.next(Story.chapters.last.unlockLevel), isNull);
   });
 
@@ -265,7 +270,7 @@ void main() {
 
   test('the story is a decent length: rich, but each chapter is a few minutes', () {
     final total = chapters.fold(0, (a, c) => a + _lines(c).length);
-    expect(total, inInclusiveRange(120, 800));
+    expect(total, inInclusiveRange(120, 1100));
     for (final c in chapters) {
       expect(_lines(c).length, inInclusiveRange(10, 60), reason: c.title);
     }
@@ -384,6 +389,74 @@ void main() {
       expect(all.contains('stop here'), isTrue, reason: 'the hut with the one rule');
       expect(all.contains('one counts'), isTrue);
       expect(all.contains('picking up where'), isTrue);
+    });
+  });
+
+  group('Season Four, The Long Table', () {
+    final four = Story.inSeason(4);
+
+    test('it brings back the people the story has met, and the table is the point', () {
+      final speakers = {for (final c in four) for (final l in _lines(c)) l.speaker};
+      // Nearly everyone returns: the valley, the coast, the mountain and the desert.
+      expect(
+        speakers,
+        containsAll([
+          StorySpeaker.chad, StorySpeaker.maple, StorySpeaker.pip, StorySpeaker.wren, StorySpeaker.sedge,
+          StorySpeaker.hush, StorySpeaker.tamsin, StorySpeaker.skarn, StorySpeaker.fennel, StorySpeaker.oakhelm,
+          StorySpeaker.grit, StorySpeaker.murmur, StorySpeaker.brad,
+        ]),
+      );
+      final all = [for (final c in four) for (final l in _lines(c)) l.text].join(' ');
+      expect(all, contains('table'));
+      expect(all, contains('chair'));
+      expect(all, contains('feast'));
+    });
+
+    test('it brings in three new characters and every one of them speaks', () {
+      final speakers = {for (final c in four) for (final l in _lines(c)) l.speaker};
+      expect(speakers, containsAll([StorySpeaker.bertram, StorySpeaker.sphinx, StorySpeaker.worm]));
+    });
+
+    test('it remembers choices from the seasons before', () {
+      final keysUsed = {
+        for (final c in four) for (final s in c.scenes) for (final n in s.nodes) if (n.only != null) n.only!.key,
+      };
+      expect(keysUsed, containsAll(['pip', 'light', 'stair', 'chime', 'motivation']));
+    });
+
+    test('it asks its own questions, with fresh keys', () {
+      final earlier = {for (final c in [...Story.inSeason(1), ...Story.inSeason(2), ...Story.inSeason(3)]) for (final ch in _choices(c)) ch.key};
+      final keys = [for (final c in four) for (final ch in _choices(c)) ch.key];
+      expect(keys.length, greaterThanOrEqualTo(7));
+      expect(keys.toSet().intersection(earlier), isEmpty);
+    });
+
+    test('it says the same kind things as the others: rest, its own pace, no deadline', () {
+      final all = [for (final c in four) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('rest is training'), isTrue);
+      expect(all.contains('at your own pace'), isTrue);
+      expect(all.contains('nothing here has a deadline'), isTrue);
+    });
+
+    test('it has its own places, and the feast comes last', () {
+      final used = {for (final c in four) for (final s in c.scenes) s.backdrop};
+      expect(used, containsAll([StoryBackdrop.courtyard, StoryBackdrop.dunes, StoryBackdrop.feast]));
+      expect(four.last.scenes.last.backdrop, StoryBackdrop.feast);
+    });
+
+    test('its newcomer is an older beginner, treated as a delight and never as a problem', () {
+      final bertram = [for (final c in four) for (final l in _lines(c)) if (l.speaker == StorySpeaker.bertram) l.text].join(' ');
+      expect(bertram, contains('eighty-three'));
+      expect(bertram.toLowerCase(), contains('begin'));
+      final others = [for (final c in four) for (final l in _lines(c)) if (l.speaker != StorySpeaker.bertram) l.text.toLowerCase()].join(' ');
+      for (final w in ['too old', 'past it', 'at your age', 'at his age', 'frail', 'elderly']) {
+        expect(others.contains(w), isFalse, reason: '"$w" about Bertram');
+      }
+    });
+
+    test('it ends at the level cap or just short of it, so the story finishes before the game does', () {
+      expect(four.last.unlockLevel, lessThanOrEqualTo(99));
+      expect(four.first.unlockLevel, greaterThan(Story.inSeason(3).last.unlockLevel));
     });
   });
 }

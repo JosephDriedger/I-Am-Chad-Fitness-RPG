@@ -323,6 +323,51 @@ void paintSkarn(Canvas c, ActorState s) {
   c.restore();
 }
 
+/// Bertram, the newest member of the guild: well into his eighties, delighted by
+/// everything, in a maroon cardigan, a beret and round glasses, with a notebook
+/// in which he writes lists.
+void paintBertram(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 1.7) * 0.7;
+  const skin = Color(0xFFE8C4A0);
+  const cardigan = Color(0xFF8E5A5A);
+  shadow(c, 15);
+  c.save();
+  c.translate(0, bob);
+  // Trousers and sensible shoes.
+  rrect(c, -7, -22, 6, 22, 2, const Color(0xFF6D5A3F));
+  rrect(c, 1.5, -22, 6, 22, 2, const Color(0xFF6D5A3F));
+  rrect(c, -9, -4, 9, 4, 2, const Color(0xFF3E2F26));
+  rrect(c, 0, -4, 9, 4, 2, const Color(0xFF3E2F26));
+  // The cardigan over a cream shirt, with three buttons.
+  rrect(c, -14, -62, 28, 42, 8, cardigan);
+  rrect(c, -4, -62, 8, 42, 2, const Color(0xFFFFF3D6));
+  for (final y in const [-54.0, -44.0, -34.0]) {
+    circle(c, 0, y, 1.6, const Color(0xFF5D4037));
+  }
+  // One arm out in front, holding the notebook and its list.
+  rrect(c, -19, -58, 6, 24, 3, cardigan);
+  circle(c, -16, -33, 3.8, skin);
+  rrect(c, 11, -56, 6, 18, 3, cardigan);
+  circle(c, 14.5, -38, 3.8, skin);
+  rrect(c, 12, -52, 11, 14, 1.5, const Color(0xFFFFF3D6));
+  for (var i = 0; i < 4; i++) {
+    line(c, 14, -49 + i * 3.2, 21, -49 + i * 3.2, 0.9, const Color(0xFF8D6E63));
+  }
+  // Head: white hair at the sides, round glasses, a kind smile, and the beret.
+  circle(c, 0, -74, 12, skin);
+  oval(c, -11, -72, 3.5, 6, const Color(0xFFEEEEEE));
+  oval(c, 11, -72, 3.5, 6, const Color(0xFFEEEEEE));
+  oval(c, 0, -85, 14, 5, const Color(0xFF6D3B3B));
+  circle(c, 1, -90.5, 2, const Color(0xFF6D3B3B));
+  strokePath(c, Path()..addOval(Rect.fromCircle(center: const Offset(-4.6, -74), radius: 4.2)), 1.2, const Color(0xFF5D4037));
+  strokePath(c, Path()..addOval(Rect.fromCircle(center: const Offset(4.6, -74), radius: 4.2)), 1.2, const Color(0xFF5D4037));
+  line(c, -0.4, -74, 0.4, -74, 1.2, const Color(0xFF5D4037));
+  circle(c, -4.6, -74, 1.1, const Color(0xFF2B1D14));
+  circle(c, 4.6, -74, 1.1, const Color(0xFF2B1D14));
+  strokePath(c, Path()..moveTo(-4, -67)..quadraticBezierTo(0, -63.5, 4, -67), 1.4, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -359,6 +404,12 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintTamsin(c, s);
     case StorySpeaker.skarn:
       paintSkarn(c, s);
+    case StorySpeaker.bertram:
+      paintBertram(c, s);
+    case StorySpeaker.sphinx:
+      paintSphinx(c, s);
+    case StorySpeaker.worm:
+      paintDuneWorm(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -382,6 +433,9 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.hush => 0.95,
       StorySpeaker.tamsin => 1.0,
       StorySpeaker.skarn => 1.35,
+      StorySpeaker.bertram => 0.95,
+      StorySpeaker.sphinx => 0.7,
+      StorySpeaker.worm => 0.6,
       _ => 1.0,
     };
 
@@ -1108,5 +1162,86 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
       _chimeRing(c, w * 0.5, h * 0.06, w * 0.2, time, sway: 0.1);
       _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFFCFD6E2));
       oval(c, w * 0.5, ground + 2, w * 0.3, h * 0.025, const Color(0xFFE4E9F1));
+    case StoryBackdrop.courtyard:
+      // The hall's courtyard on a bright afternoon, bunting up and a table not yet finished.
+      _gradient(c, full, const [Color(0xFF9CCBEF), Color(0xFFEAF4FB)]);
+      _cloud(c, w * 0.25, h * 0.1, w * 0.1, const Color(0xE6FFFFFF));
+      _fill(c, Rect.fromLTWH(0, h * 0.16, w, h * 0.54), const Color(0xFFB59A78));
+      for (var y = h * 0.18; y < h * 0.7; y += 24) {
+        line(c, 0, y, w, y, 1, const Color(0x1A000000));
+      }
+      _window(c, w * 0.1, h * 0.26, w * 0.15, h * 0.26, const Color(0xFFFFE9A8));
+      _window(c, w * 0.75, h * 0.26, w * 0.15, h * 0.26, const Color(0xFFFFE9A8));
+      // Bunting across the wall.
+      for (var i = 0; i < 12; i++) {
+        final x = w * (0.04 + i * 0.085);
+        final y = h * 0.2 + math.sin(i * 0.5) * 6;
+        fillPath(c, poly([x - 8, y, x + 8, y, x + math.sin(time * 1.5 + i) * 1.5, y + 18]), [const Color(0xFFE2663A), const Color(0xFFF0C14B), const Color(0xFF4F7FD6), const Color(0xFF2FA89A)][i % 4]);
+      }
+      _fill(c, Rect.fromLTWH(0, ground - h * 0.2, w, h - (ground - h * 0.2)), const Color(0xFFA89B8A));
+      for (var x = 0.0; x < w; x += 48) {
+        line(c, x, ground - h * 0.2, x, h, 1, const Color(0x22000000));
+      }
+      // A long table, half built, and a pile of mismatched chairs.
+      rrect(c, w * 0.1, ground - h * 0.12, w * 0.8, 9, 3, const Color(0xFF8D5E3C));
+      for (final x in [w * 0.14, w * 0.5, w * 0.84]) {
+        rrect(c, x, ground - h * 0.12 + 8, 8, h * 0.12, 2, const Color(0xFF6D4326));
+      }
+      for (var i = 0; i < 4; i++) {
+        final x = w * (0.04 + i * 0.045);
+        rrect(c, x, ground - h * 0.08 - i * 4, 18, 4, 1, [const Color(0xFFB23A3A), const Color(0xFF3F6BB2), const Color(0xFFD9A441), const Color(0xFF3A8F5A)][i]);
+        rrect(c, x, ground - h * 0.08 - i * 4, 3, h * 0.07, 1, const Color(0xFF5D4037));
+      }
+    case StoryBackdrop.dunes:
+      // Warm dunes in the late sun, a lone palm and a long shadow.
+      _gradient(c, full, const [Color(0xFFF0A860), Color(0xFFFBE3B0)]);
+      circle(c, w * 0.7, h * 0.34, w * 0.14, const Color(0x55FFF2C4));
+      circle(c, w * 0.7, h * 0.34, w * 0.085, const Color(0xFFFFF2C4));
+      _hill(c, s, h * 0.58, h * 0.04, 0.4, const Color(0xFFE2B572));
+      _hill(c, s, h * 0.68, h * 0.05, 2.0, const Color(0xFFD7A25A));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFFEBCB8E));
+      // A palm on the nearest ridge.
+      line(c, w * 0.16, h * 0.7, w * 0.19, h * 0.42, 5, const Color(0xFF8D5E3C));
+      for (var i = 0; i < 5; i++) {
+        final a = -math.pi / 2 + (i - 2) * 0.55 + math.sin(time * 0.8 + i) * 0.04;
+        line(c, w * 0.19, h * 0.42, w * 0.19 + math.cos(a) * w * 0.12, h * 0.42 + math.sin(a) * w * 0.1 + w * 0.04, 3.4, const Color(0xFF4F9A4A));
+      }
+      for (var i = 0; i < 12; i++) {
+        final p = ((time * 0.2 + i * 0.09) % 1);
+        circle(c, w * p, h * (0.78 + (i % 4) * 0.03), 1.2, const Color(0x88FFFFFF));
+      }
+    case StoryBackdrop.feast:
+      // The long table laid at night under strings of lights, and a sky of stars.
+      _gradient(c, full, const [Color(0xFF0E1330), Color(0xFF2A3B6E)]);
+      _stars(c, s, time, count: 50);
+      circle(c, w * 0.86, h * 0.14, w * 0.045, const Color(0xFFF7F0D5));
+      _fill(c, Rect.fromLTWH(0, ground - h * 0.05, w, h), const Color(0xFF26331F));
+      // Strings of lights in two sagging arcs, glowing.
+      for (final base in [h * 0.16, h * 0.26]) {
+        final p = Path()..moveTo(0, base);
+        for (var x = 0.0; x <= w; x += 10) {
+          p.lineTo(x, base + math.sin(x / w * math.pi * 3) * 14);
+        }
+        strokePath(c, p, 1.4, const Color(0xFF3E2F26));
+        for (var i = 0; i < 14; i++) {
+          final x = w * (i + 0.5) / 14;
+          final y = base + math.sin(x / w * math.pi * 3) * 14 + 4;
+          final glow = 0.7 + 0.3 * math.sin(time * 2.5 + i);
+          circle(c, x, y, 9 * glow, const Color(0x33FFC46B));
+          circle(c, x, y, 3.4, [const Color(0xFFFFE082), const Color(0xFFFFB74D), const Color(0xFFFFF59D)][i % 3]);
+        }
+      }
+      // The long table, with a cloth, candles and plates.
+      rrect(c, w * 0.04, ground - h * 0.13, w * 0.92, 10, 3, const Color(0xFFF6EED8));
+      rrect(c, w * 0.04, ground - h * 0.13 + 8, w * 0.92, h * 0.1, 2, const Color(0xFFE9DDBC));
+      for (var i = 0; i < 9; i++) {
+        final x = w * (0.1 + i * 0.1);
+        circle(c, x, ground - h * 0.135, 4, const Color(0xFFFFFFFF));
+        if (i % 3 == 1) {
+          rrect(c, x - 1.5, ground - h * 0.17, 3, 12, 1, const Color(0xFFFFF3D6));
+          final f = 1 + math.sin(time * 9 + i) * 0.12;
+          oval(c, x, ground - h * 0.18, 2.6 * f, 4.2 * f, const Color(0xFFFFB300));
+        }
+      }
   }
 }

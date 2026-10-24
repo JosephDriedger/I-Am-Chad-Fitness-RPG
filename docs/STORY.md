@@ -1,6 +1,6 @@
 # Story
 
-Three seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two) and **The Weather Chime** (Season Three). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Four seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three) and **The Long Table** (Season Four). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -101,6 +101,37 @@ Chad, Maple, Biscuit, Pip, Brad and Grit come back (Biscuit arrives at the summi
 | 6 | The Night Before the Chime | Level 66 | Above the clouds, round a small fire, everyone says what they came back with. Chad's two push-ups. |
 | 7 | The Weather Chime | Level 70 | Seven bells, seven kinds of weather, and three sounds across the map answering each other. |
 
+## Season Four: The Long Table
+
+### The premise
+
+The guild hall has outgrown its own table: Maple built one that seats sixty, and the hall seats forty. Chad's answer is a feast for everyone who ever came through the door, and the hero helps carry the invitations out along every road. Fennel and Bertram deliver them to the coast, the hut on the pass, the old wood and the dunes; Chairs are grown, soup is made for sixty, and Tamsin comes down her four hundred and twelve steps by stages, as she promised in Season Three. The season ends at a long table under strings of lights, with every chair full and one kept for whoever comes next.
+
+The season is about **making room**: hosting, belonging, and the idea that a place gets better when there is a seat for the next person. It finishes before the level cap, so it doubles as a gentle thank-you for everything that came before.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Bertram | The newest member of the guild, in his eighties, delighted by everything. Maroon cardigan, a beret, round glasses and a notebook of lists. He is a beginner, never a problem. |
+| The Sphinx | Asks a riddle to anyone who passes, and the answer is always "a nap". She will come to the feast whether or not you answer. |
+| The Dune Worm | Says hello with his whole body, in capitals. He has never been invited to anything before. |
+
+Everyone who is still around comes back: Chad, Maple, Biscuit, Pip, Brad, Grit, Murmur, Oakhelm, Wren, Sedge, Fennel, Hush, Tamsin and Skarn.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Table That Does Not Fit | Level 74 | A very good table, a hall too small for it, and a new member with a notebook. Chad plans a feast. |
+| 1 | Letters on Every Road | Level 77 | Forty-one invitations, four roads, and a tortoise who does not have appointments. |
+| 2 | Soup for Forty | Level 80 | A very large host, a very large pot, and a promise of soup for sixty. |
+| 3 | Chairs, Slowly | Level 83 | A very old tree is asked for a great many chairs, and says yes, eventually. |
+| 4 | The Edge of the Dunes | Level 86 | A riddle, a very loud hello, and two guests who need rather a lot of chair. |
+| 5 | The Weatherkeeper Comes Down | Level 89 | Four hundred and twelve steps taken one landing at a time, and a forecast for the feast. |
+| 6 | The Night Before the Table | Level 93 | Lanterns go up, the guests arrive from every road, and someone counts the chairs again. |
+| 7 | The Long Table | Level 97 | The table is laid, the chairs are full, and there is room for one more. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
@@ -108,6 +139,7 @@ A few moments ask you something. The answer is saved, the character replies to i
 - **Season One** remembers your reason for coming to the hall, whether you offered to help, how you asked Grit for the clapper, what you said to Brad, Oakhelm and Murmur, what you told Chad, and how you ring the Dawn Bell. The last chapter's farewell changes with your first answer.
 - **Season Two** asks how you welcome Pip, how you walk the road, how you spend the ferry crossing, what you say to Wren, to Murmur and to Pip, what you write back to Oakhelm, and how you light the lamp. It also remembers your Season One answers: Brad, Grit, Murmur and Oakhelm each greet you differently depending on what you said to them, and the final farewell again follows your very first answer.
 
+- **Season Four** asks what you say to Bertram, what the invitation says, what you bring to the table, which chair Chad gets, the Sphinx's riddle, what weather Skarn should send, what you would give the guild, and where you sit. It remembers what you told Pip, how you lit the lamp, what you said to Tamsin at her stair and how the Chime was started, and the farewell follows your very first answer once more.
 - **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
@@ -119,7 +151,7 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 23 across all three seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 31 across all four seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -128,7 +160,8 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | Seasons, cast, unlock rules, conditions, Season One's script | `lib/domain/story.dart` (pure Dart) |
 | Season Two's script | `lib/domain/story_season_two.dart` |
 | Season Three's script | `lib/domain/story_season_three.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn) | `lib/game/art/story_art.dart` |
+| Season Four's script | `lib/domain/story_season_four.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |

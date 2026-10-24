@@ -1,5 +1,5 @@
-/// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast", and
-/// Season Three, "The Weather Chime".
+/// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast",
+/// Season Three, "The Weather Chime", and Season Four, "The Long Table".
 /// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
@@ -9,6 +9,7 @@
 /// read again. A few choices are remembered and echoed later.
 library;
 
+import 'story_season_four.dart';
 import 'story_season_three.dart';
 import 'story_season_two.dart';
 
@@ -33,6 +34,11 @@ enum StorySpeaker {
   hush('Hush'),
   tamsin('Tamsin'),
   skarn('Skarn'),
+
+  // Season Four, "The Long Table".
+  bertram('Bertram'),
+  sphinx('The Sphinx'),
+  worm('The Dune Worm'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -68,6 +74,11 @@ enum StoryBackdrop {
   stormTop,
   highCamp,
   summit,
+
+  // Season Four, "The Long Table".
+  courtyard,
+  dunes,
+  feast,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -175,7 +186,8 @@ class StorySeason {
   String get name => switch (number) {
         1 => 'Season One',
         2 => 'Season Two',
-        _ => 'Season Three',
+        3 => 'Season Three',
+        _ => 'Season Four',
       };
 }
 
@@ -264,6 +276,12 @@ class Story {
       blurb: 'A pass full of snow, a silent chime, and a long way up that is allowed to take as long as it takes.',
       firstChapter: 16,
     ),
+    StorySeason(
+      number: 4,
+      title: 'The Long Table',
+      blurb: 'A hall too full for its own table, a feast for everyone who ever came, and room for one more.',
+      firstChapter: 24,
+    ),
   ];
 
   static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
@@ -282,7 +300,7 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters, ...seasonThreeChapters];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters, ...seasonThreeChapters, ...seasonFourChapters];
 
   static const seasonOne = <StoryChapter>[
     // ---------------------------------------------------------------------------
