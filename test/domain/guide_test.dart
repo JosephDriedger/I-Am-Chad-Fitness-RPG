@@ -4,6 +4,7 @@ import 'package:i_am_chad/domain/difficulty.dart';
 import 'package:i_am_chad/domain/expedition.dart';
 import 'package:i_am_chad/domain/guide.dart';
 import 'package:i_am_chad/domain/hero.dart';
+import 'package:i_am_chad/domain/reminders.dart';
 import 'package:i_am_chad/domain/rewards.dart';
 import 'package:i_am_chad/domain/shop.dart';
 
@@ -23,7 +24,7 @@ void main() {
     expect(Guide.sections.length, inInclusiveRange(4, 8));
     const terms = [
       'Effort Minutes', 'Daily Limit', 'XP and Levels', 'Adventure Energy', 'Rest Days', 'Camps and Forks',
-      'Active Days and Streaks', 'Weekly Goal', 'Last Week', 'Expeditions', 'Regions', 'Practice Duel', 'Focus',
+      'Active Days and Streaks', 'Weekly Goal', 'Gentle Reminders', 'Last Week', 'Expeditions', 'Regions', 'Practice Duel', 'Focus',
       'Potions', 'Enemy Moves', 'Fired Up', 'Coins', 'Gear', 'Pennants and Trophies', 'The Chronicle',
       'Saved on Your Device', 'Stop If Anything Hurts', 'Quick Honesty Check',
     ];
@@ -47,6 +48,8 @@ void main() {
     expect(_entry('Potions'), contains('${Shop.potionPrice} coins'));
     expect(_entry('Potions'), contains('${Shop.potionPouchMax} in your pouch'));
     expect(_entry('Potions'), contains('${Shop.maxPotionsBrought} of them'));
+    expect(_entry('Gentle Reminders'), contains('${ReminderPrefs.earliestHour} AM and ${ReminderPrefs.latestHour - 12} PM'));
+    expect(_entry('Gentle Reminders'), contains('off until you turn it on'));
     expect(_entry('Weekly Goal'), contains('${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}'));
   });
 

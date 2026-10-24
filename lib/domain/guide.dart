@@ -9,6 +9,7 @@ import 'combat.dart';
 import 'difficulty.dart';
 import 'expedition.dart';
 import 'hero.dart';
+import 'reminders.dart';
 import 'rewards.dart';
 import 'shop.dart';
 
@@ -84,6 +85,10 @@ class Guide {
           const GuideEntry(
             'Last Week',
             'Once you have been around for a week, the quest board looks back at the one just gone: how many days you moved, your effort minutes and what you logged most. It only ever looks at your own week, never compares you with anyone, and a quiet week is simply a rest week.',
+          ),
+          GuideEntry(
+            'Gentle Reminders',
+            'On phones that can send them, Settings has an optional nudge, off until you turn it on. You pick the days and the hour, between ${ReminderPrefs.earliestHour} AM and ${ReminderPrefs.latestHour - 12} PM. You get at most one a day, none on a day you have already moved, and none once your week is done. They never mention what you missed, and they stop by themselves if you stop opening the game.',
           ),
           const GuideEntry(
             'Back-Dated Workouts',

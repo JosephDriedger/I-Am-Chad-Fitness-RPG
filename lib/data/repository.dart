@@ -8,6 +8,7 @@ import '../domain/hero.dart';
 import '../domain/items.dart';
 import '../domain/patronage.dart';
 import '../domain/player_state.dart';
+import '../domain/reminders.dart';
 import '../domain/rewards.dart';
 import '../domain/shop.dart';
 import '../domain/streaks.dart';
@@ -497,6 +498,11 @@ class GameRepository {
               soundOn: r.soundOn,
               hapticsOn: r.hapticsOn,
               musicOn: r.musicOn,
+              reminders: ReminderPrefs(
+                enabled: r.reminderOn,
+                hour: r.reminderHour.clamp(ReminderPrefs.earliestHour, ReminderPrefs.latestHour),
+                days: ReminderPrefs.daysFromBits(r.reminderDays),
+              ),
             ));
 
   Future<void> saveSettings(AppPrefs p) async {
@@ -509,6 +515,9 @@ class GameRepository {
             soundOn: Value(p.soundOn),
             hapticsOn: Value(p.hapticsOn),
             musicOn: Value(p.musicOn),
+            reminderOn: Value(p.reminders.enabled),
+            reminderHour: Value(p.reminders.hour),
+            reminderDays: Value(p.reminders.daysBits),
           ),
         );
   }

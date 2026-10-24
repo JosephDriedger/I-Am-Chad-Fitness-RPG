@@ -6,6 +6,7 @@ import 'package:i_am_chad/app/ads.dart';
 import 'package:i_am_chad/app/app.dart';
 import 'package:i_am_chad/app/feedback.dart';
 import 'package:i_am_chad/app/providers.dart';
+import 'package:i_am_chad/app/reminders.dart';
 import 'package:i_am_chad/app/store.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/domain/player_state.dart';
@@ -42,6 +43,10 @@ Future<void> bootApp(
   /// Turn the in-app Reduce Motion setting on (the default, so scenes finish each
   /// animation in one frame) or off, to run the real animations.
   bool reducedMotion = true,
+
+  /// The pretend notification service. By default a test runs on a platform that
+  /// cannot send reminders, so Settings does not offer them.
+  ReminderGateway? reminders,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -56,6 +61,7 @@ Future<void> bootApp(
       // Never reach a real store from a test.
       storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
       adGatewayProvider.overrideWithValue(ads ?? TestAdGateway()),
+      if (reminders != null) reminderGatewayProvider.overrideWithValue(reminders),
       ...overrides,
     ],
     child: const IAmChadApp(),

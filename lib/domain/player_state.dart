@@ -3,6 +3,7 @@ library;
 
 import 'hero.dart';
 import 'items.dart';
+import 'reminders.dart';
 
 /// Derived reward for one local day (see RewardRules).
 class DayGrant {
@@ -45,6 +46,7 @@ class AppPrefs {
     this.soundOn = true,
     this.hapticsOn = true,
     this.musicOn = false,
+    this.reminders = const ReminderPrefs(),
   });
 
   final bool useMetric;
@@ -59,6 +61,9 @@ class AppPrefs {
   /// talks over their own music.
   final bool musicOn;
 
+  /// Gentle reminders, off until the player turns them on.
+  final ReminderPrefs reminders;
+
   AppPrefs copyWith({
     bool? useMetric,
     bool? reducedMotion,
@@ -66,6 +71,7 @@ class AppPrefs {
     bool? soundOn,
     bool? hapticsOn,
     bool? musicOn,
+    ReminderPrefs? reminders,
   }) =>
       AppPrefs(
         useMetric: useMetric ?? this.useMetric,
@@ -74,6 +80,7 @@ class AppPrefs {
         soundOn: soundOn ?? this.soundOn,
         hapticsOn: hapticsOn ?? this.hapticsOn,
         musicOn: musicOn ?? this.musicOn,
+        reminders: reminders ?? this.reminders,
       );
 }
 

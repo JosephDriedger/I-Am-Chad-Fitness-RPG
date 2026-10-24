@@ -7,6 +7,7 @@ import '../features/onboarding/title_screen.dart';
 import 'game_ui.dart';
 import 'music.dart';
 import 'providers.dart';
+import 'reminders.dart';
 import 'store.dart';
 import 'theme.dart';
 
@@ -66,6 +67,9 @@ class _GateState extends ConsumerState<_Gate> with WidgetsBindingObserver {
     // A listener, not a read: it has to react every time the switch, the screen
     // or the foreground changes, and an unwatched provider only rebuilds lazily.
     ref.listenManual(musicProvider, (_, _) {});
+    // Reminders follow their switch, and are replanned whenever the game opens or
+    // something they depend on changes. They are off unless the player turned them on.
+    ref.listenManual(reminderSyncProvider, (_, _) {});
     WidgetsBinding.instance.addObserver(this);
   }
 

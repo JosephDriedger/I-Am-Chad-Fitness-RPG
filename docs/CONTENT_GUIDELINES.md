@@ -28,6 +28,8 @@ Follow the usual game convention:
 - Medical claims or promises of health outcomes.
 - Urgency tricks, countdown timers, or fear of missing out.
 
+Reminder notifications follow the same rules, and more: they are off until the player turns them on, never mention streaks, missed days or anything not yet done, never count, compare or sell, and are only ever an invitation ("come by if you feel like it"). Their lines live in `ReminderCopy` and `test/domain/reminders_test.dart` lints them.
+
 The dialogue tests (`test/domain/quests_test.dart`) lint every one of Chad's lines against the banned words above, and check that each is a short, finished sentence and that every region has setting-out tips. They are a safety net, not a substitute for judgement.
 
 ## Always include

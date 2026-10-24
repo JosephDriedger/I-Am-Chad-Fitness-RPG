@@ -190,6 +190,13 @@ class AppSettings extends Table {
   /// game never talks over their own music or podcast.
   BoolColumn get musicOn => boolean().withDefault(const Constant(false))();
 
+  /// Gentle reminders (schema v12). Off unless the player turns them on. The days
+  /// are one number, bit 0 for Monday to bit 6 for Sunday (21 is Monday, Wednesday
+  /// and Friday).
+  BoolColumn get reminderOn => boolean().withDefault(const Constant(false))();
+  IntColumn get reminderHour => integer().withDefault(const Constant(18))();
+  IntColumn get reminderDays => integer().withDefault(const Constant(21))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -224,7 +231,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -264,6 +271,11 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 10) {
             await m.addColumn(appSettings, appSettings.musicOn);
+          }
+          if (from < 12) {
+            await m.addColumn(appSettings, appSettings.reminderOn);
+            await m.addColumn(appSettings, appSettings.reminderHour);
+            await m.addColumn(appSettings, appSettings.reminderDays);
           }
           // A save older than version 3 gets the whole table, columns and all, above.
           if (from >= 3 && from < 11) {

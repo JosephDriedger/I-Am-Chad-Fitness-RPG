@@ -6,10 +6,12 @@ import '../../app/ads.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import '../../app/reminders.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../domain/guide.dart';
 import '../patron/patron_screen.dart';
 import 'guide_screen.dart';
+import 'reminders_panel.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -112,6 +114,11 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          // Only where the platform can send notifications; nothing is offered that cannot be done.
+          if (ref.watch(reminderGatewayProvider).isSupported) ...[
+            const RemindersPanel(),
+            const SizedBox(height: 16),
+          ],
           const SizedBox(height: 16),
           GamePanel(
             title: 'Your Data',
