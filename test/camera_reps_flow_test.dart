@@ -197,6 +197,9 @@ void main() {
     // Saving needs no honesty question, and the entry remembers the camera.
     await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
     await tester.ensureVisible(find.text('Save Workout'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Save Workout'));
+    await tester.ensureVisible(find.text('Save Workout'));
     await tester.tap(find.text('Save Workout'));
     await settle(tester);
     expect(find.text('Quick Honesty Check'), findsNothing);
@@ -314,6 +317,9 @@ void main() {
     await tester.enterText(find.widgetWithText(TextField, 'Sets'), '2');
     await tester.enterText(find.widgetWithText(TextField, 'Reps per Set'), '8');
     await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(find.text('Save Workout'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Save Workout'));
     await tester.ensureVisible(find.text('Save Workout'));
     await tester.tap(find.text('Save Workout'));
     await settle(tester);

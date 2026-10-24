@@ -6,6 +6,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/warmup.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/demo/exercise_demo.dart';
@@ -73,9 +74,10 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        const ChadBubble(
-          text:
-              'Pick what you did. Any version counts, and you can edit or delete it later.',
+        ChadBubble(
+          text: ref.watch(workoutsProvider).value?.isEmpty ?? false
+              ? FirstSteps.trainLine
+              : 'Pick what you did. Any version counts, and you can edit or delete it later.',
         ),
         const SizedBox(height: 12),
         GamePanel(

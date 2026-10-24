@@ -50,6 +50,9 @@ Future<void> _logPress(WidgetTester tester, String kg) async {
   await tester.enterText(find.widgetWithText(TextField, 'Weight (Optional)'), kg);
   await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
   await tester.ensureVisible(find.text('Save Workout'));
+  await tester.pump();
+  await tester.ensureVisible(find.text('Save Workout'));
+  await tester.ensureVisible(find.text('Save Workout'));
   await tester.tap(find.text('Save Workout'));
   await settle(tester);
 }

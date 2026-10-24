@@ -86,6 +86,9 @@ Future<void> _logWalk(WidgetTester tester) async {
   await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '10');
   await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
   await tester.ensureVisible(find.text('Save Workout'));
+  await tester.pump();
+  await tester.ensureVisible(find.text('Save Workout'));
+  await tester.ensureVisible(find.text('Save Workout'));
   await tester.tap(find.text('Save Workout'));
   await settle(tester);
 }

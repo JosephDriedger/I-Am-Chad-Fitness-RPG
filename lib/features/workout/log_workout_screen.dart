@@ -10,6 +10,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/chad.dart';
 import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
@@ -441,6 +442,32 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
               ],
             ),
           ),
+          if (!editing && (ref.watch(workoutsProvider).value?.isEmpty ?? false)) ...[
+            const SizedBox(height: 10),
+            Semantics(
+              container: true,
+              label: '${FirstSteps.logTitle}. ${FirstSteps.logIntro} ${[for (final s in FirstSteps.logSteps) '${s.title}. ${s.text}'].join(' ')}',
+              child: ExcludeSemantics(
+                child: GamePanel(
+                  key: const Key('first_log_panel'),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(FirstSteps.logTitle, style: TextStyle(fontWeight: FontWeight.w800)),
+                      const SizedBox(height: 4),
+                      Text(
+                        [for (var i = 0; i < FirstSteps.logSteps.length; i++) '${i + 1}. ${FirstSteps.logSteps[i].title}'].join('   '),
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(FirstSteps.logIntro),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           GamePanel(
             title: 'Your Effort',

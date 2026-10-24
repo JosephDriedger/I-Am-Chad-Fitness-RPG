@@ -51,6 +51,7 @@ void main() {
     final squats = ActivityCatalog.all.where((a) => a.name.toLowerCase().contains('squat')).length;
     expect(squats, greaterThan(3));
     expect(find.text('$squats Exercises'), findsOneWidget);
+    await tester.scrollUntilVisible(_card('Goblet Squat'), 200, scrollable: find.byType(Scrollable).first);
     expect(_card('Goblet Squat'), findsOneWidget);
     expect(_card('Push-ups'), findsNothing);
 
