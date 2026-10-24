@@ -23,7 +23,7 @@ void main() {
     expect(Guide.sections.length, inInclusiveRange(4, 8));
     const terms = [
       'Effort Minutes', 'Daily Limit', 'XP and Levels', 'Adventure Energy', 'Rest Days', 'Camps and Forks',
-      'Active Days and Streaks', 'Weekly Goal', 'Expeditions', 'Regions', 'Practice Duel', 'Focus',
+      'Active Days and Streaks', 'Weekly Goal', 'Last Week', 'Expeditions', 'Regions', 'Practice Duel', 'Focus',
       'Potions', 'Enemy Moves', 'Fired Up', 'Coins', 'Gear', 'Pennants and Trophies', 'The Chronicle',
       'Saved on Your Device', 'Stop If Anything Hurts', 'Quick Honesty Check',
     ];

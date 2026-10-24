@@ -82,6 +82,10 @@ class Guide {
             'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like.',
           ),
           const GuideEntry(
+            'Last Week',
+            'Once you have been around for a week, the quest board looks back at the one just gone: how many days you moved, your effort minutes and what you logged most. It only ever looks at your own week, never compares you with anyone, and a quiet week is simply a rest week.',
+          ),
+          const GuideEntry(
             'Back-Dated Workouts',
             'You can add a workout from an earlier day so your journal is complete. It goes in the journal only, and earns no rewards, because rewards are for what you do now.',
           ),

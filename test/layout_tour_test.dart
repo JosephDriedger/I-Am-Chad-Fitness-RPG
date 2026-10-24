@@ -113,6 +113,13 @@ void main() {
         await tester.tap(find.text(label));
         await settle(tester, frames: 30);
         _noProblem(tester, 'opening $label');
+        if (label == 'Quests') {
+          // The panels further down the board are built lazily, so scroll to each one.
+          for (final panel in ['Weekly Goal', 'Last Week', 'Self-Directed Adventures']) {
+            await _reveal(tester, find.text(panel));
+            _noProblem(tester, 'scrolling to $panel');
+          }
+        }
         if (label == 'Adventure') {
           await _tap(tester, find.text('Visit the Shop'));
           await _back(tester);

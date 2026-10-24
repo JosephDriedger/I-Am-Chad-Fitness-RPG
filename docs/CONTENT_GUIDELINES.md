@@ -57,6 +57,8 @@ The quest board suggests three quests a day, rotated from a pool for the player'
 - beginner quests stay gentle (at most two sets, ten reps and ten minutes);
 - the words are kind and each description is one finished sentence.
 
+Below the weekly goal, the board also looks back at **last week** (`WeeklyRecap` in `lib/domain/recap.dart`): active days against the player's own goal, effort minutes and what they logged most, with a line from Chad. It describes only the player's own week, never compares it with anyone or with an earlier week, counts only workouts logged on the day (as the goal does), calls a quiet week a rest week, and stays hidden until there is history from before this week. `test/domain/recap_test.dart` lints the words.
+
 ## Enemies
 
 Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They must not personify the player's struggles with their body, weight, laziness or failure.

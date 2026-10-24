@@ -6,6 +6,7 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/quests.dart';
+import '../../domain/recap.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
 import '../../game/core.dart' show Haptic;
@@ -44,6 +45,7 @@ class QuestsScreen extends ConsumerWidget {
       target: player.hero.weeklyGoalTarget,
     );
     final active = QuestBoard.activeWeekdays(now: now, entries: workouts);
+    final recap = WeeklyRecap.lastWeek(now: now, entries: workouts, goalDays: player.hero.weeklyGoalTarget, rules: rules);
 
     return GameScaffold(
       title: 'Quests',
@@ -113,6 +115,10 @@ class QuestsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          if (recap != null) ...[
+            _RecapPanel(recap: recap, seed: recap.start.difference(DateTime(2024)).inDays ~/ 7),
+            const SizedBox(height: 16),
+          ],
           const SizedBox(height: 16),
           GamePanel(
             title: 'Self-Directed Adventures',
@@ -341,48 +347,56 @@ class _Pin extends StatelessWidget {
 }
 
 class _WeekTokens extends StatelessWidget {
-  const _WeekTokens({required this.active, required this.today, required this.goal});
+  const _WeekTokens({required this.active, required this.today, required this.goal, this.label});
 
   final Set<int> active;
   final int today;
   final WeeklyGoal goal;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     const letters = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     return Semantics(
-      label: 'Active days this week: ${goal.daysActive} of ${goal.target}',
+      label: label ?? 'Active days this week: ${goal.daysActive} of ${goal.target}',
       child: ExcludeSemantics(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            for (var d = 1; d <= 7; d++)
-              Column(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: active.contains(d) ? GameColors.gold : GameColors.woodDark,
-                      border: Border.all(
-                        color: d == today ? GameColors.cream : GameColors.wood,
-                        width: d == today ? 3 : 2,
+        // The seven tokens share the width, so they shrink on a narrow phone
+        // instead of running off the edge.
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final size = (box.maxWidth / 7 - 4).clamp(22.0, 38.0);
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (var d = 1; d <= 7; d++)
+                  Column(
+                    children: [
+                      Container(
+                        width: size,
+                        height: size,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: active.contains(d) ? GameColors.gold : GameColors.woodDark,
+                          border: Border.all(
+                            color: d == today ? GameColors.cream : GameColors.wood,
+                            width: d == today ? 3 : 2,
+                          ),
+                        ),
+                        child: active.contains(d)
+                            ? Icon(Icons.star_rounded, color: GameColors.goldDark, size: size * 0.62)
+                            : null,
                       ),
-                    ),
-                    child: active.contains(d)
-                        ? const Icon(Icons.star_rounded, color: GameColors.goldDark, size: 24)
-                        : null,
+                      const SizedBox(height: 3),
+                      Text(letters[d - 1],
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: d == today ? GameColors.ink : GameColors.inkSoft,
+                          )),
+                    ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(letters[d - 1],
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        color: d == today ? GameColors.ink : GameColors.inkSoft,
-                      )),
-                ],
-              ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -475,6 +489,49 @@ class _StreakPanel extends ConsumerWidget {
               children: [
                 for (final d in (claimed.toList()..sort()))
                   GameChip(text: '$d Days', icon: Icons.check_circle_rounded, color: GameColors.cream),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A kind look back at last week. Shown only once there is a week to look back
+/// on, and it only ever describes the player's own week.
+class _RecapPanel extends StatelessWidget {
+  const _RecapPanel({required this.recap, required this.seed});
+
+  final WeekRecap recap;
+  final int seed;
+
+  @override
+  Widget build(BuildContext context) {
+    final top = recap.mostLogged;
+    return GamePanel(
+      key: const Key('recap_panel'),
+      title: WeeklyRecap.title,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(WeeklyRecap.chadLine(recap, seed: seed), style: const TextStyle(fontWeight: FontWeight.w600)),
+          if (!recap.quiet) ...[
+            const SizedBox(height: 12),
+            _WeekTokens(
+              active: recap.weekdays,
+              today: 0,
+              goal: WeeklyGoal(target: recap.goalDays, daysActive: recap.activeDays),
+              label: 'Active days last week: ${WeeklyRecap.activeLabel(recap)}',
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                GameChip(text: WeeklyRecap.activeLabel(recap), icon: Icons.star_rounded, color: GameColors.gold),
+                GameChip(text: '${recap.effortMinutes.round()} Effort Min', icon: Icons.timer_outlined, color: GameColors.teal),
+                if (top != null) GameChip(text: 'Most Logged: ${top.$1.name}', icon: Icons.favorite_rounded, color: GameColors.cream),
               ],
             ),
           ],
