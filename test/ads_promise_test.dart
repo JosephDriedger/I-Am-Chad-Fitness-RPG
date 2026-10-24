@@ -95,4 +95,33 @@ void main() {
       expect(Entitlements.fromReceipts([(key: 'x', productId: Patronage.patronPackId)]).hasPremium, isFalse);
     });
   });
+
+  group('the audience is teens and adults, so ads are family-safe', () {
+    final ads = File('lib/app/ads.dart').readAsStringSync();
+
+    test('ads are limited to the most restrictive content rating', () {
+      expect(ads, contains('MaxAdContentRating.g'));
+      for (final looser in ['MaxAdContentRating.pg', 'MaxAdContentRating.t', 'MaxAdContentRating.ma', 'MaxAdContentRating.unspecified']) {
+        expect(ads, isNot(contains(looser)), reason: 'adult-themed ads must stay out');
+      }
+    });
+
+    test('ads are never personalized', () {
+      expect(ads, contains('nonPersonalizedAds: true'));
+      expect(ads, isNot(contains('nonPersonalizedAds: false')));
+    });
+
+    test('the game is never declared child-directed, because it is not for younger children', () {
+      expect(ads.toLowerCase(), isNot(contains('childdirectedtreatment')));
+      expect(ads, isNot(contains('AgeRestrictedTreatment.child')));
+    });
+
+    test('the release steps lock the AdMob account down, weight-loss ads included', () {
+      final doc = File('docs/MONETIZATION.md').readAsStringSync();
+      expect(doc, contains('General audiences'));
+      expect(doc, contains('block every sensitive category'));
+      expect(doc, contains('Weight loss and diet'));
+      expect(doc, contains('13 and over'));
+    });
+  });
 }

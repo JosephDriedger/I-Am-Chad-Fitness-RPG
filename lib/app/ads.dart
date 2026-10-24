@@ -58,7 +58,10 @@ abstract class AdGateway {
 /// The ids below are Google's public **test** ids, which only ever show test
 /// ads. They must be replaced with the real ones from an AdMob account before
 /// release (and the matching app ids in AndroidManifest.xml and Info.plist).
-/// Ads are requested non-personalized and limited to family-friendly (G) content.
+/// Ads are requested non-personalized, limited to the most restrictive content
+/// rating (G, so nothing adult-themed), and with no child age-treatment signal,
+/// because the game is aimed at teens and adults (13 and over) and not at younger
+/// children. See docs/MONETIZATION.md.
 class AdMobGateway implements AdGateway {
   static const androidChapterUnit = 'ca-app-pub-3940256099942544/1033173712';
   static const iosChapterUnit = 'ca-app-pub-3940256099942544/4411468910';
@@ -90,6 +93,8 @@ class AdMobGateway implements AdGateway {
       if (!await ConsentInformation.instance.canRequestAds()) return false;
       if (!_started) {
         await MobileAds.instance.updateRequestConfiguration(
+          // No child or teen treatment is set: players are teens and adults, and the
+          // app does not know anyone's age. Only the content rating is limited.
           RequestConfiguration(maxAdContentRating: MaxAdContentRating.g),
         );
         await MobileAds.instance.initialize();
