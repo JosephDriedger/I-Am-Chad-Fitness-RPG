@@ -97,9 +97,14 @@ class _ShopScreenState extends ConsumerState<ShopScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
         children: [
-          Row(
+          // The chip drops under the title when they cannot share a line (large text).
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12,
+            runSpacing: 6,
             children: [
-              Expanded(child: Text('Your Coins', style: gameTitle(24))),
+              Text('Your Coins', style: gameTitle(24)),
               GameChip(text: '$coins Coins', icon: Icons.monetization_on, color: GameColors.gold),
             ],
           ),
