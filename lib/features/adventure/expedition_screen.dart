@@ -56,6 +56,17 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
   late final String _chadStart;
   bool _leaveLater = false;
 
+  /// The panel under (or beside) the scene scrolls when its content is taller than the
+  /// room it has, and is kept at the bottom, where the buttons are, so the way on is
+  /// always in view.
+  final _panelScroll = ScrollController();
+
+  @override
+  void dispose() {
+    _panelScroll.dispose();
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -310,35 +321,64 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       },
       child: GameScaffold(
         title: widget.practice ? 'Practice Duel' : 'Expedition',
-        child: Column(
-          children: [
-            if (!widget.practice) _PathBar(run: _run, view: _view),
-            Expanded(
-              child: ClipRect(
-                child: GameWidget(game: _scene),
-              ),
-            ),
-            _panel(context),
-          ],
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final scene = ClipRect(child: GameWidget(game: _scene));
+            // On a phone held sideways the scene and the panel sit side by side, so the
+            // panel has the whole height. Upright, the panel goes underneath and never
+            // takes more than about half the screen; when it needs more (large text) it
+            // scrolls, and the scene keeps the rest.
+            final sideBySide = box.maxWidth > box.maxHeight * 1.2;
+            return Column(
+              children: [
+                if (!widget.practice) _PathBar(run: _run, view: _view),
+                if (sideBySide)
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(flex: 11, child: scene),
+                        Expanded(flex: 9, child: _panel(context, sideBySide: true)),
+                      ],
+                    ),
+                  )
+                else ...[
+                  Expanded(child: scene),
+                  _panel(context, maxHeight: box.maxHeight * 0.55),
+                ],
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _panel(BuildContext context) {
+  Widget _panel(BuildContext context, {double maxHeight = double.infinity, bool sideBySide = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_panelScroll.hasClients) _panelScroll.jumpTo(_panelScroll.position.maxScrollExtent);
+    });
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-      decoration: const BoxDecoration(
+      height: sideBySide ? double.infinity : null,
+      decoration: BoxDecoration(
         color: GameColors.parchment,
-        border: Border(top: BorderSide(color: GameColors.wood, width: 4)),
+        border: sideBySide
+            ? const Border(left: BorderSide(color: GameColors.wood, width: 4))
+            : const Border(top: BorderSide(color: GameColors.wood, width: 4)),
       ),
-      child: switch (_view) {
-        _View.battle => _battlePanel(context),
-        _View.battleOver => _overPanel(context),
-        _View.event => _eventPanel(context),
-        _View.result => _resultPanel(context),
-      },
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: SingleChildScrollView(
+          controller: _panelScroll,
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: switch (_view) {
+            _View.battle => _battlePanel(context),
+            _View.battleOver => _overPanel(context),
+            _View.event => _eventPanel(context),
+            _View.result => _resultPanel(context),
+          },
+        ),
+      ),
     );
   }
 

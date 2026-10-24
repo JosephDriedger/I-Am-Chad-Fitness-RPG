@@ -127,6 +127,8 @@ Nearly every test runs with Reduce Motion on, so scenes finish each animation in
 
 `test/onboarding_layout_test.dart` does the same for what every player sees first: the three onboarding steps, and the title screen a returning player sees on launch, each scrolled top to bottom on the smallest phone at the largest text, a small phone at big text and a phone on its side. It found the logo breaking "CHAD" over four lines, the title screen overflowing on a phone held sideways, and a crash on closing the title screen with Reduce Motion on.
 
+`test/expedition_layout_test.dart` covers the expedition screens at the awkward sizes: a fork in the road, a camp with a long description, a battle with its four actions and the result panel. It found that the panel under the scene overflowed on a phone held sideways, so the screen now puts the scene and the panel side by side in landscape, caps the panel at about half the height when upright, and keeps it scrolled to its buttons so the way on is always in view.
+
 `test/accessibility_test.dart` runs Flutter's own accessibility checks (tap targets at least 48 x 48, every control named for a screen reader, text contrast) on each main screen. The layout tour also covers a phone on its side.
 
 ## Ads in development
