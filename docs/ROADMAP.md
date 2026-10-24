@@ -56,7 +56,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 - Reminder notifications that are opt-in, kind and never guilt-based.
 - Recovery-friendly mini-games beyond the practice duel.
 - Weightlifting progression beyond personal bests (which are built: see [Reward rules](REWARD_RULES.md#personal-bests)), such as charts over time.
-- Release preparation: real application id, icons, store listings, privacy policy and disclosures (store purchases **and** the ad SDK, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), a real AdMob account with the test ids replaced, and the age rating, which must be settled before real ads are switched on because of the rules on advertising to children.
+- Release preparation: real application id, icons, store listings, privacy policy and disclosures (store purchases **and** the ad SDK, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), a real AdMob account with the test ids replaced and its blocking controls set (General audiences only, every sensitive category blocked, weight-loss ads included), and the stores' target audience and age rating set to teens and adults (13+).
 - More cosmetics, free and earned first. Stories are never sold (see [Monetization](MONETIZATION.md#changing-this-later)). Ideas for Premium extras that are not gameplay.
 - Asset licence register if any third-party asset is ever added.
 
@@ -86,7 +86,7 @@ Carried over from GDD section 17, with the current stance:
 | --- | --- |
 | Exact reward formula and daily caps | Proposal in [Reward rules](REWARD_RULES.md); needs fairness testing across abilities |
 | Combat class and skill design; do workouts influence specific stats | Single class, one skill; workouts do not influence stats |
-| Age rating and minors | Undecided; onboarding collects no age |
+| Age rating and minors | Decided: aimed at teens and adults (13 and over), not at younger children. Set the stores' target audience and age rating to match (see [Monetization](MONETIZATION.md#children-and-families)). Ads are G-rated and non-personalized, with no child signal. Onboarding collects no age |
 | Weightlifting in early release | Included as basic logging (sets, reps, load); no progression tracking |
 | Original art pipeline and licensing budget | Procedural art in code for now; a hand-made pass is a later decision |
 | Final title and trademark clearance | Working title only |
