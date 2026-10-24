@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/quests.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
+import '../../game/core.dart' show Haptic;
 import '../story/chronicle_screen.dart';
 import '../workout/log_workout_screen.dart';
 import '../workout/workout_screen.dart';
@@ -35,7 +37,12 @@ class QuestsScreen extends ConsumerWidget {
       hasDumbbells: player.hero.hasDumbbells,
       count: 4,
     );
-    final goal = QuestBoard.weeklyGoal(level: player.hero.experience, now: now, entries: workouts);
+    final goal = QuestBoard.weeklyGoal(
+      level: player.hero.experience,
+      now: now,
+      entries: workouts,
+      target: player.hero.weeklyGoalTarget,
+    );
     final active = QuestBoard.activeWeekdays(now: now, entries: workouts);
 
     return GameScaffold(
@@ -94,6 +101,15 @@ class QuestsScreen extends ConsumerWidget {
                           'A quiet day never takes anything away.',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
+                const SizedBox(height: 14),
+                _GoalPicker(
+                  chosen: player.hero.weeklyGoalDays,
+                  suggested: player.hero.experience.weeklyDaysGoal,
+                  onChanged: (days) {
+                    ref.read(feedbackProvider).haptic(Haptic.select);
+                    ref.read(repositoryProvider).setWeeklyGoalDays(days);
+                  },
+                ),
               ],
             ),
           ),
@@ -122,6 +138,50 @@ class QuestsScreen extends ConsumerWidget {
           const SafetyNote(),
         ],
       ),
+    );
+  }
+}
+
+/// Lets the player pick how many days a week to aim for. The goal never costs
+/// anything to miss, so there is no wrong answer; it can be changed any time.
+class _GoalPicker extends StatelessWidget {
+  const _GoalPicker({required this.chosen, required this.suggested, required this.onChanged});
+
+  /// The player's own choice, or 0 if they have not made one.
+  final int chosen;
+  final int suggested;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final current = chosen == 0 ? suggested : chosen;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('My goal, in days a week', style: TextStyle(fontWeight: FontWeight.w800, color: GameColors.inkSoft)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (var d = 1; d <= 7; d++)
+              ChoiceChip(
+                key: Key('goal_$d'),
+                label: Text('$d'),
+                selected: current == d,
+                tooltip: d == 1 ? '1 day a week' : '$d days a week',
+                onSelected: (_) => onChanged(d == suggested ? 0 : d),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Text(
+          chosen == 0
+              ? 'Chad suggests $suggested for you. Pick any number that suits your week.'
+              : 'Your own goal. Tap $suggested to go back to Chad\'s suggestion.',
+          style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ],
     );
   }
 }

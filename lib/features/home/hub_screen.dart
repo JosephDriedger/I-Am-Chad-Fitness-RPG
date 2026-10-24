@@ -42,12 +42,12 @@ class _HubScreenState extends ConsumerState<HubScreen> {
   @override
   void initState() {
     super.initState();
-    final fx = ref.read(feedbackProvider);
     _scene = HubScene(
       initial: _stateFor(ref.read(playerProvider)!),
       reducedMotion: ref.read(prefsProvider).reducedMotion,
-      onSfx: fx.sfx,
-      onHaptic: fx.haptic,
+      // Read the settings each time: they can change while the scene lives.
+      onSfx: (s) { if (mounted) ref.read(feedbackProvider).sfx(s); },
+      onHaptic: (h) { if (mounted) ref.read(feedbackProvider).haptic(h); },
       onSelect: _open,
       onChadTap: () => setState(() => _chadNudge++),
     );
@@ -59,7 +59,12 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     final prefs = ref.read(prefsProvider);
     final now = ref.read(clockProvider)();
     final today = workouts.where((w) => dayKey(w.performedAt) == dayKey(now)).toList();
-    final goal = QuestBoard.weeklyGoal(level: p.hero.experience, now: now, entries: workouts);
+    final goal = QuestBoard.weeklyGoal(
+      level: p.hero.experience,
+      now: now,
+      entries: workouts,
+      target: p.hero.weeklyGoalTarget,
+    );
     final quests = QuestBoard.dailySuggestions(
       level: p.hero.experience,
       day: now,

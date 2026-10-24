@@ -17,10 +17,10 @@ import 'package:flutter/painting.dart'
 import 'look.dart';
 
 /// Haptic feedback strengths the scenes can ask for.
-enum Haptic { light, medium, heavy }
+enum Haptic { light, medium, heavy, select, success }
 
 /// Sound effects the scenes can ask for. See `lib/app/sound.dart`.
-enum Sfx { tap, hit, skill, guard, heal, coin, levelUp, victory, defeat, whoosh, chest }
+enum Sfx { tap, hit, skill, guard, heal, coin, levelUp, victory, defeat, whoosh, chest, saved, fanfare, rep }
 
 /// A [FlameGame] that lays out a fixed design area and scales it to fit.
 ///

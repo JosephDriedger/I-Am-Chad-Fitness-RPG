@@ -158,12 +158,13 @@ class AdventureScreen extends ConsumerWidget {
       potions: Shop.basePotions + bring,
     );
     // Energy, the pouch potions and the saved starting point are written together.
-    await ref.read(repositoryProvider).startExpedition(
+    final started = await ref.read(repositoryProvider).startExpedition(
           progress,
           energyCost: Expedition.energyCost,
           broughtPotions: bring,
         );
-    if (!context.mounted) return;
+    // A second tap while the first is saving finds the run already started.
+    if (!started || !context.mounted) return;
     await Navigator.of(context).push(
       gameRoute<void>(ExpeditionScreen(seed: seed, practice: false, progress: progress)),
     );

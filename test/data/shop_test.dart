@@ -244,6 +244,14 @@ void main() {
           VALUES ('walking', 1790000000, 600);
         INSERT INTO heroes (id, name, experience, coins, streak_xp, created_at)
           VALUES (1, 'Veteran', 'regular', 54, 20, 1790000000);
+        CREATE TABLE app_settings (
+          id INTEGER NOT NULL PRIMARY KEY,
+          use_metric INTEGER NOT NULL DEFAULT 1,
+          reduced_motion INTEGER NOT NULL DEFAULT 0,
+          quiet_chad INTEGER NOT NULL DEFAULT 0,
+          sound_on INTEGER NOT NULL DEFAULT 1,
+          haptics_on INTEGER NOT NULL DEFAULT 1
+        );
         PRAGMA user_version = 5;
       ''');
     }));

@@ -92,10 +92,21 @@ The HP bars, names and focus pips are drawn in screen space, so they sit at the 
 
 ## Sound and haptics
 
-- Eleven short sound effects live in `assets/audio/`. They are **synthesized by `tool/gen_sfx.mjs`**, so they are original and carry no licence obligations. Run `node tool/gen_sfx.mjs` to regenerate them.
-- `GameFeedback` plays them with `flame_audio` and triggers vibration, each gated by the **Sound effects** and **Vibration** switches in Settings. Failures are swallowed.
-- There is no background music yet.
+**Sound effects.** Fourteen short effects live in `assets/audio/`, **synthesized by `tool/gen_sfx.mjs`** so they are original and carry no licence obligations (`node tool/gen_sfx.mjs` regenerates them). Three belong to everyday moments rather than battle: `saved` (a two-note chime when a workout is saved), `fanfare` (a personal best or a streak reward) and `rep` (one rep counted by the camera).
 
+**Haptics.** `Haptic` has five strengths: `light`, `medium`, `heavy`, a `select` tick for choosing a chip or goal, and `success`, two pulses (firm then soft) for "got it". Battles use the first three as before. Saving a workout gives `success`, the honesty question a `light` tap, and turning Vibration on in Settings lets you feel one.
+
+**Music.** Two loops, **synthesized by `tool/gen_music.mjs`** (`node tool/gen_music.mjs`): `hall_loop.wav`, a calm 76 BPM tune (about 25 s), and `battle_loop.wav`, a livelier 138 BPM tune (about 28 s). Every note wraps around the end of the file, so the loop has no click, and a test checks the seam. `lib/app/music.dart` plays them:
+
+- **Off by default** (`Music` in Settings, schema v10), because many people exercise with their own music or a podcast. It plays quietly (volume 0.3) with audio focus set to *mix with others*, so it never pauses someone else's audio.
+- The hall plays the hall tune. A battle or practice duel asks for the battle tune while it is open (`WantsMusic`) and hands the hall tune back when it closes.
+- Music stops when the app goes to the background and returns with it. A permission prompt or the notification shade (`inactive`) does not stop it.
+
+**Settings are read live.** The hall and battle scenes used to keep the sound and vibration switches they were built with, so turning Sound on in Settings did nothing in the hall until the app was restarted. Scenes now ask `feedbackProvider` each time, and a test covers it.
+
+`GameFeedback` plays effects with `flame_audio` and triggers vibration, each gated by the **Sound Effects** and **Vibration** switches. Failures are swallowed. Tests swap in recorders through `sfxPlayerProvider`, `hapticPlayerProvider` and `musicBackendProvider`.
+
+**Not yet verified:** how any of this sounds and feels. The sounds and music are checked for validity, clipping and a clean loop point, and the wiring is tested with recorders, but nobody has heard it on a speaker or felt it on a motor. The mix-with-others audio setting is untested on real devices, on iOS especially.
 ## Accessibility
 
 - Menu buttons, battle actions and the HUD stats have semantic labels; the battle log is a live region; the expedition path has a progress label.

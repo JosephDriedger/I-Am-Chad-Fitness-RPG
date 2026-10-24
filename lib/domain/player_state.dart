@@ -44,6 +44,7 @@ class AppPrefs {
     this.quietChad = false,
     this.soundOn = true,
     this.hapticsOn = true,
+    this.musicOn = false,
   });
 
   final bool useMetric;
@@ -54,12 +55,17 @@ class AppPrefs {
   final bool soundOn;
   final bool hapticsOn;
 
+  /// Background music. Off unless the player turns it on, so the game never
+  /// talks over their own music.
+  final bool musicOn;
+
   AppPrefs copyWith({
     bool? useMetric,
     bool? reducedMotion,
     bool? quietChad,
     bool? soundOn,
     bool? hapticsOn,
+    bool? musicOn,
   }) =>
       AppPrefs(
         useMetric: useMetric ?? this.useMetric,
@@ -67,6 +73,7 @@ class AppPrefs {
         quietChad: quietChad ?? this.quietChad,
         soundOn: soundOn ?? this.soundOn,
         hapticsOn: hapticsOn ?? this.hapticsOn,
+        musicOn: musicOn ?? this.musicOn,
       );
 }
 

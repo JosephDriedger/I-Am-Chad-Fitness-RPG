@@ -27,7 +27,7 @@ Roughly in priority order.
 4. **Try camera rep counting on real people.** The first version is built (push-ups and squats; see below) and runs on an emulator, but it has never counted a real rep. It needs testing on physical phones with different body types, clothing, light and angles, then the thresholds in `rep_counter.dart` tuned, an iOS build, and a decision on sit-ups and planks.
 5. **More story.** Season One is written and playable. Season Two needs new places, a new problem for the guild and chapters further up the level curve; hand-made portraits and scene art would lift it a lot. Watch whether people read the chapters or skip them, and whether the choices are noticed.
 6. **More to look at.** More enemies and biomes, and more hall decoration. The first step is done: ten pennants on the hall's bunting appear as milestones are earned (see [Monetization](MONETIZATION.md#free-looks-sit-beside-the-paid-ones)). More earned decoration, such as trophies on the shelf, would fit. A hand-made art pass can replace procedural painters one at a time.
-7. **Music.** A calm loop for the hall and a livelier one for battles, both mutable. Sound effects already exist.
+7. **Music.** Built: a calm loop for the hall and a livelier one for battles, synthesized in code, off by default, quiet, and mixed under other apps' audio (see [Game scenes](GAME_SCENES.md#sound-and-haptics)). Still open: hearing it on a real phone, and deciding whether synthesized tunes are good enough or a composer is wanted.
 8. **Interactive Chad intro.** The "brief optional introductory activity" from the GDD (a one-minute guided stretch, say) and first-use tooltips.
 9. **Review the exercise demonstrations with a qualified professional.** The animated demos and cues are original and conservative, but they have not been reviewed by a trainer or physio, and the GDD asks for that where possible. Photo or video demos, if ever added, need documented licences.
 10. **Accessibility pass.** Test with TalkBack and VoiceOver, large text, high contrast and reduced motion on real devices.
@@ -55,7 +55,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 - Character skills and stat choices; more equipment.
 - Reminder notifications that are opt-in, kind and never guilt-based.
 - Recovery-friendly mini-games beyond the practice duel.
-- Weightlifting progression tracking and personal bests.
+- Weightlifting progression beyond personal bests (which are built: see [Reward rules](REWARD_RULES.md#personal-bests)), such as charts over time.
 - Release preparation: real application id, icons, store listings, privacy disclosures (declare only store-handled purchases, per [Monetization](MONETIZATION.md#privacy-and-the-players-data)), age rating.
 - Season Two as an optional one-time expansion sold through the Patron's Hall, with Season One staying free (see [Monetization](MONETIZATION.md#changing-this-later)). More cosmetics, free and earned first.
 - Asset licence register if any third-party asset is ever added.
@@ -71,11 +71,11 @@ The original thinking, still the guide for what comes next: use the phone camera
 ## Known issues and limitations
 
 - Verified on an Android emulator and through analysis, unit tests, painter and demo invariant tests, repository and migration tests, and widget flow tests that play a full expedition. **Not yet run on a physical phone or on iOS.**
-- Animation timing and feel were checked in screenshots on the emulator, not by hand on a phone, and **sound and vibration have not been heard or felt** (an emulator has no speaker or motor to judge).
+- Animation timing and feel were checked in screenshots on the emulator, not by hand on a phone, and **sound, music and vibration have not been heard or felt** (an emulator has no speaker or motor to judge). The music and the new sounds were synthesized and checked by numbers only.
 - Camera rep counting has been run only on an emulator (preview, overlay, permission and set-up screens), and through unit tests with synthetic poses. **It has not counted a real person's reps yet**, so the thresholds and the ML Kit coordinate handling (especially the front-camera mirror and iOS) are unverified.
 - An expedition is saved at the start of each step, so closing the app mid-fight replays that fight on resume (nothing is lost).
 - Frame rate on low-end phones is unmeasured. Scenes draw everything with canvas calls each frame, which should be fine at this scale but has not been profiled.
-- The weekly goal counts days with any logged movement and cannot yet be customised.
+- The weekly goal counts days with any logged movement. The player can now pick 1 to 7 days on the quest board; the default is still the suggestion for their experience.
 - The Android and iOS application id (`com.iamchad.i_am_chad`) is a placeholder, and the store products do not exist yet, so **a real purchase has never been made**. The checkout code (`InAppPurchaseGateway`) is a thin layer over the `in_app_purchase` plugin and is untested against Google Play or StoreKit; everything around it (receipts, restore, confirm-after-save, cosmetics) is tested with a pretend store. On a device without the store set up, the Patron's Hall says the store cannot be reached and offers nothing to buy.
 
 ## Open design decisions

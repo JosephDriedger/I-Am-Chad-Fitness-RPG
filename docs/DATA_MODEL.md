@@ -53,6 +53,7 @@ A single row with `id = 1`.
 | `streak_xp` | XP paid out for streak milestones (schema v5) |
 | `potion_stock` | Healing potions in the pouch, bought in the shop (schema v6) |
 | `cape`, `hair_dye` | The chosen cape and hair dye, as ids from `Cosmetics` (`classic` and `''` by default; schema v8). Looks only. A look the player does not have access to is drawn as the default, never as an error |
+| `weekly_goal_days` | Days a week the player chose to aim for, 1 to 7; 0 means "use the suggestion for their experience" (schema v9) |
 | `created_at` | |
 
 ### `owned_items`
@@ -85,7 +86,7 @@ At most one row (`id = 1`): the expedition in progress, if any. Columns: `seed`,
 
 ### `app_settings`
 
-A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound_on`, `haptics_on`. When the row is missing the app uses defaults (metric, motion on, Chad chatty, sound and vibration on).
+A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound_on`, `haptics_on`, `music_on` (schema v10). When the row is missing the app uses defaults (metric, motion on, Chad chatty, sound and vibration on, **music off**).
 
 ## Derived values (never stored)
 
@@ -95,7 +96,8 @@ A single row with `id = 1`: `use_metric`, `reduced_motion`, `quiet_chad`, `sound
 | Level | `Progression.levelForXp(totalXp)` |
 | Energy earned | `sum(reward_grants.energy)` |
 | Energy available | `max(0, energy earned − heroes.energy_spent)` |
-| Weekly goal progress | Distinct active days in the current Monday to Sunday week |
+| Weekly goal progress | Distinct active days in the current Monday to Sunday week, against `HeroProfile.weeklyGoalTarget` (the chosen days, else the suggestion). The week edges are calendar midnights, so a clock change cannot move them |
+| Personal bests | `PersonalBests.of(workouts)`: heaviest, most reps in a set, longest and farthest per exercise, newest first. Never stored, never rewarded |
 | Quest completion | Whether an entry for the suggested activity exists today |
 | Open story chapters | Chapters whose unlock level is at or below the hero's level |
 
@@ -110,7 +112,7 @@ No account, analytics or network calls exist in the app.
 
 ## Migrations
 
-`schemaVersion` is currently **7**. Version 7 added the `story_progress` and `story_choices` tables; `test/data/story_progress_test.dart` proves a v6 save keeps its workouts and hero. Version 6 added `workouts.logged_at` and `heroes.potion_stock`; `test/data/shop_test.dart` proves a v5 save keeps its workouts, rewards and hero. Version 5 added the `streak_rewards` table and `heroes.streak_xp`; `test/data/streak_rewards_test.dart` proves a v4 save keeps its workouts and hero. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
+`schemaVersion` is currently **10**. Version 10 added `app_settings.music_on` (`test/data/migration_v10_test.dart`). Version 9 added `heroes.weekly_goal_days` (`test/data/migration_v9_test.dart`). Version 8 added `purchase_receipts`, `heroes.cape` and `heroes.hair_dye` (`test/data/migration_v8_test.dart`). Version 7 added the `story_progress` and `story_choices` tables; `test/data/story_progress_test.dart` proves a v6 save keeps its workouts and hero. Version 6 added `workouts.logged_at` and `heroes.potion_stock`; `test/data/shop_test.dart` proves a v5 save keeps its workouts, rewards and hero. Version 5 added the `streak_rewards` table and `heroes.streak_xp`; `test/data/streak_rewards_test.dart` proves a v4 save keeps its workouts and hero. Version 4 added `workouts.camera_counted`; `test/data/migration_v4_test.dart` proves a v3 save keeps every workout. Version 2 added `heroes.appearance_skin`, `app_settings.sound_on` and `app_settings.haptics_on`; `onUpgrade` adds the columns with their defaults and `test/data/migration_test.dart` proves a v1 save survives. Version 3 added the `active_expeditions` table; `test/data/migration_v3_test.dart` proves a v2 save survives, and the upgrade was also confirmed on an Android emulator with an existing save. When changing a table:
 
 1. Edit the table in `database.dart` and bump `schemaVersion`.
 2. Add the matching step in `MigrationStrategy.onUpgrade`.

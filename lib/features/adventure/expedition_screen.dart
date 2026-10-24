@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/feedback.dart';
+import '../../app/music.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/chad.dart';
@@ -36,10 +37,14 @@ class ExpeditionScreen extends ConsumerStatefulWidget {
   ConsumerState<ExpeditionScreen> createState() => _ExpeditionScreenState();
 }
 
-class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
+class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsMusic {
   late final ExpeditionRun _run;
   late final BattleScene _scene;
   BattleState? _battle;
+
+  /// The enemy of the battle on screen. The "battle over" panel reads this and
+  /// not the run, because the run moves on the moment the battle is finished.
+  EnemyTemplate? _foe;
   _View _view = _View.battle;
 
   bool _busy = true;
@@ -53,9 +58,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
   @override
   void initState() {
     super.initState();
+    wantMusic(MusicTrack.battle);
     final player = ref.read(playerProvider)!;
     final prefs = ref.read(prefsProvider);
-    final fx = ref.read(feedbackProvider);
     final freshHero = Combatant.fresh(
       name: player.hero.name,
       maxHp: player.maxHp,
@@ -91,8 +96,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
           ),
       heroName: player.hero.name,
       reducedMotion: prefs.reducedMotion,
-      onSfx: fx.sfx,
-      onHaptic: fx.haptic,
+      // Read the settings each time: they can change while the scene lives.
+      onSfx: (s) { if (mounted) ref.read(feedbackProvider).sfx(s); },
+      onHaptic: (h) { if (mounted) ref.read(feedbackProvider).haptic(h); },
     );
     _begin();
   }
@@ -132,6 +138,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
       return;
     }
     final b = _run.startBattle();
+    _foe = step.enemy;
     setState(() {
       _battle = b;
       _view = _View.battle;
@@ -210,6 +217,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
 
   Future<void> _continueAfterBattle() async {
     if (_busy) return;
+    // Lock the screen first: saving takes a moment, and a second tap in that
+    // moment must not finish the same battle twice and skip a step.
+    setState(() => _busy = true);
     _run.finishBattle(_battle!);
     await _beginStep();
   }
@@ -386,8 +396,8 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> {
             style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 4),
         Text(won
-            ? 'Rewards from this battle: +${Expedition.xpForBattle(_run.current!.enemy!)} XP, '
-                '+${Expedition.coinsForBattle(_run.current!.enemy!)} Coins.'
+            ? 'Rewards from this battle: +${Expedition.xpForBattle(_foe!)} XP, '
+                '+${Expedition.coinsForBattle(_foe!)} Coins.'
             : 'Rewards from battles already won are kept.'),
         const SizedBox(height: 12),
         GameButton(

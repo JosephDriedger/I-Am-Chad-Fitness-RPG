@@ -40,7 +40,7 @@ If `web/drift_worker.js` is missing, rebuild it with `dart compile js -O4 web/dr
 
 ## Sound effects
 
-The files in `assets/audio` are synthesized, not recorded. Edit `tool/gen_sfx.mjs` and run `node tool/gen_sfx.mjs` to regenerate them. Each file name must match an `Sfx` value in `lib/game/core.dart` (a test checks this).
+The files in `assets/audio` are synthesized, not recorded. Edit `tool/gen_sfx.mjs` and run `node tool/gen_sfx.mjs` to regenerate the effects; each file name must match an `Sfx` value in `lib/game/core.dart` (a test checks this). The two music loops come from `tool/gen_music.mjs` the same way (`node tool/gen_music.mjs`), and their file names are in `MusicTrack` in `lib/app/music.dart`. Both scripts are deterministic, so running them again rewrites identical files.
 
 ## Everyday commands
 
@@ -115,3 +115,7 @@ Real checkout needs the application id replaced and the products created in both
 ## Commits
 
 Use short, imperative commit messages that describe the change ("Add reward explanation dialog"). Keep generated code (`*.g.dart`) out of commits. `pubspec.lock` is committed because this is an application.
+
+## Random-play tests
+
+`test/domain/fuzz_test.dart` throws thousands of random days, streaks and battles at the rules and checks the promises they make (caps never exceeded, logging more never earns less, battles always end). `test/monkey_test.dart` taps, types, scrolls and goes back at random through the real app, twelve seeds of 160 steps each, and fails on any exception, printing the seed, the step and the last actions so the run can be replayed. When either finds a bug, fix it and keep a small test for that case beside it, as `test/double_tap_test.dart` and `test/save_failure_test.dart` do.

@@ -175,3 +175,16 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), pra
 - The 3-minute floor lets someone log many tiny entries to reach the cap quickly. The cap bounds the damage and the game is single-player, and the [honesty check](#honesty-check) now flags the pattern, but a per-day limit on floored entries is a possible tightening.
 - Camera-based rep recognition could verify reps, but it has real privacy, accessibility and accuracy costs. See the [roadmap](ROADMAP.md).
 - Weekly or personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is not implemented yet. See the [roadmap](ROADMAP.md).
+
+## Personal bests
+
+`lib/domain/records.dart` works out the player's own best marks from the journal: heaviest weight (with the reps done at it), most reps in one set, longest time and farthest distance, for each exercise. They appear in a **Personal Bests** panel in the journal, and the "Workout Saved!" dialog says so when a workout beats an earlier mark.
+
+- **They never change a reward.** Weight and pace still earn nothing extra (see above), so there is no pull toward lifting heavier or pushing harder than is right for the player. The panel and the dialog both say this.
+- **The first time is not a record.** Only a mark that already had a holder can be beaten, and matching a mark does not count. A tie keeps the earlier one.
+- **Editing is safe.** An entry being edited is not measured against its old self, and a typo is fixed by editing or deleting the entry, after which the marks are recalculated from the journal.
+- **Nothing is stored.** The marks are derived each time, so they can never disagree with the journal.
+
+## Weekly goal
+
+The weekly goal is the number of days in a Monday to Sunday week with any logged movement. It starts at the suggestion for the player's experience (2, 3 or 4 days) and the quest board lets them choose any number from 1 to 7, or hand the choice back by tapping the suggested number. It is only a target to look at: missing it takes nothing away and changes no reward. The week's edges are calendar midnights, so a daylight-saving change cannot shift a workout into the wrong week.

@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import '../../domain/activity.dart';
 import '../../domain/player_state.dart';
+import '../../domain/records.dart';
 import '../../domain/workout.dart';
 import '../workout/log_workout_screen.dart';
 
@@ -74,6 +76,8 @@ class HistoryScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             _WeekChart(now: now, grants: grants),
             const SizedBox(height: 14),
+            _BestsPanel(bests: PersonalBests.of(workouts), metric: metric),
+            const SizedBox(height: 14),
             for (final day in days) ...[
               _DayHeader(day: day, grant: grants[day]),
               for (final w in byDay[day]!) _WorkoutTile(entry: w, metric: metric),
@@ -82,6 +86,67 @@ class HistoryScreen extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// The player's own best marks, newest first. Collapsed to a few until asked.
+class _BestsPanel extends StatefulWidget {
+  const _BestsPanel({required this.bests, required this.metric});
+
+  final List<PersonalBest> bests;
+  final bool metric;
+
+  @override
+  State<_BestsPanel> createState() => _BestsPanelState();
+}
+
+class _BestsPanelState extends State<_BestsPanel> {
+  static const _shown = 5;
+  bool _all = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final bests = widget.bests;
+    if (bests.isEmpty) return const SizedBox.shrink();
+    final visible = _all ? bests : bests.take(_shown).toList();
+    return GamePanel(
+      title: 'Personal Bests',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final b in visible)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.workspace_premium_rounded, color: GameColors.teal, size: 22),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${ActivityCatalog.byId(b.activityId)?.name ?? 'Unknown'}: ${b.kind.label}',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ),
+                  Text(b.describe(metric: widget.metric), style: gameTitle(17)),
+                ],
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Your own marks. They are only for looking back on, and never change what you earn.',
+            style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
+          ),
+          if (bests.length > _shown)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => setState(() => _all = !_all),
+                child: Text(_all ? 'Show Fewer' : 'Show All ${bests.length}'),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

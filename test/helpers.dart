@@ -25,14 +25,18 @@ Future<void> bootApp(
   List<Override> overrides = const [],
   bool storyOffers = false,
   StoreGateway? store,
+
+  /// Leave the sound, vibration and settings providers to [overrides], so a test
+  /// can run the real feedback pipeline instead of the silent one.
+  bool liveFeedback = false,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(db),
       clockProvider.overrideWithValue(() => clock),
-      feedbackProvider.overrideWithValue(GameFeedback.silent()),
-      prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
+      if (!liveFeedback) feedbackProvider.overrideWithValue(GameFeedback.silent()),
+      if (!liveFeedback) prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
       showTitleOnLaunchProvider.overrideWithValue(false),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),

@@ -107,4 +107,10 @@ save('victory', arp([67, 72, 76, 79], 0.11, 0.35, 'tri'), 0.65);
 { const b = sweep(420, 140, 0.7, { wave: 'tri', curve: 1.5 }); save('defeat', b, 0.6); }
 save('whoosh', whooshNoise(0.28), 0.5);
 { const b = buf(0.9); mix(b, sweep(180, 340, 0.25, { wave: 'saw', curve: 1 }), 0, 0.35); mix(b, arp([84, 88, 91, 96], 0.07, 0.3), 0.3, 0.7); save('chest', b, 0.65); }
+// Workout saved: a warm two-note chime with a little shimmer on top.
+{ const b = buf(0.7); mix(b, tone(note(79), 0.5, { curve: 2.4 }), 0, 0.7); mix(b, tone(note(91), 0.4, { curve: 3.5 }), 0, 0.25); mix(b, tone(note(84), 0.55, { curve: 2.2 }), 0.12, 0.8); mix(b, tone(note(96), 0.4, { curve: 3.5 }), 0.12, 0.22); save('saved', b, 0.6); }
+// Fanfare for a personal best or a streak reward: a rising run, then a bright held chord.
+{ const run = arp([67, 71, 74, 79, 83], 0.075, 0.22); const chord = buf(0.8); [67, 74, 79, 83].forEach((n) => mix(chord, tone(note(n), 0.8, { wave: 'tri', curve: 1.5 }), 0, 0.45)); mix(chord, tone(note(95), 0.6, { curve: 3 }), 0.05, 0.25); const b = buf(1.5); mix(b, run, 0, 0.8); mix(b, chord, 0.37); save('fanfare', b, 0.7); }
+// One counted rep: a soft, low tick, quieter and rounder than a tap.
+{ const b = buf(0.09); mix(b, tone(520, 0.08, { wave: 'tri', curve: 5 }), 0, 0.8); mix(b, noise(0.012, { lp: 0.5 }), 0, 0.3); save('rep', b, 0.45); }
 console.log('wrote sound effects to', out);

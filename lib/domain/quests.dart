@@ -188,7 +188,9 @@ class QuestBoard {
         .where((q) => hasDumbbells || !q.needsDumbbells)
         .toList();
 
-    final offset = startOfDay(day).difference(DateTime(2024)).inDays;
+    // Whole calendar days, counted in UTC so a clock change cannot shift it.
+    final d = day.toLocal();
+    final offset = DateTime.utc(d.year, d.month, d.day).difference(DateTime.utc(2024)).inDays;
     final rotated = [
       for (var i = 0; i < pool.length; i++) pool[(i + offset) % pool.length],
     ];
@@ -200,21 +202,30 @@ class QuestBoard {
     return rotated.take(count).toList();
   }
 
+  /// Midnight starting the Monday-Sunday week containing [now], and midnight
+  /// starting the next one. Built from calendar dates rather than by adding 24
+  /// hours, so a clock change inside the week cannot move the edges.
+  static (DateTime, DateTime) weekBounds(DateTime now) {
+    final today = startOfDay(now);
+    final monday = DateTime(today.year, today.month, today.day - (today.weekday - 1));
+    final nextMonday = DateTime(monday.year, monday.month, monday.day + 7);
+    return (monday, nextMonday);
+  }
+
   /// Days with any logged movement in the Monday-Sunday week containing [now].
   static WeeklyGoal weeklyGoal({
     required ExperienceLevel level,
     required DateTime now,
     required Iterable<WorkoutEntry> entries,
+    int? target,
   }) {
-    final today = startOfDay(now);
-    final monday = today.subtract(Duration(days: today.weekday - 1));
-    final nextMonday = monday.add(const Duration(days: 7));
+    final (monday, nextMonday) = weekBounds(now);
     final days = <String>{
       for (final e in entries)
         if (e.countsForRewards && !e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))
           dayKey(e.performedAt),
     };
-    return WeeklyGoal(target: level.weeklyDaysGoal, daysActive: days.length);
+    return WeeklyGoal(target: target ?? level.weeklyDaysGoal, daysActive: days.length);
   }
 
   /// Weekday numbers (1 = Monday ... 7 = Sunday) with any logged movement in
@@ -223,9 +234,7 @@ class QuestBoard {
     required DateTime now,
     required Iterable<WorkoutEntry> entries,
   }) {
-    final today = startOfDay(now);
-    final monday = today.subtract(Duration(days: today.weekday - 1));
-    final nextMonday = monday.add(const Duration(days: 7));
+    final (monday, nextMonday) = weekBounds(now);
     return {
       for (final e in entries)
         if (e.countsForRewards && !e.performedAt.isBefore(monday) && e.performedAt.isBefore(nextMonday))

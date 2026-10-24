@@ -5,6 +5,7 @@ import '../features/home/home_shell.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/title_screen.dart';
 import 'game_ui.dart';
+import 'music.dart';
 import 'providers.dart';
 import 'store.dart';
 import 'theme.dart';
@@ -51,7 +52,7 @@ class _Gate extends ConsumerStatefulWidget {
   ConsumerState<_Gate> createState() => _GateState();
 }
 
-class _GateState extends ConsumerState<_Gate> {
+class _GateState extends ConsumerState<_Gate> with WidgetsBindingObserver {
   bool _titleDone = false;
 
   @override
@@ -60,6 +61,28 @@ class _GateState extends ConsumerState<_Gate> {
     // Listen to the store from launch, so a purchase that finished while the
     // app was closed (a parent approving one, say) is delivered and saved.
     ref.read(storeProvider);
+    // Background music follows its switch, the screen in front and whether the
+    // app is showing. It stays off unless the player turns it on.
+    // A listener, not a read: it has to react every time the switch, the screen
+    // or the foreground changes, and an unwatched provider only rebuilds lazily.
+    ref.listenManual(musicProvider, (_, _) {});
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Quiet when the player leaves the game, back when they return. A brief
+    // "inactive" (a permission prompt, the notification shade) keeps playing.
+    final away = state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached;
+    ref.read(appActiveProvider.notifier).set(!away);
   }
 
   @override

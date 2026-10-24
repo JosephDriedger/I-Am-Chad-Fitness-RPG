@@ -40,6 +40,16 @@ void main() {
     expect(saved.heroHp, 46);
   });
 
+  test('a second start while one is under way spends nothing and changes nothing', () async {
+    expect(await repo.startExpedition(start, energyCost: 2), isTrue);
+    final again = ExpeditionProgress.fresh(seed: 99, heroLevel: 1, heroMaxHp: 46, potions: 5);
+    expect(await repo.startExpedition(again, energyCost: 2, broughtPotions: 3), isFalse);
+
+    final hero = (await repo.watchHero().first)!;
+    expect(hero.energySpent, 2);
+    expect((await repo.activeExpedition())!.seed, 42);
+  });
+
   test('progress updates in place; there is only ever one active expedition', () async {
     await repo.startExpedition(start, energyCost: 2);
     await repo.saveExpeditionProgress(const ExpeditionProgress(

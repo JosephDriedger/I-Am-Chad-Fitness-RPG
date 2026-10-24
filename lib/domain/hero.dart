@@ -39,6 +39,7 @@ class HeroProfile {
     this.potionStock = 0,
     this.cape = 'classic',
     this.hairDye = '',
+    this.weeklyGoalDays = 0,
   });
 
   final String name;
@@ -65,6 +66,18 @@ class HeroProfile {
   final String cape;
   final String hairDye;
 
+  /// The days a week the player chose to aim for, or 0 if they have not.
+  final int weeklyGoalDays;
+
+  /// Days a week to aim for: the player's own choice, else the suggestion for
+  /// their experience.
+  int get weeklyGoalTarget => weeklyGoalDays >= minWeeklyGoal && weeklyGoalDays <= maxWeeklyGoal
+      ? weeklyGoalDays
+      : experience.weeklyDaysGoal;
+
+  static const minWeeklyGoal = 1;
+  static const maxWeeklyGoal = 7;
+
   HeroProfile copyWith({
     String? name,
     int? appearanceStyle,
@@ -81,6 +94,7 @@ class HeroProfile {
     int? potionStock,
     String? cape,
     String? hairDye,
+    int? weeklyGoalDays,
   }) =>
       HeroProfile(
         name: name ?? this.name,
@@ -98,6 +112,7 @@ class HeroProfile {
         potionStock: potionStock ?? this.potionStock,
         cape: cape ?? this.cape,
         hairDye: hairDye ?? this.hairDye,
+        weeklyGoalDays: weeklyGoalDays ?? this.weeklyGoalDays,
       );
 }
 

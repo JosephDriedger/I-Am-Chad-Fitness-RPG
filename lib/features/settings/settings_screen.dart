@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
+import '../../game/core.dart' show Haptic, Sfx;
 import '../patron/patron_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -55,14 +57,31 @@ class SettingsScreen extends ConsumerWidget {
                   title: const Text('Sound Effects', style: TextStyle(fontWeight: FontWeight.w800)),
                   subtitle: const Text('Short, quiet cues for hits, loot and level-ups.'),
                   value: prefs.soundOn,
-                  onChanged: (v) => repo.saveSettings(prefs.copyWith(soundOn: v)),
+                  onChanged: (v) {
+                    repo.saveSettings(prefs.copyWith(soundOn: v));
+                    // Let them hear what they just switched on.
+                    if (v) _preview(ref).sfx(Sfx.saved);
+                  },
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Music', style: TextStyle(fontWeight: FontWeight.w800)),
+                  subtitle: const Text(
+                    'A calm tune in the guild hall and a livelier one in battle. Off unless you want it, and it plays quietly under any other audio.',
+                  ),
+                  value: prefs.musicOn,
+                  onChanged: (v) => repo.saveSettings(prefs.copyWith(musicOn: v)),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: const Text('Vibration', style: TextStyle(fontWeight: FontWeight.w800)),
-                  subtitle: const Text('Gentle haptic feedback during battles.'),
+                  subtitle: const Text('Gentle pulses in battles, when you save a workout and as reps are counted.'),
                   value: prefs.hapticsOn,
-                  onChanged: (v) => repo.saveSettings(prefs.copyWith(hapticsOn: v)),
+                  onChanged: (v) {
+                    repo.saveSettings(prefs.copyWith(hapticsOn: v));
+                    // And feel it.
+                    if (v) _preview(ref).haptic(Haptic.success);
+                  },
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
@@ -175,3 +194,12 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 }
+
+/// Sound and vibration that play whatever the switches say, for the moment a
+/// switch is turned on. Goes through the same players as the game itself.
+GameFeedback _preview(WidgetRef ref) => GameFeedback(
+      soundOn: true,
+      hapticsOn: true,
+      player: ref.read(sfxPlayerProvider),
+      hapticPlayer: ref.read(hapticPlayerProvider),
+    );

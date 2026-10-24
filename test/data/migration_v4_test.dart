@@ -44,6 +44,14 @@ void main() {
           VALUES ('push_up', 1790000000, 3, 10);
         INSERT INTO workouts (activity_id, performed_at, duration_seconds)
           VALUES ('walking', 1790003600, 600);
+        CREATE TABLE app_settings (
+          id INTEGER NOT NULL PRIMARY KEY,
+          use_metric INTEGER NOT NULL DEFAULT 1,
+          reduced_motion INTEGER NOT NULL DEFAULT 0,
+          quiet_chad INTEGER NOT NULL DEFAULT 0,
+          sound_on INTEGER NOT NULL DEFAULT 1,
+          haptics_on INTEGER NOT NULL DEFAULT 1
+        );
         PRAGMA user_version = 3;
       ''');
     }));

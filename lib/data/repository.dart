@@ -167,6 +167,15 @@ class GameRepository {
     );
   }
 
+  /// Sets the days a week the player aims for (1 to 7). Zero goes back to the
+  /// suggestion for their experience. Anything else is ignored.
+  Future<void> setWeeklyGoalDays(int days) async {
+    final valid = days == 0 || (days >= HeroProfile.minWeeklyGoal && days <= HeroProfile.maxWeeklyGoal);
+    if (!valid) return;
+    await (_db.update(_db.heroes)..where((h) => h.id.equals(1)))
+        .write(HeroesCompanion(weeklyGoalDays: Value(days)));
+  }
+
   Future<void> spendEnergy(int amount) async {
     await _db.customUpdate(
       'UPDATE heroes SET energy_spent = energy_spent + ? WHERE id = 1',
@@ -193,8 +202,13 @@ class GameRepository {
   ///
   /// [broughtPotions] come out of the potion pouch and are part of
   /// `p.potions`. Any not used come back when the expedition ends.
-  Future<void> startExpedition(ExpeditionProgress p, {required int energyCost, int broughtPotions = 0}) {
+  ///
+  /// Returns false, and changes nothing, when an expedition is already under
+  /// way, so a double tap on "Set Out" can never spend the energy twice or
+  /// overwrite the run in progress.
+  Future<bool> startExpedition(ExpeditionProgress p, {required int energyCost, int broughtPotions = 0}) {
     return _db.transaction(() async {
+      if (await activeExpedition() != null) return false;
       await spendEnergy(energyCost);
       await saveExpeditionProgress(p);
       if (broughtPotions > 0) {
@@ -204,6 +218,7 @@ class GameRepository {
           updates: {_db.heroes},
         );
       }
+      return true;
     });
   }
 
@@ -476,6 +491,7 @@ class GameRepository {
               quietChad: r.quietChad,
               soundOn: r.soundOn,
               hapticsOn: r.hapticsOn,
+              musicOn: r.musicOn,
             ));
 
   Future<void> saveSettings(AppPrefs p) async {
@@ -487,6 +503,7 @@ class GameRepository {
             quietChad: Value(p.quietChad),
             soundOn: Value(p.soundOn),
             hapticsOn: Value(p.hapticsOn),
+            musicOn: Value(p.musicOn),
           ),
         );
   }
@@ -531,6 +548,7 @@ class GameRepository {
           'potionStock': hero.potionStock,
           'cape': hero.cape,
           'hairDye': hero.hairDye,
+          'weeklyGoalDays': hero.weeklyGoalDays,
         },
       'purchases': [
         for (final r in receipts) {'productId': r.productId, 'grantedAt': r.grantedAt.toIso8601String()}
@@ -612,5 +630,6 @@ class GameRepository {
         potionStock: r.potionStock,
         cape: r.cape,
         hairDye: r.hairDye,
+        weeklyGoalDays: r.weeklyGoalDays,
       );
 }

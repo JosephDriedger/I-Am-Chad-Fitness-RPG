@@ -107,7 +107,7 @@ class _CameraRepsScreenState extends ConsumerState<CameraRepsScreen> {
     final update = _counter.update(s.pose, s.millis);
     if (update.counted) {
       final fx = ref.read(feedbackProvider);
-      fx.sfx(Sfx.tap);
+      fx.sfx(Sfx.rep);
       fx.haptic(Haptic.medium);
     }
     _live.value = _Live(s.pose, update);

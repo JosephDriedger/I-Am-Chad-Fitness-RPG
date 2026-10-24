@@ -70,6 +70,10 @@ class Heroes extends Table {
   /// classic cape or the natural hair colour.
   TextColumn get cape => text().withDefault(const Constant('classic'))();
   TextColumn get hairDye => text().withDefault(const Constant(''))();
+
+  /// Days a week the player has chosen to aim for (1 to 7, schema v9). Zero
+  /// means they have not chosen, so the suggestion for their experience is used.
+  IntColumn get weeklyGoalDays => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -175,6 +179,10 @@ class AppSettings extends Table {
   BoolColumn get soundOn => boolean().withDefault(const Constant(true))();
   BoolColumn get hapticsOn => boolean().withDefault(const Constant(true))();
 
+  /// Background music (schema v10). Off unless the player turns it on, so the
+  /// game never talks over their own music or podcast.
+  BoolColumn get musicOn => boolean().withDefault(const Constant(false))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -209,7 +217,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -243,6 +251,12 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(purchaseReceipts);
             await m.addColumn(heroes, heroes.cape);
             await m.addColumn(heroes, heroes.hairDye);
+          }
+          if (from < 9) {
+            await m.addColumn(heroes, heroes.weeklyGoalDays);
+          }
+          if (from < 10) {
+            await m.addColumn(appSettings, appSettings.musicOn);
           }
         },
         beforeOpen: (details) async {

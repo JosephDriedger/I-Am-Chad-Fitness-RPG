@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
@@ -12,10 +13,12 @@ import '../../domain/activity.dart';
 import '../../domain/chad.dart';
 import '../../domain/honesty.dart';
 import '../../domain/quests.dart';
+import '../../domain/records.dart';
 import '../../domain/rep_counter.dart';
 import '../../domain/rewards.dart';
 import '../../domain/streaks.dart';
 import '../../domain/workout.dart';
+import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/look.dart';
 import 'camera_reps_screen.dart';
 import 'exercise_demo_card.dart';
@@ -196,9 +199,10 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       context: context,
       initialTime: TimeOfDay.fromDateTime(_when),
     );
-    if (time == null) return;
-    setState(() => _when =
-        DateTime(date.year, date.month, date.day, time.hour, time.minute));
+    if (time == null || !mounted) return;
+    // A time later today has not happened yet; settle on now instead.
+    final picked = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    setState(() => _when = picked.isAfter(now) ? now : picked);
   }
 
   /// The entry as the fields currently describe it.
@@ -259,6 +263,8 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
 
     final concerns = _honestyNotes(entry, metric);
     if (concerns.isNotEmpty) {
+      // A soft tap to get attention, nothing alarming: it is only a question.
+      ref.read(feedbackProvider).haptic(Haptic.light);
       final accurate = await showGameDialog<bool>(
         context: context,
         title: 'Quick Honesty Check',
@@ -287,15 +293,30 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
 
     setState(() => _saving = true);
     final repo = ref.read(repositoryProvider);
-    final firstEver = (ref.read(workoutsProvider).value ?? const []).isEmpty;
-    if (entry.id == null) {
-      await repo.addWorkout(entry);
-    } else {
-      await repo.updateWorkout(entry);
+    final journal = ref.read(workoutsProvider).value ?? const <WorkoutEntry>[];
+    final firstEver = journal.isEmpty;
+    final bests = PersonalBests.brokenBy(entry, journal);
+    // Read what depends on the screen before the first wait: the player can
+    // leave while it saves, and a screen that is gone cannot be asked anything.
+    final today = ref.read(clockProvider)();
+    final earns = _earnsRewards;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (entry.id == null) {
+        await repo.addWorkout(entry);
+      } else {
+        await repo.updateWorkout(entry);
+      }
+    } catch (_) {
+      // Nothing was saved, so let them try again instead of leaving Save dead.
+      if (mounted) setState(() => _saving = false);
+      messenger.showSnackBar(const SnackBar(content: Text('That could not be saved. Please try again.')));
+      return;
     }
-    if (!_earnsRewards) {
+    if (!earns) {
       // Back-dated: saved for the journal, nothing to pay.
       if (!mounted) return;
+      ref.read(feedbackProvider).both(Sfx.tap, Haptic.light);
       await showGameDialog<void>(
         context: context,
         title: 'Saved to Your Journal',
@@ -327,10 +348,15 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     }
     final reward = await repo.rewardForDay(entry.performedAt);
     // Pay any streak milestone this workout has reached. Never takes anything away.
-    final today = ref.read(clockProvider)();
     final streakPaid = await repo.claimStreakRewards(today: today);
     final streak = await repo.streakStatus(today: today);
     if (!mounted) return;
+    // A chime and two soft pulses for a saved workout, and the fanfare when it
+    // also set a personal best or reached a streak reward.
+    ref.read(feedbackProvider).both(
+          bests.isNotEmpty || streakPaid.isNotEmpty ? Sfx.fanfare : Sfx.saved,
+          Haptic.success,
+        );
     await showGameDialog<void>(
       context: context,
       title: 'Workout Saved!',
@@ -340,6 +366,8 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
         forToday: dayKey(entry.performedAt) == dayKey(today),
         streakPaid: streakPaid,
         streak: streak,
+        bests: bests,
+        metric: metric,
         chadLine: ChadDialogue.line(
           firstEver
               ? ChadContext.firstWorkout
@@ -430,7 +458,10 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                         ChoiceChip(
                           label: Text(v),
                           selected: _variant == v,
-                          onSelected: (on) => setState(() => _variant = on ? v : null),
+                          onSelected: (on) {
+                            ref.read(feedbackProvider).haptic(Haptic.select);
+                            setState(() => _variant = on ? v : null);
+                          },
                         ),
                     ],
                   ),
@@ -536,7 +567,10 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                       ChoiceChip(
                         label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
                         selected: _effort == i,
-                        onSelected: (on) => setState(() => _effort = on ? i : null),
+                        onSelected: (on) {
+                          ref.read(feedbackProvider).haptic(Haptic.select);
+                          setState(() => _effort = on ? i : null);
+                        },
                       ),
                   ],
                 ),
@@ -683,8 +717,13 @@ class _RewardContent extends StatelessWidget {
     required this.chadLine,
     required this.streakPaid,
     required this.streak,
+    this.bests = const [],
+    this.metric = true,
   });
 
+  /// Marks this workout beat, if any. Just a pat on the back: never a reward.
+  final List<PersonalBest> bests;
+  final bool metric;
   final DayReward reward;
   final RewardRules rules;
   final bool forToday;
@@ -714,6 +753,10 @@ class _RewardContent extends StatelessWidget {
         ),
         const SizedBox(height: 14),
         Text(rules.explain(reward)),
+        if (bests.isNotEmpty) ...[
+          const SizedBox(height: 14),
+          _PersonalBestCard(bests: bests, metric: metric),
+        ],
         for (final m in streakPaid) ...[
           const SizedBox(height: 14),
           _StreakRewardCard(milestone: m),
@@ -737,6 +780,54 @@ class _RewardContent extends StatelessWidget {
         const SizedBox(height: 14),
         ChadBubble(text: chadLine),
       ],
+      ),
+    );
+  }
+}
+
+/// Shown when a workout beats one of the player's own marks. It is a note of
+/// congratulation only: personal bests never change what a workout earns.
+class _PersonalBestCard extends StatelessWidget {
+  const _PersonalBestCard({required this.bests, required this.metric});
+
+  final List<PersonalBest> bests;
+  final bool metric;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = [for (final b in bests) '${b.kind.label}: ${b.describe(metric: metric)}'];
+    return Semantics(
+      label: 'New personal ${bests.length == 1 ? 'best' : 'bests'}. ${lines.join('. ')}',
+      child: ExcludeSemantics(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFDFF3EE),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: GameColors.teal, width: 2.5),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.workspace_premium_rounded, color: GameColors.teal),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text(bests.length == 1 ? 'New Personal Best!' : 'New Personal Bests!', style: gameTitle(19))),
+                ],
+              ),
+              const SizedBox(height: 4),
+              for (final l in lines)
+                Text(l, style: const TextStyle(fontWeight: FontWeight.w800, color: GameColors.ink)),
+              const SizedBox(height: 4),
+              const Text(
+                'Your own marks, just for you to enjoy. They never change what you earn.',
+                style: TextStyle(fontWeight: FontWeight.w600, color: GameColors.inkSoft, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
