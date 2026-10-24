@@ -220,26 +220,55 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     final state = _stateFor(player);
     _scene.apply(state);
 
-    return Stack(
-      children: [
-        Positioned.fill(child: GameWidget(game: _scene)),
-        SafeArea(
-          child: Column(
+    final hud = _Hud(
+      player: player,
+      dye: ref.watch(heroLookProvider)?.dye,
+      goalDone: state.weeklyDone,
+      goalTarget: state.weeklyGoal,
+      streak: ref.watch(streakProvider)?.current ?? 0,
+      onSettings: () => Navigator.of(context).push(gameRoute<void>(const SettingsScreen())),
+    );
+    Widget menu(bool vertical) => _MenuBar(
+          vertical: vertical,
+          canAdventure: state.canAdventure,
+          questPending: state.questPending,
+          onTap: _scene.activate,
+        );
+
+    return LayoutBuilder(
+      builder: (context, box) {
+        // Held sideways, the menu becomes a rail down the right-hand side, so the hall
+        // has the whole height instead of being covered by a bar along the bottom.
+        if (box.maxWidth > box.maxHeight * 1.2) {
+          return Row(
             children: [
-              _Hud(player: player, dye: ref.watch(heroLookProvider)?.dye, goalDone: state.weeklyDone, goalTarget: state.weeklyGoal, streak: ref.watch(streakProvider)?.current ?? 0, onSettings: () {
-                Navigator.of(context).push(
-                    gameRoute<void>(const SettingsScreen()));
-              }),
-              const Spacer(),
-              _MenuBar(
-                canAdventure: state.canAdventure,
-                questPending: state.questPending,
-                onTap: _scene.activate,
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: GameWidget(game: _scene)),
+                    SafeArea(right: false, child: Column(children: [hud, const Spacer()])),
+                  ],
+                ),
               ),
+              SafeArea(left: false, child: SizedBox(width: 104, child: menu(true))),
             ],
-          ),
-        ),
-      ],
+          );
+        }
+        return Stack(
+          children: [
+            Positioned.fill(child: GameWidget(game: _scene)),
+            SafeArea(
+              child: Column(
+                children: [
+                  hud,
+                  const Spacer(),
+                  menu(false),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -394,16 +423,26 @@ class _MenuBar extends StatelessWidget {
     required this.canAdventure,
     required this.questPending,
     required this.onTap,
+    this.vertical = false,
   });
 
+  /// A rail down the side (for a phone held sideways) instead of a bar along the bottom.
+  final bool vertical;
   final bool canAdventure;
   final bool questPending;
   final void Function(HubTarget) onTap;
 
   @override
   Widget build(BuildContext context) {
+    final buttons = [
+      _MenuButton(Icons.fitness_center, 'Train', () => onTap(HubTarget.train)),
+      _MenuButton(Icons.flag, 'Quests', () => onTap(HubTarget.quests), badge: questPending),
+      _MenuButton(Icons.explore, 'Adventure', () => onTap(HubTarget.adventure), highlight: canAdventure),
+      _MenuButton(Icons.person, 'Hero', () => onTap(HubTarget.hero)),
+      _MenuButton(Icons.menu_book, 'Journal', () => onTap(HubTarget.journal)),
+    ];
     return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+      padding: vertical ? const EdgeInsets.fromLTRB(0, 8, 8, 8) : const EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         decoration: BoxDecoration(
@@ -411,16 +450,7 @@ class _MenuBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: _woodLight, width: 2),
         ),
-        child: Row(
-          children: [
-            _MenuButton(Icons.fitness_center, 'Train', () => onTap(HubTarget.train)),
-            _MenuButton(Icons.flag, 'Quests', () => onTap(HubTarget.quests), badge: questPending),
-            _MenuButton(Icons.explore, 'Adventure', () => onTap(HubTarget.adventure),
-                highlight: canAdventure),
-            _MenuButton(Icons.person, 'Hero', () => onTap(HubTarget.hero)),
-            _MenuButton(Icons.menu_book, 'Journal', () => onTap(HubTarget.journal)),
-          ],
-        ),
+        child: vertical ? Column(children: buttons) : Row(children: buttons),
       ),
     );
   }
@@ -453,7 +483,10 @@ class _MenuButton extends StatelessWidget {
                 color: highlight ? const Color(0xFF1F7A70) : _woodLight.withValues(alpha: 0.55),
                 border: highlight ? Border.all(color: const Color(0xFF5AD1C4), width: 2) : null,
               ),
-              child: Column(
+              // Shrinks a little rather than overflowing, at large text or on a short rail.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Stack(
@@ -481,6 +514,7 @@ class _MenuButton extends StatelessWidget {
                       style: const TextStyle(
                           color: _cream, fontSize: 11, fontWeight: FontWeight.w700)),
                 ],
+              ),
               ),
             ),
           ),

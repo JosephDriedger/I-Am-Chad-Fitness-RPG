@@ -28,22 +28,30 @@ class HistoryScreen extends ConsumerWidget {
       error: (e, _) => Center(child: Text('Could not load history: $e')),
       data: (workouts) {
         if (workouts.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.menu_book_rounded, size: 64, color: GameColors.woodLight),
-                  const SizedBox(height: 12),
-                  Text('No Workouts Yet', style: gameTitle(26)),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Your workouts will appear here. Every legend starts with a first entry.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.w600),
+          // Centred when there is room, and scrolls on a short screen or at large text.
+          return LayoutBuilder(
+            builder: (context, box) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: box.maxHeight),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.menu_book_rounded, size: 64, color: GameColors.woodLight),
+                        const SizedBox(height: 12),
+                        Text('No Workouts Yet', style: gameTitle(26)),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Your workouts will appear here. Every legend starts with a first entry.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ),
             ),
           );

@@ -131,6 +131,8 @@ Nearly every test runs with Reduce Motion on, so scenes finish each animation in
 
 `test/story_layout_test.dart` reads whole chapters (the one with the most choices in each season, and the one with the longest line) at the same awkward sizes, answering every choice and checking each option can be reached. It found the chapter title card overflowing at every small size, the question above the answers pushing past the panel at large text, and the "carry on" arrow taking a row of its own, so a phone held sideways now shows the picture and the text side by side.
 
+`test/new_player_layout_test.dart` visits every main screen as a brand-new player sees it (no workouts, no energy, nothing earned), because the "nothing yet" pages never appear to the hero the main tour uses; it found the empty Journal overflowing on a short screen. `test/hall_layout_test.dart` checks the hall's menu: a bar along the bottom upright, and a rail down the right-hand side when the phone is held sideways, where the room has the whole height.
+
 `test/accessibility_test.dart` runs Flutter's own accessibility checks (tap targets at least 48 x 48, every control named for a screen reader, text contrast) on each main screen. The layout tour also covers a phone on its side.
 
 ## Ads in development
