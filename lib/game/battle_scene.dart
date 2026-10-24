@@ -14,7 +14,7 @@ import 'package:flutter/painting.dart'
 import '../domain/combat.dart';
 import '../domain/expedition.dart';
 import '../domain/items.dart';
-import 'art/enemy_art.dart' show paintBard, paintSpring;
+import 'art/enemy_art.dart' show paintBard, paintSignpost, paintSpring;
 import 'art/painters.dart';
 import 'core.dart';
 import 'look.dart';
@@ -591,6 +591,8 @@ class BattleScene extends GameScene {
   Future<void> applyEvent(EventKind kind, {required int heroHp, int stash = 8}) async {
     final at = Vector2(heroHome.x + 20, groundY - 70);
     switch (kind) {
+      case EventKind.fork:
+        break; // the way taken is shown as the camp it works like
       case EventKind.restock:
         sfx(Sfx.heal);
         burst(Burst.stars(at));
@@ -1140,6 +1142,8 @@ class _Prop extends PositionComponent {
         paintBard(canvas, _t);
       case EventKind.spring:
         paintSpring(canvas, _t);
+      case EventKind.fork:
+        paintSignpost(canvas, _t);
     }
     canvas.restore();
   }

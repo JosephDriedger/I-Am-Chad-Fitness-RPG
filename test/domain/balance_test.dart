@@ -5,6 +5,8 @@ import 'package:i_am_chad/domain/expedition.dart';
 import 'package:i_am_chad/domain/hero.dart';
 import 'package:i_am_chad/domain/rng.dart';
 
+import 'fork_policy.dart';
+
 Combatant _hero(int level) => Combatant.fresh(
       name: 'Hero',
       maxHp: Progression.maxHp(level),
@@ -51,7 +53,7 @@ BattleState _fight(BattleState s, GameRng rng) {
   var longest = 0;
   while (!run.finished) {
     if (run.current!.kind == StepKind.event) {
-      run.resolveEvent();
+      run.resolveEvent(choice: wayAtFork(run));
     } else {
       final end = _fight(run.startBattle(), run.rng);
       if (end.turn > longest) longest = end.turn;

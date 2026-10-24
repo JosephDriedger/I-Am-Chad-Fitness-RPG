@@ -96,6 +96,10 @@ class Guide {
             'There are ${Difficulty.maxTier}. ${_regionList()} A region stays open for good, so you can always go back to an easier one.',
           ),
           const GuideEntry(
+            'Camps and Forks',
+            'Between battles you stop at a camp, where you might heal, find a potion, pick up coins or start the next fight with focus. At a fork in the road you choose one of two ways. Each gives a different camp\'s benefit, and neither is a wrong choice.',
+          ),
+          const GuideEntry(
             'Practice Duel',
             'A relaxed fight in the guild yard. Always free, always against gentle enemies, and it pays nothing. It is there for rest days.',
           ),

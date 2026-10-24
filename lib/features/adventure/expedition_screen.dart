@@ -234,11 +234,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     await _beginStep();
   }
 
-  Future<void> _onward() async {
+  Future<void> _onward([int choice = 0]) async {
     if (_busy) return;
-    final kind = _run.current!.event!.kind;
+    final kind = _run.current!.event!.chosenKind(choice);
     setState(() => _busy = true);
-    _run.resolveEvent();
+    _run.resolveEvent(choice: choice);
     await _scene.applyEvent(
       kind,
       heroHp: _run.hero.hp,
@@ -427,6 +427,16 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     );
   }
 
+  /// What an effect gives, in words.
+  String _effectText(EventKind kind) => switch (kind) {
+        EventKind.restock => '+1 Potion',
+        EventKind.rest => 'Recover 40% of your max HP',
+        EventKind.treasure => '+${Expedition.stashCoins(_run.expedition.tier)} Coins',
+        EventKind.bard => 'Start the next fight with 2 focus',
+        EventKind.spring => 'Recover 25% of your max HP',
+        EventKind.fork => '',
+      };
+
   Widget _eventPanel(BuildContext context) {
     final ev = _run.current?.event;
     final t = Theme.of(context).textTheme;
@@ -439,22 +449,32 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
         const SizedBox(height: 4),
         Text(ev.text),
         const SizedBox(height: 6),
-        Text(
-          switch (ev.kind) {
-            EventKind.restock => '+1 Potion',
-            EventKind.rest => 'Recover 40% of your max HP',
-            EventKind.treasure => '+${Expedition.stashCoins(_run.expedition.tier)} Coins',
-            EventKind.bard => 'Start the next fight with 2 focus',
-            EventKind.spring => 'Recover 25% of your max HP',
-          },
-          style: t.labelLarge,
-        ),
-        const SizedBox(height: 12),
-        GameButton(
-          label: 'Onward',
-          icon: Icons.directions_walk_rounded,
-          onPressed: _busy ? null : _onward,
-        ),
+        if (ev.hasChoice) ...[
+          Text('Either way is a good way.', style: t.labelLarge),
+          const SizedBox(height: 8),
+          for (var i = 0; i < ev.choices.length; i++) ...[
+            if (i > 0) const SizedBox(height: 8),
+            GameButton(
+              key: Key('fork_$i'),
+              label: ev.choices[i].label,
+              icon: Icons.signpost_rounded,
+              kind: i == 0 ? GameButtonKind.primary : GameButtonKind.secondary,
+              onPressed: _busy ? null : () => _onward(i),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 2, left: 4),
+              child: Text(_effectText(ev.choices[i].kind), style: t.bodySmall),
+            ),
+          ],
+        ] else ...[
+          Text(_effectText(ev.kind), style: t.labelLarge),
+          const SizedBox(height: 12),
+          GameButton(
+            label: 'Onward',
+            icon: Icons.directions_walk_rounded,
+            onPressed: _busy ? null : _onward,
+          ),
+        ],
       ],
     );
   }

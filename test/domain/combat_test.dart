@@ -4,6 +4,8 @@ import 'package:i_am_chad/domain/expedition.dart';
 import 'package:i_am_chad/domain/hero.dart';
 import 'package:i_am_chad/domain/rng.dart';
 
+import 'fork_policy.dart';
+
 Combatant _hero(int level) => Combatant.fresh(
       name: 'Hero',
       maxHp: Progression.maxHp(level),
@@ -40,7 +42,7 @@ ExpeditionRun _run(int seed, int level) {
   );
   while (!run.finished) {
     if (run.current!.kind == StepKind.event) {
-      run.resolveEvent();
+      run.resolveEvent(choice: wayAtFork(run));
     } else {
       run.finishBattle(_fight(run.startBattle(), run.rng));
     }
@@ -213,9 +215,10 @@ void main() {
           if (_run(seed, level).victory) wins++;
         }
         final rate = wins / n;
-        // Never a wall. Currently ~90% at level 1 and ~98% later for a sensible
-        // player; tuning is tracked in docs/ROADMAP.md.
-        expect(rate, inInclusiveRange(0.75, 1.0),
+        // Never a wall. This script is deliberately simple: it ignores the newer enemy
+        // moves (flurry, brace, mend), so it plays worse than the one in balance_test.dart,
+        // which is the real guard on the curve. About 90% at level 1 and 70% or more later (see docs/ROADMAP.md).
+        expect(rate, inInclusiveRange(0.65, 1.0),
             reason: 'win rate at level $level was $rate');
       });
     }

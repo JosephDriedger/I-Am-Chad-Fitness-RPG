@@ -610,3 +610,24 @@ void paintSphinx(Canvas c, ActorState s) {
   strokePath(c, q, 2.6, const Color(0xFFFFF3D6));
   circle(c, 25, -65 - lift + bob, 1.8, const Color(0xFFFFF3D6));
 }
+
+/// A signpost where the path splits, with an arrow each way and a lantern.
+void paintSignpost(Canvas c, double t) {
+  oval(c, 0, 0, 22, 5, const Color(0x2E000000));
+  rrect(c, -3, -62, 6, 62, 2, const Color(0xFF6D4C2F));
+  // Two arrows, pointing apart.
+  c.save();
+  c.translate(0, -52);
+  fillPath(c, poly([-3, -6, -26, -6, -32, 0, -26, 6, -3, 6]), const Color(0xFFD7A86E));
+  fillPath(c, poly([3, 12, 26, 12, 32, 18, 26, 24, 3, 24]), const Color(0xFFC9955A));
+  for (var i = 0; i < 3; i++) {
+    line(c, -24 + i * 6.0, -3, -24 + i * 6.0, 3, 1.2, const Color(0xFF8D6E63));
+    line(c, 8 + i * 6.0, 15, 8 + i * 6.0, 21, 1.2, const Color(0xFF8D6E63));
+  }
+  c.restore();
+  // A small lantern hanging from the top, swaying and glowing.
+  final sway = math.sin(t * 1.6) * 2;
+  line(c, 3, -60, 12 + sway * 0.4, -52, 1.2, const Color(0xFF5D4037));
+  circle(c, 12 + sway, -48, 8 + math.sin(t * 4) * 0.8, const Color(0x33FFC857));
+  rrect(c, 9.5 + sway, -52, 5, 7, 1.5, const Color(0xFFFFE9A8));
+}

@@ -74,6 +74,15 @@ void main() {
           paintSpring(c, 1.2);
         },
       ),
+      (
+        'signpost (a fork in the road)',
+        Biome.night,
+        (c) {
+          c.translate(_cellW * 0.5, _ground);
+          c.scale(1.9, 1.9);
+          paintSignpost(c, 1.2);
+        },
+      ),
     ];
     await tester.runAsync(() async {
       Directory(out!).createSync(recursive: true);

@@ -391,14 +391,34 @@ class EnemyPool {
   static List<EnemyTemplate> get everyone => [...regular, ...bosses];
 }
 
-enum EventKind { restock, rest, treasure, bard, spring }
+/// What a camp does. A [fork] gives the player a choice between two of the others.
+enum EventKind { restock, rest, treasure, bard, spring, fork }
+
+/// One way to go at a fork. It has the effect of an ordinary camp, so there is
+/// nothing new to balance, and neither way is wrong.
+class EventChoice {
+  const EventChoice(this.label, this.kind);
+
+  final String label;
+  final EventKind kind;
+}
 
 class ExpeditionEvent {
-  const ExpeditionEvent(this.kind, this.title, this.text, {this.tier = 0});
+  const ExpeditionEvent(this.kind, this.title, this.text, {this.tier = 0, this.choices = const []});
 
   final EventKind kind;
   final String title;
   final String text;
+
+  /// The options at a [EventKind.fork]; empty for every other camp.
+  final List<EventChoice> choices;
+
+  bool get hasChoice => choices.isNotEmpty;
+
+  /// The effect that happens when the player takes option [choice] (counted
+  /// from 0, and kept in range), or just this camp's own for one with no choice.
+  EventKind chosenKind(int choice) =>
+      hasChoice ? choices[choice.clamp(0, choices.length - 1)].kind : kind;
 
   /// The region this camp belongs to, or 0 for one that can turn up anywhere.
   final int tier;
@@ -504,10 +524,81 @@ class ExpeditionEvent {
     ),
   ];
 
+  /// Camps where the path splits and the player picks a way. Each option is an
+  /// ordinary camp's effect, and nothing is lost by either.
+  static const forks = <ExpeditionEvent>[
+    ExpeditionEvent(
+      EventKind.fork,
+      'A Fork in the Road',
+      'The path splits in two. One way is sunny and bright, and the other is shady and quiet.',
+      choices: [
+        EventChoice('Take the sunny path', EventKind.bard),
+        EventChoice('Take the shady path', EventKind.spring),
+      ],
+    ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Tide or Cliff',
+      'At low tide you could walk the wet sand, or climb the cliff path for the view.',
+      tier: 2,
+      choices: [
+        EventChoice('Walk the tide line', EventKind.spring),
+        EventChoice('Climb the cliff path', EventKind.bard),
+      ],
+    ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Glow or Hush',
+      'One tunnel glows with mushrooms and chatter. The other is dark and very quiet.',
+      tier: 3,
+      choices: [
+        EventChoice('Follow the glow', EventKind.restock),
+        EventChoice('Take the quiet tunnel', EventKind.rest),
+      ],
+    ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Sled or Snowshoes',
+      'Someone has left a sled at the top of a long slope, with a snowshoe trail beside it.',
+      tier: 4,
+      choices: [
+        EventChoice('Ride the sled run', EventKind.bard),
+        EventChoice('Follow the snowshoe trail', EventKind.treasure),
+      ],
+    ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Ledge or Ridge',
+      'A stone ledge offers shelter. The ridge beyond it is open, and the view is tremendous.',
+      tier: 5,
+      choices: [
+        EventChoice('Wait under the ledge', EventKind.rest),
+        EventChoice('Cross the ridge', EventKind.bard),
+      ],
+    ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Oasis or Dunes',
+      'Palm trees shimmer to one side. A smooth, bright dune rises to the other.',
+      tier: 6,
+      choices: [
+        EventChoice('Rest at the oasis', EventKind.spring),
+        EventChoice('Cross the dunes', EventKind.treasure),
+      ],
+    ),
+  ];
+
   /// The first region only meets the original three. Later ones add the other
-  /// two, and the camps that belong to that region.
-  static List<ExpeditionEvent> poolFor(int tier) =>
-      tier <= 1 ? all.sublist(0, 3) : [...all, for (final e in regional) if (e.tier == tier) e];
+  /// two, a fork in the road, and the camps that belong to that region.
+  static List<ExpeditionEvent> poolFor(int tier) => tier <= 1
+      ? all.sublist(0, 3)
+      : [
+          ...all,
+          for (final e in forks)
+            if (e.tier == 0 || e.tier == tier) e,
+          for (final e in regional)
+            if (e.tier == tier) e,
+        ];
 }
 
 enum StepKind { battle, event }
@@ -760,10 +851,12 @@ class ExpeditionRun {
     }
   }
 
-  /// Applies the current event's effect and advances.
-  void resolveEvent() {
+  /// Applies the current event's effect and advances. At a fork, [choice] says which way (0 or 1).
+  void resolveEvent({int choice = 0}) {
     final ev = current!.event!;
-    switch (ev.kind) {
+    switch (ev.chosenKind(choice)) {
+      case EventKind.fork:
+        break; // only ever the name of a camp with choices; its options do the work
       case EventKind.restock:
         potions += 1;
       case EventKind.rest:
