@@ -394,11 +394,14 @@ class EnemyPool {
 enum EventKind { restock, rest, treasure, bard, spring }
 
 class ExpeditionEvent {
-  const ExpeditionEvent(this.kind, this.title, this.text);
+  const ExpeditionEvent(this.kind, this.title, this.text, {this.tier = 0});
 
   final EventKind kind;
   final String title;
   final String text;
+
+  /// The region this camp belongs to, or 0 for one that can turn up anywhere.
+  final int tier;
 
   static const all = <ExpeditionEvent>[
     ExpeditionEvent(
@@ -430,8 +433,81 @@ class ExpeditionEvent {
     ),
   ];
 
-  /// The first region only meets the original three; later ones add the rest.
-  static List<ExpeditionEvent> poolFor(int tier) => tier <= 1 ? all.sublist(0, 3) : all;
+  /// Camps that belong to one region. They work exactly like the general ones
+  /// of the same kind, and only the place and the words change.
+  static const regional = <ExpeditionEvent>[
+    ExpeditionEvent(
+      EventKind.spring,
+      'A Tide-Pool Picnic',
+      'A basket, a blanket and a very polite hermit crab. You sit, you eat, and you feel a good deal better.',
+      tier: 2,
+    ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Driftwood Fire',
+      'Someone has left a stack of dry driftwood and a note: "Sit as long as you like." You do.',
+      tier: 2,
+    ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Glowcap Grotto',
+      'Soft green light and a patch of dry moss. A fine place to catch your breath.',
+      tier: 3,
+    ),
+    ExpeditionEvent(
+      EventKind.restock,
+      'A Crystal Peddler',
+      'A peddler who sells potion bottles and very long stories. You leave with a potion, minus the story.',
+      tier: 3,
+    ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Hut at the Snow Line',
+      'A cousin of Hush keeps a stove going here. There is soup. There is always soup.',
+      tier: 4,
+    ),
+    ExpeditionEvent(
+      EventKind.treasure,
+      'A Yeti\'s Spare Pocket',
+      'A friendly yeti pats down his fur and finds some coins. "Ah. I wondered where those went."',
+      tier: 4,
+    ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Sheltered Alcove',
+      'The wind howls around the rock and, for once, not at you. You rest a while.',
+      tier: 5,
+    ),
+    ExpeditionEvent(
+      EventKind.bard,
+      'A Friendly Storm Chaser',
+      'Someone on a ridge waves and sends a tune of rolling thunder your way. You start the next fight with focus to spare.',
+      tier: 5,
+    ),
+    ExpeditionEvent(
+      EventKind.spring,
+      'An Oasis',
+      'Palm trees, still water, and one very smug duck. You sit a while and feel a good deal better.',
+      tier: 6,
+    ),
+    ExpeditionEvent(
+      EventKind.restock,
+      'A Passing Caravan',
+      'A caravan shares its water and a spare potion. The camel has no opinions about you at all.',
+      tier: 6,
+    ),
+    ExpeditionEvent(
+      EventKind.treasure,
+      'A Riddle for a Coin',
+      'A sign in the sand: "Solve this riddle, win a coin." The answer is, once again, "a nap". You get the coin.',
+      tier: 6,
+    ),
+  ];
+
+  /// The first region only meets the original three. Later ones add the other
+  /// two, and the camps that belong to that region.
+  static List<ExpeditionEvent> poolFor(int tier) =>
+      tier <= 1 ? all.sublist(0, 3) : [...all, for (final e in regional) if (e.tier == tier) e];
 }
 
 enum StepKind { battle, event }

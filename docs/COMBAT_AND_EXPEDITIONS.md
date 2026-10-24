@@ -87,7 +87,7 @@ A reward-bearing expedition costs **2 adventure energy** (spent when you set out
 
 - Regular enemies drawn without repeats from the region's own pool plus the region before it (never a tougher one).
 - One of the region's two bosses.
-- Camp events drawn from the pool (the first region only meets the first three).
+- Camp events drawn from the pool: the first region only meets the first three, and each later region adds the other two and a few camps of its own.
 - A loot item: 65% from the region's own gear, otherwise from an earlier region, so nothing is ever out of reach.
 
 A saved run remembers its region. A run saved before regions existed resumes in the toughest region open at its level.
@@ -101,6 +101,8 @@ A saved run remembers its region. A run saved before regions existed resumes in 
 | Chad's "secret" stash | 8 coins, plus 4 per region above the first | All |
 | A wandering bard | The next fight starts with 2 focus | Region 2 and up |
 | A quiet spring | Recover 25% of max HP | Region 2 and up |
+
+From region 2 up each region also has camps of its own (a tide-pool picnic on the coast, a glowcap grotto in the caves, a hut at the snow line, a sheltered alcove in the storm, an oasis in the dunes, and so on). They work exactly like the general camp of the same kind and only change the place and the words, so no new rules are needed. See `ExpeditionEvent.regional`.
 
 ### Rewards
 
@@ -145,11 +147,11 @@ Twenty-eight pieces across four slots (head, body, weapon, trinket), one worn pe
 | Region | Win rate at those levels |
 | --- | --- |
 | 1 | 84%, 93%, 98% |
-| 2 | 84%, 88%, 80% |
-| 3 | 68%, 81%, 82% |
-| 4 | 58%, 73%, 76% |
-| 5 | 68%, 62%, 66% |
-| 6 | 57%, 52%, 68% |
+| 2 | 87%, 90%, 84% |
+| 3 | 72%, 84%, 88% |
+| 4 | 64%, 75%, 76% |
+| 5 | 69%, 68%, 69% |
+| 6 | 60%, 53%, 68% |
 
 Real players will have gear (a few points of attack, defense and HP), can read the intent line better than a script, and can drop back to an easier region. The tests only guard the shape: the first region is gentle, no region is a wall (every case above 45%), each region is harder than the one before on average, each step is a noticeable but small drop, and no battle runs past 30 turns. They are a regression guard, not proof of fun. Real playtesting should drive the next tuning pass (see the [roadmap](ROADMAP.md)).
 
