@@ -116,8 +116,8 @@ class SettingsScreen extends ConsumerWidget {
           ),
           // Only where the platform can send notifications; nothing is offered that cannot be done.
           if (ref.watch(reminderGatewayProvider).isSupported) ...[
-            const RemindersPanel(),
             const SizedBox(height: 16),
+            const RemindersPanel(),
           ],
           const SizedBox(height: 16),
           GamePanel(

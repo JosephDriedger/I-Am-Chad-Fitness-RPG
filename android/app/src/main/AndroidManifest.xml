@@ -2,6 +2,11 @@
     <!-- Only used by the optional "Count My Reps With the Camera" feature. -->
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
+    <!-- Optional gentle reminders (off until the player turns them on in Settings).
+         The plugin adds POST_NOTIFICATIONS and VIBRATE. Boot-completed lets the
+         phone put the planned reminders back after a restart. No exact-alarm
+         permission is used: a reminder a few minutes late is fine. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:label="I Am Chad"
         android:name="${applicationName}"
@@ -28,6 +33,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
+        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
         <!-- Google AdMob. This is Google's public TEST app id, so only test ads can
              appear. Replace it with the real AdMob app id before release (see
              docs/MONETIZATION.md). Ads show only at the start of a story chapter. -->

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
+import 'app/local_reminders.dart';
 import 'app/providers.dart';
+import 'app/reminders.dart';
 import 'domain/player_state.dart';
 import 'dev/preview.dart';
 
@@ -13,6 +15,8 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProviderScope(
     overrides: [
+      // Real reminders where the phone can send them; everywhere else the switch is hidden.
+      if (LocalReminderGateway.platformCanNotify) reminderGatewayProvider.overrideWith((_) => LocalReminderGateway()),
       // Dev previews run in a throttled browser pane: skip animation and sound.
       if (_preview.isNotEmpty)
         prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true, soundOn: false, hapticsOn: false)),

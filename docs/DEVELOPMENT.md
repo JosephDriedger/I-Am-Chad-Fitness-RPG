@@ -140,3 +140,9 @@ Nearly every test runs with Reduce Motion on, so scenes finish each animation in
 ## Ads in development
 
 Real ads need an AdMob account, so the app ships Google's public **test** ids (in `lib/app/ads.dart`, `AndroidManifest.xml` and `Info.plist`). A non-Premium player opening an unread chapter on Android or iOS then sees Google's labelled test ad; web and desktop show none. Tests never reach Google: `bootApp` swaps in `TestAdGateway`, and `test/ads_promise_test.dart` keeps ad code out of everywhere except the story screen. See [Monetization](MONETIZATION.md#setting-it-up-in-the-stores) before release.
+
+## Reminders in development
+
+The reminder rules and settings are pure Dart (`lib/domain/reminders.dart`); delivery is `LocalReminderGateway` in `lib/app/local_reminders.dart`, the only file that uses `flutter_local_notifications`, `timezone` and `flutter_timezone`, installed in `lib/main.dart` on Android and iOS only. Tests use `TestReminderGateway` (`bootApp(reminders: ...)`) and never schedule anything; `test/reminders_promise_test.dart` keeps the plugin in one file, permission asking inside `requestPermission()`, and exact alarms, repeats and payloads out.
+
+To check the real thing on an Android emulator: turn the switch on in Settings (the system prompt appears only then), then `adb shell dumpsys alarm` and look for `ScheduledNotificationReceiver` entries at the chosen hour; turning the switch off removes them. The Android set-up is core-library desugaring and a `RECEIVE_BOOT_COMPLETED` receiver (so the phone restores the plan after a restart) in `android/app`, plus `res/raw/keep.xml` so a release build keeps the notification icon. Reminders are scheduled inexactly, so they can arrive up to an hour after the chosen time.
