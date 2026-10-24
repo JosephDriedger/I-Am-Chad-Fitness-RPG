@@ -36,7 +36,7 @@ class EquipmentItem {
   final int attack;
   final int defense;
 
-  /// The region whose expeditions drop this (1 to 6). Pieces from a tougher
+  /// The region whose expeditions drop this (1 to 7). Pieces from a tougher
   /// region are a little stronger, still within a few points.
   final int tier;
 
@@ -318,6 +318,47 @@ class ItemCatalog {
       hp: 12,
       tier: 6,
       accent: 0xFF26C6DA,
+    ),
+
+    // ---- The Starlit Isles (region 7) ----------------------------------------
+    EquipmentItem(
+      id: 'comet_blade',
+      name: 'Comet Blade',
+      slot: EquipmentSlot.weapon,
+      description: 'Leaves a trail of sparks. Apologises for it.',
+      attack: 8,
+      tier: 7,
+      accent: 0xFF80DEEA,
+    ),
+    EquipmentItem(
+      id: 'stargazer_cap',
+      name: 'Stargazer\'s Cap',
+      slot: EquipmentSlot.head,
+      description: 'Has a little brim for the bright bits.',
+      hp: 16,
+      defense: 4,
+      tier: 7,
+      accent: 0xFF7986CB,
+    ),
+    EquipmentItem(
+      id: 'night_watch_cloak',
+      name: 'Night Watch Cloak',
+      slot: EquipmentSlot.body,
+      description: 'Soft, dark, and covered in tiny stitched stars.',
+      defense: 8,
+      hp: 5,
+      tier: 7,
+      accent: 0xFF3949AB,
+    ),
+    EquipmentItem(
+      id: 'starlight_jar',
+      name: 'Jar of Starlight',
+      slot: EquipmentSlot.trinket,
+      description: 'Do not shake it. It gets excited.',
+      attack: 4,
+      hp: 14,
+      tier: 7,
+      accent: 0xFFFFF59D,
     ),
   ];
 

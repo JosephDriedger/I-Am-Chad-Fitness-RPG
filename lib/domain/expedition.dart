@@ -1,4 +1,4 @@
-/// Seeded expeditions: a short sequence of battles and events in one of six
+/// Seeded expeditions: a short sequence of battles and events in one of seven
 /// regions, each tougher than the last. See docs/COMBAT_AND_EXPEDITIONS.md.
 library;
 
@@ -29,7 +29,7 @@ class EnemyTemplate {
   final double defense;
   final bool boss;
 
-  /// The region this enemy belongs to (1 to 6).
+  /// The region this enemy belongs to (1 to 7).
   final int tier;
 
   /// How it picks its moves: whether it braces, mends, strikes twice, or gets
@@ -242,6 +242,35 @@ class EnemyPool {
       tier: 6,
       behavior: EnemyBehavior(heavy: 0.15, brace: 0.25, mend: 0.2),
     ),
+
+    // ---- The Starlit Isles (region 7) --------------------------------------------
+    EnemyTemplate(
+      name: 'Lantern Moth',
+      blurb: 'Drawn to lamps. Currently drawn to you.',
+      hp: 0.8,
+      attack: 1.05,
+      defense: 0.75,
+      tier: 7,
+      behavior: EnemyBehavior(heavy: 0.1, flurry: 0.35, mend: 0.15),
+    ),
+    EnemyTemplate(
+      name: 'Comet Cat',
+      blurb: 'Leaves a trail of sparkle and a great deal of fur.',
+      hp: 0.7,
+      attack: 1.1,
+      defense: 0.7,
+      tier: 7,
+      behavior: EnemyBehavior(heavy: 0.15, flurry: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Star Turtle',
+      blurb: 'Carries a whole constellation on its back, politely.',
+      hp: 1.1,
+      attack: 0.9,
+      defense: 1.2,
+      tier: 7,
+      behavior: EnemyBehavior(heavy: 0.2, brace: 0.3, mend: 0.2),
+    ),
   ];
 
   static const bosses = <EnemyTemplate>[
@@ -371,6 +400,28 @@ class EnemyPool {
       boss: true,
       tier: 6,
       behavior: EnemyBehavior(heavy: 0.2, flurry: 0.2, brace: 0.15, mend: 0.15, enrageBelow: 0.45),
+    ),
+
+    // ---- The Starlit Isles ---------------------------------------------------------
+    EnemyTemplate(
+      name: 'The Comet King',
+      blurb: 'Arrives every seventy-six years and brings opinions.',
+      hp: 1.6,
+      attack: 1.15,
+      defense: 1.0,
+      boss: true,
+      tier: 7,
+      behavior: EnemyBehavior(heavy: 0.25, flurry: 0.3, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Nova, the Very Bright',
+      blurb: 'Cannot be looked at directly, so please do not.',
+      hp: 1.5,
+      attack: 1.15,
+      defense: 1.1,
+      boss: true,
+      tier: 7,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.2, brace: 0.2, mend: 0.1, enrageBelow: 0.45),
     ),
   ];
 
@@ -522,6 +573,30 @@ class ExpeditionEvent {
       'A sign in the sand: "Solve this riddle, win a coin." The answer is, once again, "a nap". You get the coin.',
       tier: 6,
     ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Stargazing Ledge',
+      'A flat rock, a warm blanket and the whole sky. You lie back and rest a while.',
+      tier: 7,
+    ),
+    ExpeditionEvent(
+      EventKind.restock,
+      'A Cloud Peddler',
+      'A peddler floats past on a small cloud and presses a spare potion into your hands. "Mind the comets."',
+      tier: 7,
+    ),
+    ExpeditionEvent(
+      EventKind.bard,
+      'A Lullaby on the Wind',
+      'Somewhere a very large cat is purring a tune. You start the next fight with focus to spare.',
+      tier: 7,
+    ),
+    ExpeditionEvent(
+      EventKind.treasure,
+      'A Fallen Star',
+      'A small star has dropped into the grass. It is happy to be picked up and leaves a few coins behind.',
+      tier: 7,
+    ),
   ];
 
   /// Camps where the path splits and the player picks a way. Each option is an
@@ -586,6 +661,16 @@ class ExpeditionEvent {
         EventChoice('Cross the dunes', EventKind.treasure),
       ],
     ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Moon or Star',
+      'A silver bridge of moonlight leads one way, and a trail of fresh comet-glitter leads the other.',
+      tier: 7,
+      choices: [
+        EventChoice('Rest on the moonbeam', EventKind.rest),
+        EventChoice('Chase the comet trail', EventKind.bard),
+      ],
+    ),
   ];
 
   /// The first region only meets the original three. Later ones add the other
@@ -642,7 +727,7 @@ class Expedition {
   final int heroLevel;
   final List<ExpeditionStep> steps;
 
-  /// The region, 1 to 6. Decides the enemies, the scenery, the loot and how
+  /// The region, 1 to 7. Decides the enemies, the scenery, the loot and how
   /// tough everything is.
   final int tier;
 

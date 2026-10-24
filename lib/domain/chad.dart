@@ -218,6 +218,14 @@ class ChadDialogue {
       'The dune worm says hello loudly. Guard on the wind-up and say hello '
           'back.',
     ],
+    7: [
+      'Comet cats and lantern moths strike twice. Guard when you are hurt, and '
+          'they run out of sparkle.',
+      'Star turtles brace behind their shells and mend slowly. Be patient, '
+          'build focus, then strike.',
+      'Nova is too bright to look at, so look at the intent line instead. It '
+          'always says what is coming.',
+    ],
   };
 
   /// Picks a line deterministically from [seed] so it doesn't flicker on

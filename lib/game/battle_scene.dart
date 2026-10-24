@@ -64,7 +64,7 @@ const _enemyArt = <String, _EnemyArt>{
 
 /// The stages: meadow, forest dusk, boss arena, night camp (events), and the
 /// scenery of the later regions.
-enum Biome { meadow, forest, arena, night, coast, cave, peak, storm, dunes }
+enum Biome { meadow, forest, arena, night, coast, cave, peak, storm, dunes, isles }
 
 class BattleScene extends GameScene {
   BattleScene({
@@ -732,6 +732,7 @@ class Backdrop extends Component {
         Biome.peak => (const Color(0xFF9CC9EC), const Color(0xFFEAF4FB), const Color(0xFFB8CCDD), const Color(0xFFD5E4EF), const Color(0xFFEAF2F8)),
         Biome.storm => (const Color(0xFF2B2F45), const Color(0xFF6B6F8F), const Color(0xFF3F4660), const Color(0xFF343A52), const Color(0xFF55607A)),
         Biome.dunes => (const Color(0xFFF0A860), const Color(0xFFFBE3B0), const Color(0xFFE2B572), const Color(0xFFD7A25A), const Color(0xFFEBCB8E)),
+        Biome.isles => (const Color(0xFF0E1236), const Color(0xFF5B4FA8), const Color(0xFF3E3F88), const Color(0xFF4C4C9E), const Color(0xFF6A66B8)),
       };
 
   @override
@@ -744,7 +745,27 @@ class Backdrop extends Component {
     canvas.drawRect(Rect.fromLTWH(left, -400, width, groundY + 400), _paint);
     _paint.shader = null;
 
-    if (biome == Biome.night) {
+    if (biome == Biome.isles) {
+      // A sky full of stars, a big low moon, and the odd shooting star.
+      for (var i = 0; i < _stars.length; i++) {
+        final tw = 0.5 + 0.5 * math.sin(_t * 2 + i);
+        _paint.color = Color.fromRGBO(255, 255, 255, 0.4 + 0.5 * tw);
+        canvas.drawCircle(_stars[i], 0.9 + (i % 3) * 0.5, _paint);
+      }
+      _paint.color = const Color(0x33F1F4C9);
+      canvas.drawCircle(const Offset(268, 80), 40, _paint);
+      _paint.color = const Color(0xFFF1F4C9);
+      canvas.drawCircle(const Offset(268, 80), 24, _paint);
+      final shoot = (_t * 0.18) % 1;
+      if (shoot < 0.12) {
+        final p = shoot / 0.12;
+        _paint
+          ..color = Color.fromRGBO(255, 255, 255, 1 - p)
+          ..strokeWidth = 2;
+        final head = Offset(-60 + p * 260, -20 + p * 90);
+        canvas.drawLine(head, head - const Offset(34, 15), _paint);
+      }
+    } else if (biome == Biome.night) {
       for (var i = 0; i < _stars.length; i++) {
         final tw = 0.5 + 0.5 * math.sin(_t * 2 + i);
         _paint.color = Color.fromRGBO(255, 255, 255, 0.35 + 0.5 * tw);
@@ -892,6 +913,27 @@ class Backdrop extends Component {
       if (flash > 0) {
         _paint.color = const Color(0x33FFFFFF);
         canvas.drawRect(Rect.fromLTWH(left, -400, width, groundY + 400), _paint);
+      }
+    }
+    if (biome == Biome.isles) {
+      // Little islands drifting in the air, each with a rocky underside and a grassy top.
+      for (var i = 0; i < 4; i++) {
+        final x = -170 + i * 190 + math.sin(_t * 0.3 + i * 2) * 10;
+        final y = groundY - 140 - (i % 2) * 36 + math.sin(_t * 0.6 + i) * 6;
+        _paint.color = const Color(0xFF3A3470);
+        canvas.drawPath(
+          Path()
+            ..moveTo(x - 38, y)
+            ..lineTo(x + 38, y)
+            ..lineTo(x + 10, y + 34)
+            ..lineTo(x - 6, y + 22)
+            ..close(),
+          _paint,
+        );
+        _paint.color = const Color(0xFF5FA86A);
+        canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: 80, height: 14), _paint);
+        _paint.color = const Color(0xFF7BC47A);
+        canvas.drawOval(Rect.fromCenter(center: Offset(x, y - 2), width: 66, height: 8), _paint);
       }
     }
     if (biome == Biome.dunes) {

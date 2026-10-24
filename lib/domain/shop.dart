@@ -57,6 +57,11 @@ class Shop {
     'dune_robe': 2800,
     'sunstone_blade': 3000,
     'oasis_flask': 3000,
+    // The Starlit Isles.
+    'stargazer_cap': 3500,
+    'night_watch_cloak': 3700,
+    'comet_blade': 4000,
+    'starlight_jar': 4000,
   };
 
   /// The coin price of an item, or null if it is not sold.

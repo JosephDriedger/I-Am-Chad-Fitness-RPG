@@ -531,6 +531,12 @@ ActorPainter enemyPainter(String name) => switch (name) {
       'Scarab Roller' => paintScarab,
       'The Great Dune Worm' => paintDuneWorm,
       'The Riddling Sphinx' => paintSphinx,
+      // The Starlit Isles.
+      'Lantern Moth' => paintLanternMoth,
+      'Comet Cat' => paintCometCat,
+      'Star Turtle' => paintStarTurtle,
+      'The Comet King' => paintCometKing,
+      'Nova, the Very Bright' => paintNova,
       _ => paintSlime,
     };
 

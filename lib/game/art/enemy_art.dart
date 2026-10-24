@@ -631,3 +631,156 @@ void paintSignpost(Canvas c, double t) {
   circle(c, 12 + sway, -48, 8 + math.sin(t * 4) * 0.8, const Color(0x33FFC857));
   rrect(c, 9.5 + sway, -52, 5, 7, 1.5, const Color(0xFFFFE9A8));
 }
+
+// ---------------------------------------------------------------------------
+// The Starlit Isles
+// ---------------------------------------------------------------------------
+
+/// A large soft moth with a glowing belly, flapping.
+void paintLanternMoth(Canvas c, ActorState s) {
+  final flap = math.sin(s.time * 9 + s.windUp * 6) * 0.35;
+  final hover = -26 + math.sin(s.time * 2) * 4;
+  oval(c, 0, 0, 16, 3, const Color(0x24000000));
+  c.save();
+  c.translate(0, hover);
+  // Wings, a pair each side, beating.
+  for (final side in [-1.0, 1.0]) {
+    c.save();
+    c.rotate(side * (0.2 + flap));
+    oval(c, side * 22, -8, 21, 13, const Color(0xFFD7C8F0));
+    oval(c, side * 20, 8, 15, 9, const Color(0xFFBFA8E6));
+    circle(c, side * 24, -9, 4.5, const Color(0xFF8E6FD0));
+    c.restore();
+  }
+  // Fuzzy body and the lantern in its belly.
+  oval(c, 0, 0, 9, 15, const Color(0xFF8D6E63));
+  circle(c, 0, 4, 7, const Color(0x44FFE082));
+  circle(c, 0, 4, 4, const Color(0xFFFFE082));
+  // Head with feathery antennae.
+  circle(c, 0, -17, 7, const Color(0xFF8D6E63));
+  strokePath(c, Path()..moveTo(-3, -22)..quadraticBezierTo(-10, -32, -14, -28), 1.6, const Color(0xFF5D4037));
+  strokePath(c, Path()..moveTo(3, -22)..quadraticBezierTo(10, -32, 14, -28), 1.6, const Color(0xFF5D4037));
+  circle(c, -3, -17, 2.2, const Color(0xFFFFFFFF));
+  circle(c, 3, -17, 2.2, const Color(0xFFFFFFFF));
+  circle(c, -3, -17, 1, _ink);
+  circle(c, 3, -17, 1, _ink);
+  c.restore();
+}
+
+/// A cat trailing sparkles, mid-bound.
+void paintCometCat(Canvas c, ActorState s) {
+  final bound = math.sin(s.time * 5).abs() * 5;
+  shadow(c, 20);
+  c.save();
+  c.translate(0, -bound);
+  // The sparkle trail, behind.
+  for (var i = 0; i < 6; i++) {
+    final p = (s.time * 1.2 + i / 6) % 1;
+    final a = (1 - p).clamp(0.0, 1.0);
+    final x = -16 - p * 40;
+    final y = -22 + math.sin(p * 6 + i) * 5;
+    circle(c, x, y, 3.4 * (1 - p * 0.6), Color.fromRGBO(255, 241, 118, a));
+    circle(c, x + 4, y - 5, 1.6, Color.fromRGBO(255, 255, 255, a));
+  }
+  // Tail, body, legs.
+  strokePath(c, Path()..moveTo(-14, -22)..quadraticBezierTo(-30, -34, -26, -48), 5, const Color(0xFF5C6BC0));
+  oval(c, 0, -22, 18, 11, const Color(0xFF7986CB));
+  rrect(c, -10, -14, 5, 14, 2, const Color(0xFF5C6BC0));
+  rrect(c, 7, -14, 5, 14, 2, const Color(0xFF5C6BC0));
+  // Head with ears and a star on the forehead.
+  circle(c, 18, -30, 9.5, const Color(0xFF7986CB));
+  fillPath(c, poly([11, -36, 13, -48, 19, -38]), const Color(0xFF7986CB));
+  fillPath(c, poly([21, -38, 27, -48, 27, -35]), const Color(0xFF7986CB));
+  circle(c, 15, -31, 2.2, const Color(0xFFFFEB3B));
+  circle(c, 22, -31, 2.2, const Color(0xFFFFEB3B));
+  circle(c, 15.6, -31, 1, _ink);
+  circle(c, 22.6, -31, 1, _ink);
+  circle(c, 18.5, -38, 2, const Color(0xFFFFF59D));
+  c.restore();
+}
+
+/// A turtle carrying a night sky on its shell.
+void paintStarTurtle(Canvas c, ActorState s) {
+  final plod = math.sin(s.time * 1.6) * 1.2;
+  shadow(c, 30);
+  // Legs and tail.
+  rrect(c, -22, -10, 10, 10, 3, const Color(0xFF9DAA66));
+  rrect(c, 12, -10, 10, 10, 3, const Color(0xFF9DAA66));
+  oval(c, -30, -8, 6, 3, const Color(0xFF9DAA66));
+  c.save();
+  c.translate(0, plod);
+  // The shell: a dark dome with stars and a few joined lines.
+  oval(c, 0, -24, 28, 20, const Color(0xFF1F2A5C));
+  oval(c, 0, -28, 22, 13, const Color(0xFF2E3C7E));
+  const stars = [Offset(-14, -28), Offset(-4, -36), Offset(8, -30), Offset(16, -24), Offset(0, -22)];
+  for (var i = 0; i < stars.length - 1; i++) {
+    line(c, stars[i].dx, stars[i].dy, stars[i + 1].dx, stars[i + 1].dy, 0.9, const Color(0x66FFF59D));
+  }
+  for (var i = 0; i < stars.length; i++) {
+    final tw = 0.6 + 0.4 * math.sin(s.time * 3 + i);
+    circle(c, stars[i].dx, stars[i].dy, 2 + tw, Color.fromRGBO(255, 245, 157, tw));
+  }
+  // The head, patient and kind.
+  oval(c, 28, -20, 9, 7, const Color(0xFFB7C27A));
+  circle(c, 35, -24, 7, const Color(0xFFB7C27A));
+  circle(c, 37.5, -25.5, 1.5, _ink);
+  strokePath(c, Path()..moveTo(34, -20)..quadraticBezierTo(37, -18, 40, -20), 1.2, const Color(0xFF7C8A4A));
+  c.restore();
+}
+
+/// A comet with a crown and a long tail, very sure of itself.
+void paintCometKing(Canvas c, ActorState s) {
+  final hover = -46 + math.sin(s.time * 1.5) * 5 - s.windUp * 8 + s.attack * 10;
+  oval(c, 0, 0, 22, 4, const Color(0x24000000));
+  c.save();
+  c.translate(0, hover);
+  // The tail, streaming up and back.
+  for (var i = 0; i < 9; i++) {
+    final t = i / 8;
+    final w = 17 * (1 - t * 0.85);
+    circle(c, -t * 46, -t * 34, w, Color.fromRGBO(129, 212, 250, 0.55 * (1 - t)));
+  }
+  // The head: a glowing orb with a face.
+  circle(c, 0, 0, 25, const Color(0x44B3E5FC));
+  circle(c, 0, 0, 19, const Color(0xFFE1F5FE));
+  circle(c, 0, 0, 14, const Color(0xFFB3E5FC));
+  circle(c, -5, -3, 3, const Color(0xFFFFFFFF));
+  circle(c, 5, -3, 3, const Color(0xFFFFFFFF));
+  circle(c, -4.4, -3, 1.3, _ink);
+  circle(c, 5.6, -3, 1.3, _ink);
+  strokePath(c, Path()..moveTo(-6, 5)..quadraticBezierTo(0, 9, 6, 5), 1.7, _ink);
+  // A crown, slightly crooked.
+  fillPath(c, poly([-12, -17, -12, -29, -6, -22, 0, -32, 6, -22, 12, -29, 12, -17]), const Color(0xFFF2C94C));
+  rrect(c, -12, -19, 24, 4, 1.5, const Color(0xFFB8860B));
+  circle(c, 0, -24, 2, const Color(0xFFE53935));
+  c.restore();
+}
+
+/// A burst of light in sunglasses, because it cannot be looked at directly.
+void paintNova(Canvas c, ActorState s) {
+  final pulse = 1 + math.sin(s.time * 3) * 0.06 + s.windUp * 0.14;
+  final hover = -44 + math.sin(s.time * 1.8) * 4;
+  oval(c, 0, 0, 22, 4, const Color(0x24000000));
+  c.save();
+  c.translate(0, hover);
+  c.rotate(s.time * 0.25);
+  c.scale(pulse, pulse);
+  // The rays.
+  final pts = <double>[];
+  for (var i = 0; i < 24; i++) {
+    final a = i * math.pi / 12;
+    final r = i.isEven ? 34.0 : 19.0;
+    pts
+      ..add(math.cos(a) * r)
+      ..add(math.sin(a) * r);
+  }
+  fillPath(c, poly(pts), const Color(0xFFFFE082));
+  c.restore();
+  circle(c, 0, hover, 24 * pulse, const Color(0x55FFF59D));
+  circle(c, 0, hover, 17 * pulse, const Color(0xFFFFFDE7));
+  // Sunglasses and a pleased smile.
+  rrect(c, -13, hover - 7, 11, 7, 2.5, const Color(0xFF263238));
+  rrect(c, 2, hover - 7, 11, 7, 2.5, const Color(0xFF263238));
+  line(c, -2, hover - 4, 2, hover - 4, 1.6, const Color(0xFF263238));
+  strokePath(c, Path()..moveTo(-6, hover + 5)..quadraticBezierTo(0, hover + 10, 6, hover + 5), 1.7, const Color(0xFFB8860B));
+}

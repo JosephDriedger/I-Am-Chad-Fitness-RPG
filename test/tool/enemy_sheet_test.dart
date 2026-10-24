@@ -29,6 +29,7 @@ Biome _biomeOf(Terrain t) => switch (t) {
       Terrain.peak => Biome.peak,
       Terrain.storm => Biome.storm,
       Terrain.dunes => Biome.dunes,
+      Terrain.isles => Biome.isles,
     };
 
 void main() {

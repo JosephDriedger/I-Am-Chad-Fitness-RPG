@@ -134,6 +134,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       Terrain.peak => Biome.peak,
       Terrain.storm => Biome.storm,
       Terrain.dunes => Biome.dunes,
+      Terrain.isles => Biome.isles,
     };
   }
 
