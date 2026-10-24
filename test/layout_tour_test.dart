@@ -93,7 +93,7 @@ Future<void> _scrollThrough(WidgetTester tester, String screen) async {
 /// layout overflow says where it happened.
 void _noProblem(WidgetTester tester, String step) {
   final problem = tester.takeException();
-  if (problem != null) fail('$step threw: $problem');
+  if (problem != null) fail('$step threw: ${problem is FlutterError ? problem.toStringDeep() : problem}');
 }
 
 void main() {
@@ -161,6 +161,7 @@ void main() {
         }
         if (label == 'Hero') {
           await _tap(tester, find.text('Customise'));
+          await _scrollThrough(tester, 'Customise');
           await _tap(tester, find.text('Save'));
         }
         if (label == 'Train') {
@@ -177,6 +178,8 @@ void main() {
           await tester.enterText(find.byType(TextField).first, 'Dumbbell Shoulder Press');
           await settle(tester);
           await _tap(tester, find.byWidgetPredicate((w) => w is Text && w.data == 'Dumbbell Shoulder Press'));
+          // Every panel of the log form, down to the save button, then back up to fill it in.
+          await _scrollThrough(tester, 'the log screen');
           await _enter(tester, 'Sets', '3');
           await _enter(tester, 'Reps per Set', '99');
           await _enter(tester, 'Weight (Optional)', '20');

@@ -34,6 +34,10 @@ Future<void> bootApp(
   /// Leave the sound, vibration and settings providers to [overrides], so a test
   /// can run the real feedback pipeline instead of the silent one.
   bool liveFeedback = false,
+
+  /// Show the title screen a returning player sees on launch. Off by default so
+  /// tests go straight to the hall.
+  bool showTitle = false,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -42,7 +46,7 @@ Future<void> bootApp(
       clockProvider.overrideWithValue(() => clock),
       if (!liveFeedback) feedbackProvider.overrideWithValue(GameFeedback.silent()),
       if (!liveFeedback) prefsProvider.overrideWithValue(const AppPrefs(reducedMotion: true)),
-      showTitleOnLaunchProvider.overrideWithValue(false),
+      showTitleOnLaunchProvider.overrideWithValue(showTitle),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),
       // Never reach a real store from a test.

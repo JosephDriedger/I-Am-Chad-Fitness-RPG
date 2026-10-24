@@ -58,12 +58,17 @@ class _TitleLockupState extends State<TitleLockup> with SingleTickerProviderStat
                 ),
                 Align(
                   alignment: const Alignment(0, -0.78),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('I AM', style: gameTitle(26, color: GameColors.gold, letterSpacing: 6).copyWith(shadows: _outline)),
-                      Text('CHAD', style: gameTitle(72, color: GameColors.cream, letterSpacing: 3).copyWith(shadows: _outline, height: 0.95)),
-                    ],
+                  // A logo keeps its designed size whatever the text-size setting, and shrinks to
+                  // fit if the space is tight, instead of breaking "CHAD" over four lines.
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('I AM', textScaler: TextScaler.noScaling, style: gameTitle(26, color: GameColors.gold, letterSpacing: 6).copyWith(shadows: _outline)),
+                        Text('CHAD', textScaler: TextScaler.noScaling, style: gameTitle(72, color: GameColors.cream, letterSpacing: 3).copyWith(shadows: _outline, height: 0.95)),
+                      ],
+                    ),
                   ),
                 ),
                 Align(
@@ -77,7 +82,7 @@ class _TitleLockupState extends State<TitleLockup> with SingleTickerProviderStat
                       border: Border.all(color: GameColors.redDark, width: 2.5),
                       boxShadow: const [BoxShadow(color: Color(0x88000000), offset: Offset(0, 3))],
                     ),
-                    child: Text('FITNESS RPG', style: gameTitle(20, color: Colors.white, letterSpacing: 2)),
+                    child: Text('FITNESS RPG', textScaler: TextScaler.noScaling, style: gameTitle(20, color: Colors.white, letterSpacing: 2)),
                   ),
                 ),
               ],

@@ -50,12 +50,18 @@ class _TitleScreenState extends State<TitleScreen> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _go,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+          child: LayoutBuilder(
+            builder: (context, box) => SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              // Always at least the screen tall, so the content is centred on a tall phone and
+              // scrolls on a short one (a phone on its side, or very large text).
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: box.maxHeight - 40),
+                child: IntrinsicHeight(
+                  child: Column(
               children: [
                 const Spacer(),
-                const TitleLockup(height: 340),
+                TitleLockup(height: (box.maxHeight * 0.5).clamp(190.0, 340.0)),
                 const Spacer(),
                 Text('Welcome back, ${widget.heroName}!', style: gameTitle(26, color: GameColors.cream), textAlign: TextAlign.center),
                 const SizedBox(height: 6),
@@ -72,6 +78,9 @@ class _TitleScreenState extends State<TitleScreen> {
                 ),
                 const SizedBox(height: 4),
               ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -91,8 +100,15 @@ class _Pulse extends StatefulWidget {
 }
 
 class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1100))..repeat(reverse: true);
+  // Made in initState, not on first use: with reduced motion it is never used while the
+  // button is on screen, and creating it for the first time in dispose() is unsafe.
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1100));
+  }
 
   @override
   void dispose() {
@@ -102,7 +118,11 @@ class _PulseState extends State<_Pulse> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.still) return widget.child;
+    if (widget.still) {
+      _c.stop();
+      return widget.child;
+    }
+    if (!_c.isAnimating) _c.repeat(reverse: true);
     return ScaleTransition(
       scale: Tween(begin: 0.97, end: 1.03).animate(CurvedAnimation(parent: _c, curve: Curves.easeInOut)),
       child: widget.child,
