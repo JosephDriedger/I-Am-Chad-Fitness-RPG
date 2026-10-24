@@ -1,14 +1,14 @@
 /// How expeditions get harder as the hero levels up, without ever becoming a
 /// wall. See docs/COMBAT_AND_EXPEDITIONS.md.
 ///
-/// The world is five regions. Each opens at a hero level, has its own enemies,
+/// The world is six regions. Each opens at a hero level, has its own enemies,
 /// bosses, scenery and loot, and is a little tougher than the one before. A
 /// region stays open for good, so a player can always go back to an easier one,
 /// and being knocked out still keeps everything earned so far.
 library;
 
 /// What a region looks like. The game scenes map each to a backdrop.
-enum Terrain { meadow, forest, coast, cave, peak, storm }
+enum Terrain { meadow, forest, coast, cave, peak, storm, dunes }
 
 class Region {
   const Region({
@@ -24,7 +24,7 @@ class Region {
     required this.coinBonus,
   });
 
-  /// 1 to 5. Also what saved expeditions remember.
+  /// 1 to 6. Also what saved expeditions remember.
   final int tier;
   final String name;
   final String blurb;
@@ -111,9 +111,21 @@ class Difficulty {
       xpBonus: 8,
       coinBonus: 4,
     ),
+    Region(
+      tier: 6,
+      name: 'The Sunstone Dunes',
+      blurb: 'Warm sand, long shadows and a great many riddles.',
+      minLevel: 36,
+      terrains: [Terrain.dunes, Terrain.dunes],
+      hpScale: 1.0,
+      attackScale: 0.49,
+      defenseScale: 0.9,
+      xpBonus: 10,
+      coinBonus: 5,
+    ),
   ];
 
-  static const maxTier = 5;
+  static const maxTier = 6;
 
   /// The region with this tier, clamped to the ones that exist.
   static Region region(int tier) => regions[tier.clamp(1, maxTier) - 1];

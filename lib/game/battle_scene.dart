@@ -64,7 +64,7 @@ const _enemyArt = <String, _EnemyArt>{
 
 /// The stages: meadow, forest dusk, boss arena, night camp (events), and the
 /// scenery of the later regions.
-enum Biome { meadow, forest, arena, night, coast, cave, peak, storm }
+enum Biome { meadow, forest, arena, night, coast, cave, peak, storm, dunes }
 
 class BattleScene extends GameScene {
   BattleScene({
@@ -729,6 +729,7 @@ class Backdrop extends Component {
         Biome.cave => (const Color(0xFF1B1530), const Color(0xFF3B2F5C), const Color(0xFF2E2547), const Color(0xFF241C3A), const Color(0xFF4A3F66)),
         Biome.peak => (const Color(0xFF9CC9EC), const Color(0xFFEAF4FB), const Color(0xFFB8CCDD), const Color(0xFFD5E4EF), const Color(0xFFEAF2F8)),
         Biome.storm => (const Color(0xFF2B2F45), const Color(0xFF6B6F8F), const Color(0xFF3F4660), const Color(0xFF343A52), const Color(0xFF55607A)),
+        Biome.dunes => (const Color(0xFFF0A860), const Color(0xFFFBE3B0), const Color(0xFFE2B572), const Color(0xFFD7A25A), const Color(0xFFEBCB8E)),
       };
 
   @override
@@ -759,6 +760,12 @@ class Backdrop extends Component {
     } else if (biome == Biome.forest) {
       _paint.color = const Color(0x66FFD9A0);
       canvas.drawCircle(Offset(80, groundY - 90), 54, _paint);
+    } else if (biome == Biome.dunes) {
+      // A low, huge sun.
+      _paint.color = const Color(0x55FFF2C4);
+      canvas.drawCircle(Offset(250, groundY - 120), 58, _paint);
+      _paint.color = const Color(0xFFFFF2C4);
+      canvas.drawCircle(Offset(250, groundY - 120), 34, _paint);
     }
 
     if (biome == Biome.meadow || biome == Biome.forest) {
@@ -883,6 +890,19 @@ class Backdrop extends Component {
       if (flash > 0) {
         _paint.color = const Color(0x33FFFFFF);
         canvas.drawRect(Rect.fromLTWH(left, -400, width, groundY + 400), _paint);
+      }
+    }
+    if (biome == Biome.dunes) {
+      // A shimmer of heat along the horizon, and sand blowing past.
+      for (var i = 0; i < 6; i++) {
+        final x = -200 + i * 130 + math.sin(_t * 0.6 + i) * 8;
+        _paint.color = const Color(0x22FFFFFF);
+        canvas.drawOval(Rect.fromCenter(center: Offset(x, groundY - 16 - (i % 2) * 6), width: 120, height: 6), _paint);
+      }
+      for (var i = 0; i < 30; i++) {
+        final p = ((_t * 0.22 + i * 0.113) % 1);
+        _paint.color = Color.fromRGBO(255, 236, 190, 0.55 * (1 - p));
+        canvas.drawCircle(Offset(-120 + p * 640 + (i * 31) % 90, groundY - 10 - ((i * 47) % 150)), 1.2 + (i % 3) * 0.4, _paint);
       }
     }
     if (biome == Biome.arena) {

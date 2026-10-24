@@ -432,27 +432,38 @@ class _RegionPicker extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    final next = Difficulty.regions.where((r) => !Difficulty.isOpen(r.tier, level)).firstOrNull;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final r in Difficulty.regions)
-          Semantics(
-            label: Difficulty.isOpen(r.tier, level)
-                ? '${r.name}. ${r.tier == selected ? 'Chosen.' : 'Tap to choose.'}'
-                : '${r.name}. Opens at level ${r.minLevel}.',
-            child: ExcludeSemantics(
-              child: ChoiceChip(
-                key: Key('region_${r.tier}'),
-                label: Text(
-                  Difficulty.isOpen(r.tier, level) ? '${r.tier}' : '${r.tier}  Lv ${r.minLevel}',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final r in Difficulty.regions)
+              Semantics(
+                label: Difficulty.isOpen(r.tier, level)
+                    ? '${r.name}. ${r.tier == selected ? 'Chosen.' : 'Tap to choose.'}'
+                    : '${r.name}. Opens at level ${r.minLevel}.',
+                child: ExcludeSemantics(
+                  child: ChoiceChip(
+                    key: Key('region_${r.tier}'),
+                    avatar: Difficulty.isOpen(r.tier, level) ? null : const Icon(Icons.lock_outline, size: 14),
+                    label: Text('${r.tier}', style: const TextStyle(fontWeight: FontWeight.w800)),
+                    selected: r.tier == selected,
+                    onSelected: Difficulty.isOpen(r.tier, level) ? (_) => ref.read(selectedRegionProvider.notifier).select(r.tier) : null,
+                  ),
                 ),
-                selected: r.tier == selected,
-                onSelected: Difficulty.isOpen(r.tier, level) ? (_) => ref.read(selectedRegionProvider.notifier).select(r.tier) : null,
               ),
-            ),
+          ],
+        ),
+        if (next != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Next: ${next.name}, at Level ${next.minLevel}.',
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
+        ],
       ],
     );
   }

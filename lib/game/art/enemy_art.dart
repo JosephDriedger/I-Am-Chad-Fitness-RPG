@@ -436,3 +436,177 @@ void paintSpring(Canvas c, double t) {
     strokePath(c, Path()..moveTo(26, -10)..quadraticBezierTo(30 + i * 3, -22 - i * 4, 36 + i * 4, -22 - i * 6), 2, const Color(0xFF66BB6A));
   }
 }
+
+// ---------------------------------------------------------------------------
+// The Sunstone Dunes
+// ---------------------------------------------------------------------------
+
+/// A small whirlwind of sand with a face, and somebody's hat going round on top.
+void paintDustDevil(Canvas c, ActorState s) {
+  final spin = s.time * 6 + s.windUp * 8 + s.attack * 10;
+  shadow(c, 18);
+  const sand = Color(0xFFE0B26B);
+  const pale = Color(0xFFF5D9A0);
+  for (var i = 0; i < 6; i++) {
+    final w = 8 + i * 3.6 + s.windUp * i * 0.7;
+    final dx = math.sin(spin + i * 0.9) * (3 + i * 0.8);
+    oval(c, dx, -6 - i * 10.0, w, 6, Color.lerp(sand, pale, i / 5)!);
+  }
+  // Grit going round.
+  for (var i = 0; i < 7; i++) {
+    final a = spin * 1.3 + i * 0.9;
+    circle(c, math.cos(a) * (14 + i * 2), -10 - i * 8 + math.sin(a) * 3, 1.5, const Color(0xFFB8864B));
+  }
+  // The face rides the second band from the top.
+  final fx = math.sin(spin + 4.5) * 6;
+  circle(c, fx - 5, -50, 2.6, const Color(0xFFFFFFFF));
+  circle(c, fx + 5, -50, 2.6, const Color(0xFFFFFFFF));
+  circle(c, fx - 4.5, -50, 1.1, _ink);
+  circle(c, fx + 5.5, -50, 1.1, _ink);
+  strokePath(c, Path()..moveTo(fx - 5, -43)..quadraticBezierTo(fx, -38, fx + 5, -43), 1.6, _ink);
+  // The stolen hat.
+  c.save();
+  c.translate(math.sin(spin + 5.4) * 9, -68);
+  c.rotate(math.sin(spin) * 0.3);
+  rrect(c, -9, -3, 18, 3, 1.5, const Color(0xFF6D4326));
+  rrect(c, -5, -9, 10, 7, 2, const Color(0xFF8D5E3C));
+  c.restore();
+}
+
+/// A cactus in a flowerpot helmet, with a very small sword.
+void paintCactusKnight(Canvas c, ActorState s) {
+  final sway = math.sin(s.time * 2) * 1.2;
+  final raise = s.windUp * 14 - s.attack * 10;
+  shadow(c, 18);
+  const green = Color(0xFF4F9A4A);
+  const dark = Color(0xFF2F6E33);
+  c.save();
+  c.translate(sway * 0.4, 0);
+  // Arms, one holding the sword.
+  rrect(c, -26, -42, 14, 8, 4, green);
+  rrect(c, -26, -58, 8, 24, 4, green);
+  rrect(c, 12, -42, 14, 8, 4, green);
+  rrect(c, 19, -54, 8, 20, 4, green);
+  line(c, 23, -56 - raise * 0.3, 38, -78 - raise, 2.8, const Color(0xFFCFD8DC));
+  rrect(c, 19, -58 - raise * 0.3, 9, 3, 1.5, const Color(0xFFB87D2E));
+  // Body, with ridges and prickles.
+  rrect(c, -13, -60, 26, 58, 12, green);
+  for (final x in const [-6.0, 0.0, 6.0]) {
+    line(c, x, -56, x, -6, 1.2, dark);
+  }
+  for (final p in const [[-14.0, -30.0], [14.0, -22.0], [-14.0, -14.0], [14.0, -40.0]]) {
+    line(c, p[0], p[1], p[0] + (p[0] < 0 ? -4 : 4), p[1] - 2, 1.4, const Color(0xFFF1F8E9));
+  }
+  // The pot helmet and its single flower.
+  fillPath(c, poly([-14, -60, 14, -60, 11, -78, -11, -78]), const Color(0xFFC0643A));
+  rrect(c, -16, -63, 32, 5, 2, const Color(0xFFD9784A));
+  circle(c, 0, -82, 4, const Color(0xFFF48FB1));
+  circle(c, 0, -82, 1.6, const Color(0xFFFFEE58));
+  // A kind, serious face.
+  circle(c, -5, -46, 2.2, const Color(0xFFFFFFFF));
+  circle(c, 5, -46, 2.2, const Color(0xFFFFFFFF));
+  circle(c, -4.6, -46, 1, _ink);
+  circle(c, 5.4, -46, 1, _ink);
+  strokePath(c, Path()..moveTo(-4, -38)..quadraticBezierTo(0, -35, 4, -38), 1.5, _ink);
+  c.restore();
+}
+
+/// A dung beetle in blue, rolling a golden ball that it will not explain.
+void paintScarab(Canvas c, ActorState s) {
+  final roll = s.time * 3 + s.attack * 4;
+  final shove = s.attack * 8 - s.windUp * 6;
+  shadow(c, 28);
+  // The ball, out in front.
+  c.save();
+  c.translate(24 + shove, -15);
+  c.rotate(roll);
+  circle(c, 0, 0, 15, const Color(0xFFD9A441));
+  circle(c, 0, 0, 15, const Color(0x22000000));
+  circle(c, -2, -2, 12, const Color(0xFFF2C94C));
+  line(c, -9, 0, 9, 0, 1.6, const Color(0xFFB8864B));
+  line(c, 0, -9, 0, 9, 1.6, const Color(0xFFB8864B));
+  c.restore();
+  // Legs.
+  for (var i = 0; i < 3; i++) {
+    final wig = math.sin(s.time * 8 + i * 1.7) * 2;
+    line(c, -14 + i * 8, -10, -18 + i * 8 + wig, 0, 2.2, const Color(0xFF1F3F5F));
+  }
+  line(c, 6, -16, 14, -6, 2.6, const Color(0xFF1F3F5F));
+  // Shell, wing line and a gleam.
+  oval(c, -8, -20, 22, 13, const Color(0xFF2E6AA3));
+  line(c, -8, -32, -8, -8, 1.4, const Color(0xFF1F3F5F));
+  oval(c, -16, -25, 6, 3, const Color(0x66FFFFFF));
+  // Head with horns.
+  circle(c, 14, -22, 8, const Color(0xFF1F3F5F));
+  fillPath(c, poly([12, -29, 16, -29, 14, -39]), const Color(0xFF90A4AE));
+  circle(c, 17, -24, 2.2, const Color(0xFFFFFFFF));
+  circle(c, 17.6, -24, 1, _ink);
+  strokePath(c, Path()..moveTo(14, -17)..quadraticBezierTo(18, -15, 20, -18), 1.4, const Color(0xFFFFB74D));
+}
+
+/// A great sand-coloured worm coming up out of a dune to say hello.
+void paintDuneWorm(Canvas c, ActorState s) {
+  final sway = math.sin(s.time * 1.4) * 6;
+  final lunge = s.attack * 14 - s.windUp * 10;
+  const skin = Color(0xFFB07A55);
+  const belly = Color(0xFFE3B98C);
+  oval(c, 0, -2, 38, 9, const Color(0xFFD9B070));
+  for (var i = 0; i < 7; i++) {
+    final t = i / 6;
+    final x = sway * t + t * t * (20 + lunge);
+    final y = -10 - t * 68;
+    final r = 21 - t * 4;
+    circle(c, x, y, r, i.isEven ? skin : shade(skin, 0.05));
+    oval(c, x + 4, y + 2, r * 0.5, r * 0.8, belly);
+    line(c, x - r * 0.9, y, x - r * 0.5, y + 2, 1.3, shade(skin, -0.12));
+  }
+  // The head, at the top, with a mouth open towards the hero.
+  const t = 1.0;
+  final hx = sway * t + t * t * (20 + lunge) + 6;
+  const hy = -78.0;
+  circle(c, hx, hy, 19, shade(skin, 0.04));
+  final gape = 6 + s.windUp * 6 + s.attack * 5;
+  oval(c, hx + 12, hy + 4, 8, gape, const Color(0xFF5A2A2A));
+  for (var i = 0; i < 4; i++) {
+    final ty = hy + 4 - gape + 3 + i * (gape * 2 - 6) / 3;
+    fillPath(c, poly([hx + 8, ty - 2, hx + 14, ty, hx + 8, ty + 2]), const Color(0xFFFFF3D6));
+  }
+  circle(c, hx - 2, hy - 8, 3, const Color(0xFFFFFFFF));
+  circle(c, hx - 1.4, hy - 8, 1.3, _ink);
+  strokePath(c, Path()..moveTo(hx - 7, hy - 13)..quadraticBezierTo(hx - 2, hy - 16, hx + 3, hy - 12), 1.6, shade(skin, -0.2));
+}
+
+/// A sphinx lying in the sun, in a striped headcloth, with a riddle in the air.
+void paintSphinx(Canvas c, ActorState s) {
+  final breathe = math.sin(s.time * 1.6) * 1;
+  final lift = s.windUp * 8 - s.attack * 6;
+  const fur = Color(0xFFE0B26B);
+  const dark = Color(0xFFC08F4B);
+  shadow(c, 38);
+  // The tail, curling up behind.
+  strokePath(c, Path()..moveTo(-32, -10)..quadraticBezierTo(-50, -12, -44, -30 + math.sin(s.time * 2) * 3), 4, dark);
+  // Body and the two front paws, out in front.
+  oval(c, -6, -20 + breathe, 32, 16, fur);
+  rrect(c, 6, -11, 34, 9, 4, fur);
+  rrect(c, 8, -5, 32, 6, 3, dark);
+  // The striped headcloth and the face.
+  fillPath(c, poly([12, -62 - lift, 38, -62 - lift, 44, -26, 6, -26]), const Color(0xFFF2C94C));
+  for (var i = 0; i < 4; i++) {
+    final y = -58 - lift + i * 8.0;
+    line(c, 13 + i * 0.7, y, 37 - i * 0.7, y, 2.4, const Color(0xFF2E6AA3));
+  }
+  circle(c, 25, -46 - lift, 9.5, const Color(0xFFD9A074));
+  circle(c, 21.5, -47 - lift, 1.8, _ink);
+  circle(c, 28.5, -47 - lift, 1.8, _ink);
+  strokePath(c, Path()..moveTo(20, -43 - lift)..quadraticBezierTo(25, -39 - lift, 30, -43 - lift), 1.5, const Color(0xFF8E4B3A));
+  // The riddle: a question mark that bobs.
+  final bob = math.sin(s.time * 2.2) * 3;
+  final q = Path()
+    ..moveTo(18, -80 - lift + bob)
+    ..quadraticBezierTo(18, -88 - lift + bob, 25, -88 - lift + bob)
+    ..quadraticBezierTo(32, -88 - lift + bob, 32, -81 - lift + bob)
+    ..quadraticBezierTo(32, -76 - lift + bob, 25, -73 - lift + bob)
+    ..lineTo(25, -70 - lift + bob);
+  strokePath(c, q, 2.6, const Color(0xFFFFF3D6));
+  circle(c, 25, -65 - lift + bob, 1.8, const Color(0xFFFFF3D6));
+}

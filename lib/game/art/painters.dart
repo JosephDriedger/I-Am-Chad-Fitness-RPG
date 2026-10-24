@@ -525,6 +525,12 @@ ActorPainter enemyPainter(String name) => switch (name) {
       'Static Imp' => _staticImp,
       'The Thunderhead' => paintThunderhead,
       'Stormcaller Skarn' => _stormcaller,
+      // The Sunstone Dunes.
+      'Dust Devil' => paintDustDevil,
+      'Cactus Knight' => paintCactusKnight,
+      'Scarab Roller' => paintScarab,
+      'The Great Dune Worm' => paintDuneWorm,
+      'The Riddling Sphinx' => paintSphinx,
       _ => paintSlime,
     };
 

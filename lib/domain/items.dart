@@ -36,7 +36,7 @@ class EquipmentItem {
   final int attack;
   final int defense;
 
-  /// The region whose expeditions drop this (1 to 5). Pieces from a tougher
+  /// The region whose expeditions drop this (1 to 6). Pieces from a tougher
   /// region are a little stronger, still within a few points.
   final int tier;
 
@@ -277,6 +277,47 @@ class ItemCatalog {
       hp: 10,
       tier: 5,
       accent: 0xFFFFF176,
+    ),
+
+    // ---- The Sunstone Dunes (region 6) ---------------------------------------
+    EquipmentItem(
+      id: 'sunstone_blade',
+      name: 'Sunstone Blade',
+      slot: EquipmentSlot.weapon,
+      description: 'Warm to hold, even at night.',
+      attack: 7,
+      tier: 6,
+      accent: 0xFFFFB300,
+    ),
+    EquipmentItem(
+      id: 'nomad_hood',
+      name: 'Nomad\'s Hood',
+      slot: EquipmentSlot.head,
+      description: 'Shades the eyes and keeps a few secrets.',
+      hp: 14,
+      defense: 3,
+      tier: 6,
+      accent: 0xFFD7A86E,
+    ),
+    EquipmentItem(
+      id: 'dune_robe',
+      name: 'Dune Robe',
+      slot: EquipmentSlot.body,
+      description: 'Light as air and dry in a minute.',
+      defense: 7,
+      hp: 4,
+      tier: 6,
+      accent: 0xFFFFCC80,
+    ),
+    EquipmentItem(
+      id: 'oasis_flask',
+      name: 'Pocket Oasis',
+      slot: EquipmentSlot.trinket,
+      description: 'A tiny pond in a flask. There is a tiny duck.',
+      attack: 3,
+      hp: 12,
+      tier: 6,
+      accent: 0xFF26C6DA,
     ),
   ];
 

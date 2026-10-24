@@ -52,6 +52,11 @@ class Shop {
     'gale_cloak': 2000,
     'storm_edge': 2100,
     'lightning_bottle': 2100,
+    // The Sunstone Dunes.
+    'nomad_hood': 2600,
+    'dune_robe': 2800,
+    'sunstone_blade': 3000,
+    'oasis_flask': 3000,
   };
 
   /// The coin price of an item, or null if it is not sold.

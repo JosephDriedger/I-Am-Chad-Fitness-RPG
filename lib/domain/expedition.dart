@@ -1,4 +1,4 @@
-/// Seeded expeditions: a short sequence of battles and events in one of five
+/// Seeded expeditions: a short sequence of battles and events in one of six
 /// regions, each tougher than the last. See docs/COMBAT_AND_EXPEDITIONS.md.
 library;
 
@@ -29,7 +29,7 @@ class EnemyTemplate {
   final double defense;
   final bool boss;
 
-  /// The region this enemy belongs to (1 to 5).
+  /// The region this enemy belongs to (1 to 6).
   final int tier;
 
   /// How it picks its moves: whether it braces, mends, strikes twice, or gets
@@ -213,6 +213,35 @@ class EnemyPool {
       tier: 5,
       behavior: EnemyBehavior(heavy: 0.2, brace: 0.2, mend: 0.2),
     ),
+
+    // ---- The Sunstone Dunes (region 6) -----------------------------------------
+    EnemyTemplate(
+      name: 'Dust Devil',
+      blurb: 'Spins, giggles and rearranges your hat.',
+      hp: 0.75,
+      attack: 1.05,
+      defense: 0.8,
+      tier: 6,
+      behavior: EnemyBehavior(heavy: 0.1, flurry: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Cactus Knight',
+      blurb: 'Prickly manners, soft heart, very small sword.',
+      hp: 1.05,
+      attack: 0.95,
+      defense: 1.1,
+      tier: 6,
+      behavior: EnemyBehavior(heavy: 0.3, brace: 0.2),
+    ),
+    EnemyTemplate(
+      name: 'Scarab Roller',
+      blurb: 'Rolls a mysterious ball. Heals when it finds shade.',
+      hp: 0.95,
+      attack: 0.9,
+      defense: 1.15,
+      tier: 6,
+      behavior: EnemyBehavior(heavy: 0.15, brace: 0.25, mend: 0.2),
+    ),
   ];
 
   static const bosses = <EnemyTemplate>[
@@ -321,6 +350,28 @@ class EnemyPool {
       tier: 5,
       behavior: EnemyBehavior(heavy: 0.2, flurry: 0.25, brace: 0.15, mend: 0.1, enrageBelow: 0.45),
     ),
+
+    // ---- The Sunstone Dunes -------------------------------------------------------
+    EnemyTemplate(
+      name: 'The Great Dune Worm',
+      blurb: 'Surfaces to say hello. Hello is loud.',
+      hp: 1.55,
+      attack: 1.1,
+      defense: 1.0,
+      boss: true,
+      tier: 6,
+      behavior: EnemyBehavior(heavy: 0.3, flurry: 0.2, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'The Riddling Sphinx',
+      blurb: 'Asks a riddle. The answer is always "a nap".',
+      hp: 1.45,
+      attack: 1.1,
+      defense: 1.1,
+      boss: true,
+      tier: 6,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.2, brace: 0.15, mend: 0.15, enrageBelow: 0.45),
+    ),
   ];
 
   /// The ordinary enemies met in a region of [tier]: its own, plus the ones from
@@ -404,7 +455,8 @@ String _shapeFor(int tier) => switch (tier) {
       <= 2 => 'beb' 'B',
       3 => 'bebb' 'B',
       4 => 'bbeb' 'B',
-      _ => 'bbebe' 'B',
+      5 => 'bbebe' 'B',
+      _ => 'bbebb' 'B',
     };
 
 class Expedition {
@@ -423,7 +475,7 @@ class Expedition {
   final int heroLevel;
   final List<ExpeditionStep> steps;
 
-  /// The region, 1 to 5. Decides the enemies, the scenery, the loot and how
+  /// The region, 1 to 6. Decides the enemies, the scenery, the loot and how
   /// tough everything is.
   final int tier;
 

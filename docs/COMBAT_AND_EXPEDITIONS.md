@@ -58,7 +58,7 @@ A **boss** can also get **fired up**: once it drops below a set share of its hea
 
 ## Regions
 
-The world is five regions, defined in `difficulty.dart`. Each opens at a hero level, has its own enemies, bosses, scenery, camp events and loot, and is a little tougher than the one before. **A region stays open for good**, so the player can always go back to an easier one, and a picker on the Adventure screen chooses where to set out. The toughest open region is the default.
+The world is six regions, defined in `difficulty.dart`. Each opens at a hero level, has its own enemies, bosses, scenery, camp events and loot, and is a little tougher than the one before. **A region stays open for good**, so the player can always go back to an easier one, and a picker on the Adventure screen chooses where to set out. The toughest open region is the default.
 
 | # | Region | Opens at | Steps | Scenery | Bonus per battle (XP / coins) |
 | --- | --- | --- | --- | --- | --- |
@@ -67,6 +67,7 @@ The world is five regions, defined in `difficulty.dart`. Each opens at a hero le
 | 3 | The Glimmer Caverns | Level 10 | 5 | Crystal caves | +4 / +2 |
 | 4 | Frostpeak Pass | Level 16 | 5 | Snowy peak, cave | +6 / +3 |
 | 5 | Thunder Heights | Level 24 | 6 | Storm, peak | +8 / +4 |
+| 6 | The Sunstone Dunes | Level 36 | 6 | Desert dunes | +10 / +5 |
 
 An enemy's HP, attack and defense are the hero's stats at that level, times the enemy's own build, times the region's three dials (`hpScale`, `attackScale`, `defenseScale`). The later regions' attack dials are below 1 on purpose: enemies hit a little less, but fights last longer and the tactics matter more. A boss's bonus is doubled. Difficulty is meant to come from enemy variety and tactics, not from stat inflation.
 
@@ -80,6 +81,7 @@ A reward-bearing expedition costs **2 adventure energy** (spent when you set out
 | 3 | `b e b b B` |
 | 4 | `b b e b B` |
 | 5 | `b b e b e B` |
+| 6 | `b b e b b B` |
 
 `Expedition.generate(seed, heroLevel, tier)` builds it deterministically:
 
@@ -128,12 +130,13 @@ Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGua
 | The Glimmer Caverns | Crystal Beetle (braces), Glowcap Shroom (mends), Echo Bat (flurries) | Crystal Colossus, Mother Glowcap |
 | Frostpeak Pass | Frost Sprite (flurries), Snow Yeti (heavy blows), Icicle Golem (braces) | The Avalanche Matron, Old Man Winter |
 | Thunder Heights | Thunder Cloud (flurries), Gale Hawk (flurries), Static Imp (braces and mends) | The Thunderhead, Stormcaller Skarn |
+| The Sunstone Dunes | Dust Devil (flurries), Cactus Knight (heavy blows, braces), Scarab Roller (braces and mends) | The Great Dune Worm, The Riddling Sphinx |
 
 Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md). The enemy art is in [`enemy_art.dart`](../lib/game/art/enemy_art.dart); several bosses are a recoloured or crowned version of a regular enemy's drawing.
 
 ## Equipment
 
-Twenty-four pieces across four slots (head, body, weapon, trinket), one worn per slot: the original eight, and four from each later region. Bonuses stay small, from +1 on the first pieces to +6 at the top, and each region's pieces are a little stronger than the last one's. Gear is found as loot and also sold in the Guild Shop for coins (see [Reward rules](REWARD_RULES.md#coins-and-the-shop)), at prices that rise with the region. Duplicates convert to coins. The pieces from later regions have no hand-drawn art of their own and are drawn on the hero in the colour in their `accent` field.
+Twenty-eight pieces across four slots (head, body, weapon, trinket), one worn per slot: the original eight, and four from each later region. Bonuses stay small, from +1 on the first pieces to +7 at the top, and each region's pieces are a little stronger than the last one's. Gear is found as loot and also sold in the Guild Shop for coins (see [Reward rules](REWARD_RULES.md#coins-and-the-shop)), at prices that rise with the region. Duplicates convert to coins. The pieces from later regions have no hand-drawn art of their own and are drawn on the hero in the colour in their `accent` field.
 
 ## Balance status
 
@@ -146,6 +149,7 @@ Twenty-four pieces across four slots (head, body, weapon, trinket), one worn per
 | 3 | 68%, 81%, 82% |
 | 4 | 58%, 73%, 76% |
 | 5 | 68%, 62%, 66% |
+| 6 | 57%, 52%, 68% |
 
 Real players will have gear (a few points of attack, defense and HP), can read the intent line better than a script, and can drop back to an easier region. The tests only guard the shape: the first region is gentle, no region is a wall (every case above 45%), each region is harder than the one before on average, each step is a noticeable but small drop, and no battle runs past 30 turns. They are a regression guard, not proof of fun. Real playtesting should drive the next tuning pass (see the [roadmap](ROADMAP.md)).
 
