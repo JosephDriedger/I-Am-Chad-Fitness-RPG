@@ -129,7 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         const _Bullet(Icons.explore,
             'Spend energy on short turn-based expeditions with loot.'),
         const _Bullet(Icons.hotel,
-            'Rest days are training. Missed days never cost you progress.'),
+            'Rest days are training. Quiet days never cost you progress.'),
         const _Bullet(Icons.lock_outline,
             'Everything is saved on your device. No account needed.'),
         const SizedBox(height: 8),

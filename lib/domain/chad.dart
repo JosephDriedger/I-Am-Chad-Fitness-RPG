@@ -29,6 +29,8 @@ class ChadDialogue {
           'started at Level 1. Except me. I started at Level 2. Long story.',
       'Ah, a new face! Move at whatever pace suits you. Heroes come in all '
           'sizes of step.',
+      'Welcome, hero! If you would like a gentle start, the training yard has '
+          'a one-minute warm-up with me. No rewards, no pressure, just a stretch.',
     ],
     ChadContext.idle: [
       'Whenever you\'re ready. The guild hall isn\'t going anywhere. Mostly.',
