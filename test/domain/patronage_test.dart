@@ -160,11 +160,54 @@ void main() {
       expect(month.map((p) => p.id), containsAll(['streak_7', 'streak_30']));
     });
 
+    test('trophies are earned by playing, none is sold, and the shelf has room for all', () {
+      expect(Cosmetics.trophies.map((t) => t.id).toSet(), hasLength(Cosmetics.trophies.length));
+      expect(Cosmetics.trophies.every((t) => t.unlock.isEarned), isTrue);
+      expect(Cosmetics.trophies.length, lessThanOrEqualTo(6));
+      expect({for (final t in Cosmetics.trophies) t.shape}, hasLength(Cosmetics.trophies.length), reason: 'each looks different');
+    });
+
+    test('the shelf starts bare and trophies are set out only for what was earned', () {
+      expect(Cosmetics.earnedTrophies(const CosmeticContext()), isEmpty);
+      // The early game earns none: they are for the long haul.
+      expect(Cosmetics.earnedTrophies(const CosmeticContext(level: 30, victories: 24, workouts: 100)), isEmpty);
+
+      final lantern = Story.inSeason(2).last.number;
+      final chime = Story.inSeason(3).last.number;
+      expect(
+        Cosmetics.earnedTrophies(CosmeticContext(chaptersRead: {lantern})).map((t) => t.id),
+        ['story_two'],
+      );
+      expect(
+        Cosmetics.earnedTrophies(CosmeticContext(level: 40, victories: 25, chaptersRead: {lantern, chime})).map((t) => t.id),
+        ['story_two', 'level_40', 'twenty_five_victories', 'story_three'],
+      );
+      expect(
+        Cosmetics.earnedTrophies(const CosmeticContext(level: 50, victories: 99, claimedStreakDays: {90})).length,
+        4,
+      );
+      // Reading chapter 15 alone earns nothing but its own trophy; a bigger level also keeps the smaller one.
+      expect(Cosmetics.earnedTrophies(const CosmeticContext(level: 99)).map((t) => t.id), ['level_40', 'level_50']);
+    });
+
+    test('a season trophy is tied to the last chapter of that season', () {
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_two').unlock.n, Story.inSeason(2).last.number);
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_three').unlock.n, Story.inSeason(3).last.number);
+    });
+
+    test('hints for a finished season name the season', () {
+      expect(Unlock.chapter(Story.inSeason(1).last.number).hint, 'Earned by finishing the Season One story');
+      expect(Unlock.chapter(Story.inSeason(2).last.number).hint, 'Earned by finishing the Season Two story');
+      expect(Unlock.chapter(Story.inSeason(3).last.number).hint, 'Earned by finishing the Season Three story');
+      expect(Unlock.chapter(3).hint, 'Earned by reading chapter 3');
+    });
+
     test('unlock hints are calm', () {
       for (final u in [
         ...Cosmetics.capes.map((c) => c.unlock),
         ...Cosmetics.dyes.map((d) => d.unlock),
         ...Cosmetics.pennants.map((p) => p.unlock),
+        ...Cosmetics.trophies.map((t) => t.unlock),
       ]) {
         final h = u.hint.toLowerCase();
         for (final w in ['must', 'only', 'hurry', 'limited', 'before', 'miss']) {

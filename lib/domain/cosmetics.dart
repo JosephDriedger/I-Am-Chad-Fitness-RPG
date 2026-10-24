@@ -41,13 +41,21 @@ class Unlock {
         UnlockKind.workouts => c.workouts >= n,
       };
 
+  /// The season whose last chapter is [chapter], if it is one.
+  static StorySeason? _finishedSeason(int chapter) {
+    for (final s in Story.seasons) {
+      if (Story.inSeason(s.number).last.number == chapter) return s;
+    }
+    return null;
+  }
+
   /// Says how to get it, calmly and without pressure.
   String get hint => switch (kind) {
         UnlockKind.free => 'Free',
         UnlockKind.patron => 'Patron Pack',
         UnlockKind.level => 'Earned at Level $n',
-        UnlockKind.chapter => n == Story.inSeason(1).last.number
-            ? 'Earned by finishing the Season One story'
+        UnlockKind.chapter => _finishedSeason(n) != null
+            ? 'Earned by finishing the ${_finishedSeason(n)!.name} story'
             : 'Earned by reading chapter $n',
         UnlockKind.victories => n == 1 ? 'Earned by winning an expedition' : 'Earned by winning $n expeditions',
         UnlockKind.streak => 'Earned at a $n-day streak',
@@ -113,6 +121,20 @@ class Pennant {
   final int color;
 }
 
+/// What a trophy on the Journal shelf looks like.
+enum TrophyShape { lantern, chime, cup, star, shield, sun }
+
+/// A trophy on the Journal shelf, for the bigger milestones. Earned by playing,
+/// never sold, and never taken away.
+class Trophy {
+  const Trophy(this.id, this.name, this.unlock, this.shape);
+
+  final String id;
+  final String name;
+  final Unlock unlock;
+  final TrophyShape shape;
+}
+
 /// Things the Patron Pack adds to the guild hall.
 class PatronDecor {
   const PatronDecor._();
@@ -160,6 +182,17 @@ class Cosmetics {
     Pennant('level_30', 'Level 30', Unlock.level(30), 0xFFC2477F),
   ];
 
+  /// The Journal shelf's trophies, in the order they are set out. The shelf has
+  /// room for six. All earned; none sold.
+  static const trophies = <Trophy>[
+    Trophy('story_two', 'The Lantern Coast', Unlock.chapter(15), TrophyShape.lantern),
+    Trophy('level_40', 'Level 40', Unlock.level(40), TrophyShape.cup),
+    Trophy('twenty_five_victories', 'Twenty-Five Expeditions', Unlock.victories(25), TrophyShape.shield),
+    Trophy('streak_90', 'Season of Strength', Unlock.streak(90), TrophyShape.sun),
+    Trophy('story_three', 'The Weather Chime', Unlock.chapter(23), TrophyShape.chime),
+    Trophy('level_50', 'Level 50', Unlock.level(50), TrophyShape.star),
+  ];
+
   static Cape capeById(String id) => capes.firstWhere((c) => c.id == id, orElse: () => capes.first);
 
   static HairDye? dyeById(String id) {
@@ -186,6 +219,11 @@ class Cosmetics {
   static List<Pennant> earnedPennants(CosmeticContext c) => [
         for (final p in pennants)
           if (p.unlock.isMet(c)) p,
+      ];
+
+  static List<Trophy> earnedTrophies(CosmeticContext c) => [
+        for (final t in trophies)
+          if (t.unlock.isMet(c)) t,
       ];
 
   /// Hall decorations the Patron Pack adds.

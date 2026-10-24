@@ -39,7 +39,7 @@ Cosmetics have three sources, and the game has plenty to look at without paying:
 | Source | Examples |
 | --- | --- |
 | **Free** | The classic cape, six hair styles, six outfit colours, six skin tones, and every piece of gear. |
-| **Earned by playing** | The Dawn Mantle (finish Season One), the Sunrise and Moonlit hair dyes (levels 5 and 10), and ten hall **pennants** that hang on bunting across the guild hall: first workout, first expedition, a heroic week, levels 5, 10, 20 and 30, ten expeditions, a month's streak and the finished season. They appear as milestones are reached, are never taken down, and are never for sale. |
+| **Earned by playing** | The Dawn Mantle (finish Season One), the Sunrise and Moonlit hair dyes (levels 5 and 10), and ten hall **pennants** that hang on bunting across the guild hall: first workout, first expedition, a heroic week, levels 5, 10, 20 and 30, ten expeditions, a month's streak and the finished season. They appear as milestones are reached, are never taken down, and are never for sale. Six **trophies** on the Journal bookshelf work the same way, for the long haul: the Season Two and Three finales, levels 40 and 50, 25 expeditions and a 90-day streak. |
 | **Patron Pack** | The extra mantles, dyes and decorations listed above. |
 
 So paying does not make a hero look "more accomplished": the pennants and the Dawn Mantle can only be earned. The pack is extra choice, not better standing.
@@ -100,7 +100,7 @@ Do this once, with the real application id (the generated id `com.iamchad.i_am_c
 
 ## Changing this later
 
-Allowed without a new decision: new cosmetics for the pack or as free or earned looks, new pennants, a new tip tier at or below the ceiling.
+Allowed without a new decision: new cosmetics for the pack or as free or earned looks, new pennants or trophies, a new tip tier at or below the ceiling.
 
 Needs a new entry in the [decision log](DECISIONS.md) first, because it changes a promise: anything that touches gameplay, **any ad anywhere other than the start of a story chapter**, any other ad or tracking SDK, a subscription, a random reward, a currency bought with money, a limited-time offer, or a purchase prompt outside the Patron's Hall.
 

@@ -12,7 +12,7 @@ import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/painting.dart'
     show TextPainter, TextSpan, TextStyle, FontWeight, TextDirection, TextAlign;
 
-import '../domain/cosmetics.dart' show PatronDecor;
+import '../domain/cosmetics.dart' show PatronDecor, TrophyShape;
 import 'art/painters.dart';
 import 'core.dart';
 import 'look.dart';
@@ -32,6 +32,7 @@ class HubState {
     this.hour = 12,
     this.itemsOwned = 0,
     this.pennants = const [],
+    this.trophies = const [],
     this.patronDecor = const {},
     this.highlight,
   });
@@ -50,6 +51,10 @@ class HubState {
   /// Colours (ARGB) of the pennants the player has earned, in hanging order.
   /// The bunting starts bare and fills in as milestones are reached.
   final List<int> pennants;
+
+  /// The trophies set out on the Journal shelf, in order. The shelf has room
+  /// for six; it shows books on that row until the first one is earned.
+  final List<TrophyShape> trophies;
 
   /// Ids from `PatronDecor` for the optional Patron Pack. Looks only.
   final Set<String> patronDecor;
@@ -382,9 +387,17 @@ class HubScene extends GameScene {
       const Color(0xFFB23A3A), const Color(0xFF3F6BB2), const Color(0xFF3A8F5A), const Color(0xFFD9A441),
       const Color(0xFF7B4FB2), const Color(0xFFB2603A), const Color(0xFF2F8F8F),
     ];
+    final trophies = _state.trophies;
     for (var row = 0; row < 4; row++) {
       final y = r.top + 10 + row * 50;
       rrect(c, r.left + 6, y + 40, r.width - 12, 5, 0, const Color(0xFF6F4727));
+      if (row == 0 && trophies.isNotEmpty) {
+        // The top shelf holds the trophies instead of books.
+        for (var t = 0; t < trophies.length && t < 6; t++) {
+          _trophy(c, trophies[t], r.left + 20 + t * 14.5, y + 40);
+        }
+        continue;
+      }
       var x = r.left + 10.0;
       var i = row * 3;
       while (x < r.right - 18) {
@@ -401,6 +414,89 @@ class HubScene extends GameScene {
     if (s.wobble > 0) {
       final w = math.sin(s.wobble * math.pi * 5) * 1.5 * s.wobble;
       oval(c, r.center.dx + w, r.top + 66, 3, 2, const Color(0xFFFFF59D));
+    }
+  }
+
+  /// One small trophy standing on a shelf, [x] the middle of its plinth and
+  /// [baseY] the shelf board. Each is about 14 wide and 28 tall.
+  void _trophy(Canvas c, TrophyShape shape, double x, double baseY) {
+    const gold = Color(0xFFE6B83C);
+    const goldDark = Color(0xFFB8860B);
+    rrect(c, x - 6, baseY - 3, 12, 3, 1, const Color(0xFF8D6E63));
+    final b = baseY - 3;
+    switch (shape) {
+      case TrophyShape.cup:
+        rrect(c, x - 1.5, b - 8, 3, 8, 0, goldDark);
+        c.drawPath(
+          Path()
+            ..moveTo(x - 6, b - 26)
+            ..lineTo(x + 6, b - 26)
+            ..quadraticBezierTo(x + 6, b - 10, x, b - 9)
+            ..quadraticBezierTo(x - 6, b - 10, x - 6, b - 26)
+            ..close(),
+          Paint()..color = gold,
+        );
+        strokePath(c, Path()..moveTo(x - 6, b - 23)..quadraticBezierTo(x - 10, b - 22, x - 6, b - 16), 1.4, goldDark);
+        strokePath(c, Path()..moveTo(x + 6, b - 23)..quadraticBezierTo(x + 10, b - 22, x + 6, b - 16), 1.4, goldDark);
+        rrect(c, x - 3.5, b - 24, 2, 8, 1, const Color(0x66FFFFFF));
+      case TrophyShape.star:
+        rrect(c, x - 1.5, b - 8, 3, 8, 0, goldDark);
+        final pts = <double>[];
+        for (var i = 0; i < 10; i++) {
+          final a = -math.pi / 2 + i * math.pi / 5;
+          final rad = i.isEven ? 8.5 : 3.6;
+          pts
+            ..add(x + math.cos(a) * rad)
+            ..add(b - 18 + math.sin(a) * rad);
+        }
+        fillPath(c, poly(pts), gold);
+        circle(c, x, b - 18, 1.8, const Color(0xFFFFF3D6));
+      case TrophyShape.shield:
+        c.drawPath(
+          Path()
+            ..moveTo(x - 6, b - 26)
+            ..lineTo(x + 6, b - 26)
+            ..lineTo(x + 6, b - 14)
+            ..quadraticBezierTo(x + 6, b - 5, x, b - 3)
+            ..quadraticBezierTo(x - 6, b - 5, x - 6, b - 14)
+            ..close(),
+          Paint()..color = const Color(0xFF3F6BB2),
+        );
+        line(c, x, b - 26, x, b - 4, 1.6, gold);
+        line(c, x - 6, b - 17, x + 6, b - 17, 1.6, gold);
+        circle(c, x, b - 17, 2.2, gold);
+      case TrophyShape.sun:
+        final glow = 0.7 + 0.3 * math.sin(clock * 2);
+        rrect(c, x - 1.5, b - 8, 3, 8, 0, goldDark);
+        for (var i = 0; i < 8; i++) {
+          final a = i * math.pi / 4;
+          line(c, x + math.cos(a) * 6, b - 17 + math.sin(a) * 6, x + math.cos(a) * 9.5, b - 17 + math.sin(a) * 9.5, 1.6, const Color(0xFFF2994A));
+        }
+        circle(c, x, b - 17, 5.4, Color.lerp(const Color(0xFFF2994A), const Color(0xFFFFD36B), glow)!);
+      case TrophyShape.lantern:
+        final glow = 0.6 + 0.4 * math.sin(clock * 3);
+        strokePath(c, Path()..moveTo(x - 4, b - 22)..quadraticBezierTo(x, b - 30, x + 4, b - 22), 1.3, const Color(0xFFC49A4A));
+        rrect(c, x - 5.5, b - 22, 11, 3, 1, const Color(0xFFC49A4A));
+        rrect(c, x - 5, b - 19, 10, 13, 2, Color.lerp(const Color(0xFFFFE9A8), const Color(0xFFFFC857), glow)!);
+        circle(c, x, b - 13, 2.4, const Color(0xFFFFB02E));
+        rrect(c, x - 5.5, b - 6, 11, 3, 1, const Color(0xFFC49A4A));
+        line(c, x, b - 19, x, b - 6, 1, const Color(0xFFC49A4A));
+      case TrophyShape.chime:
+        strokePath(c, Path()..moveTo(x - 6, b - 8)..lineTo(x - 6, b - 22)..quadraticBezierTo(x, b - 29, x + 6, b - 22)..lineTo(x + 6, b - 8), 1.6, const Color(0xFFCFD8DC));
+        for (var i = 0; i < 3; i++) {
+          final bx = x - 3.6 + i * 3.6;
+          final sway = math.sin(clock * 1.8 + i * 1.3) * 0.6;
+          line(c, bx, b - 23 + (i == 1 ? -2 : 0), bx + sway, b - 17, 0.9, const Color(0xFFCFD8DC));
+          c.drawPath(
+            Path()
+              ..moveTo(bx + sway - 1.2, b - 17)
+              ..lineTo(bx + sway + 1.2, b - 17)
+              ..lineTo(bx + sway + 2.4, b - 11)
+              ..lineTo(bx + sway - 2.4, b - 11)
+              ..close(),
+            Paint()..color = const Color(0xFFD9A441),
+          );
+        }
     }
   }
 

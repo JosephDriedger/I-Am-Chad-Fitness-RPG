@@ -94,6 +94,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       // A gentle "start here" until the first workout is logged, then never again.
       highlight: workouts.isEmpty ? HubTarget.train : null,
       pennants: cosmetics == null ? const [] : [for (final x in Cosmetics.earnedPennants(cosmetics)) x.color],
+      trophies: cosmetics == null ? const [] : [for (final t in Cosmetics.earnedTrophies(cosmetics)) t.shape],
       patronDecor: cosmetics == null ? const {} : Cosmetics.patronDecor(cosmetics),
       chadLine: quiet ? 'Tap me if you want a word.' : ChadDialogue.line(ctx, seed: seed),
       questPending: quests.any((q) => !q.isDoneBy(today)),
