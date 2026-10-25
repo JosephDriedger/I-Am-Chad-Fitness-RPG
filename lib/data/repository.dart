@@ -32,6 +32,12 @@ class GameRepository {
     return q.watch().map((rows) => rows.map(_toEntry).toList());
   }
 
+  /// Every workout once, newest first, for something that wants the journal as it is now.
+  Future<List<WorkoutEntry>> allWorkouts() async {
+    final rows = await (_db.select(_db.workouts)..orderBy([(t) => OrderingTerm.desc(t.performedAt)])).get();
+    return rows.map(_toEntry).toList();
+  }
+
   Future<int> addWorkout(WorkoutEntry e) async {
     return _db.transaction(() async {
       final id = await _db.into(_db.workouts).insert(_toCompanion(e));

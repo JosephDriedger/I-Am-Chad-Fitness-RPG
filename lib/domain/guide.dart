@@ -180,7 +180,7 @@ class Guide {
         GuideSection('Your Data', [
           const GuideEntry(
             'Saved on Your Device',
-            'Your hero, workouts and progress stay on your phone. There is no account. In Settings you can copy a full backup to keep or to move to a new phone, restore one, or delete it all.',
+            'Your hero, workouts and progress stay on your phone. There is no account. In Settings you can copy a full backup to keep or to move to a new phone, restore one, save your workouts as a spreadsheet to look at, or delete it all.',
           ),
           const GuideEntry(
             'Camera Counting',
