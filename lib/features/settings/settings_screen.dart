@@ -12,6 +12,7 @@ import '../../domain/guide.dart';
 import '../patron/patron_screen.dart';
 import 'guide_screen.dart';
 import 'reminders_panel.dart';
+import 'restore_dialog.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -127,12 +128,43 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Your workouts, progress and story choices are stored only on this device, and there is no account. '
+                  'To keep them safe or move to a new phone, copy a full backup and restore it there. '
                   'The only things that use the internet are the store, the one ad at the start of a story chapter '
                   '(which Premium removes), and downloading a later story season once, when you choose to. '
                   'That download sends nothing about you.',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
+                GameButton(
+                  key: const Key('copy_backup'),
+                  label: 'Copy a Full Backup',
+                  icon: Icons.backup_rounded,
+                  kind: GameButtonKind.secondary,
+                  onPressed: () async {
+                    final json = await repo.backupJson();
+                    await Clipboard.setData(ClipboardData(text: json));
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Copied. Paste it into a note or an email to yourself. It restores on this phone or a new one.'),
+                      ));
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                GameButton(
+                  key: const Key('restore_backup'),
+                  label: 'Restore From a Backup',
+                  icon: Icons.restore_rounded,
+                  kind: GameButtonKind.secondary,
+                  onPressed: () async {
+                    final name = await showRestoreBackup(context, repo);
+                    if (name != null && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restored. Welcome back, $name.')));
+                      Navigator.of(context).popUntil((r) => r.isFirst);
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
                 GameButton(
                   label: 'Copy My Data (JSON)',
                   icon: Icons.copy_all_rounded,
@@ -142,7 +174,7 @@ class SettingsScreen extends ConsumerWidget {
                     await Clipboard.setData(ClipboardData(text: json));
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Copied. Paste it anywhere to keep a backup.'),
+                        content: Text('Copied. This is a readable summary of your workouts. To keep a backup you can restore, use Copy a Full Backup.'),
                       ));
                     }
                   },

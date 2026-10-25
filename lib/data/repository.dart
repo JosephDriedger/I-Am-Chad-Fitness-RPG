@@ -13,6 +13,7 @@ import '../domain/rewards.dart';
 import '../domain/shop.dart';
 import '../domain/streaks.dart';
 import '../domain/workout.dart';
+import 'backup.dart';
 import 'database.dart';
 
 /// Single access point for saved data. Workouts are written first and
@@ -577,6 +578,96 @@ class GameRepository {
       ],
     };
     return const JsonEncoder.withIndent('  ').convert(data);
+  }
+
+  // ---- Backup and restore --------------------------------------------------
+
+  /// The tables a backup holds: everything about the player, in an order where
+  /// anything another table depends on comes first. The device's own preferences
+  /// stay out (see backup.dart).
+  List<TableInfo<Table, dynamic>> get _backupTables => [
+        for (final t in _db.allTables)
+          if (!Backup.deviceTables.contains(t.actualTableName)) t,
+      ];
+
+  /// The whole game as JSON the player can keep and restore (see backup.dart).
+  Future<String> backupJson() async {
+    final tables = <String, List<Map<String, Object?>>>{};
+    for (final t in _backupTables) {
+      final rows = await _db.customSelect('SELECT * FROM "${t.actualTableName}"').get();
+      tables[t.actualTableName] = [
+        for (final r in rows) {for (final e in r.data.entries) e.key: _plain(e.value)},
+      ];
+    }
+    return Backup(schemaVersion: _db.schemaVersion, createdAt: DateTime.now(), tables: tables).encode();
+  }
+
+  static Object? _plain(Object? v) => v is bool ? (v ? 1 : 0) : v;
+
+  /// Reads and checks a pasted backup without touching anything. Throws a
+  /// [BackupException] if it cannot be used.
+  Backup readBackup(String text) {
+    final backup = Backup.parse(
+      text,
+      knownColumns: {for (final t in _backupTables) t.actualTableName: {for (final c in t.$columns) c.$name}},
+      currentSchema: _db.schemaVersion,
+    );
+    // Values must be the kind each column holds, so nothing odd is stored.
+    for (final t in _backupTables) {
+      final types = {for (final c in t.$columns) c.$name: c};
+      for (final row in backup.rows(t.actualTableName)) {
+        for (final cell in row.entries) {
+          final column = types[cell.key]!;
+          final v = cell.value;
+          if (v == null) {
+            if (!column.$nullable) throw const BackupException(BackupProblem.damaged);
+            continue;
+          }
+          final ok = switch (column.type) {
+            DriftSqlType.string => v is String,
+            DriftSqlType.bool => v is bool || v == 0 || v == 1,
+            DriftSqlType.int || DriftSqlType.bigInt || DriftSqlType.dateTime => v is int,
+            DriftSqlType.double => v is num,
+            _ => false,
+          };
+          if (!ok) throw const BackupException(BackupProblem.damaged);
+        }
+      }
+    }
+    return backup;
+  }
+
+  /// Replaces everything about the player with [backup], all or nothing: if any
+  /// row cannot be stored or read back, nothing changes.
+  Future<void> restoreBackup(Backup backup) async {
+    try {
+      await _db.transaction(() async {
+        await _db.customStatement('PRAGMA defer_foreign_keys = ON');
+        for (final t in _backupTables) {
+          await _db.customStatement('DELETE FROM "${t.actualTableName}"');
+        }
+        for (final t in _backupTables) {
+          for (final row in backup.rows(t.actualTableName)) {
+            final columns = row.keys.toList();
+            await _db.customStatement(
+              'INSERT INTO "${t.actualTableName}" (${columns.map((c) => '"$c"').join(', ')}) '
+              'VALUES (${List.filled(columns.length, '?').join(', ')})',
+              [for (final c in columns) _plain(row[c])],
+            );
+          }
+        }
+        // Read everything back, so a row the game could not use rolls the whole thing back.
+        for (final t in _backupTables) {
+          await _db.select(t).get();
+        }
+      });
+    } on BackupException {
+      rethrow;
+    } catch (_) {
+      throw const BackupException(BackupProblem.damaged);
+    } finally {
+      _db.markTablesUpdated(_db.allTables);
+    }
   }
 
   /// Wipes all saved data from the device.
