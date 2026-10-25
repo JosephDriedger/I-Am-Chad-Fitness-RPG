@@ -34,6 +34,10 @@ Future<void> bootApp(
   DateTime? now,
   List<Override> overrides = const [],
   bool storyOffers = false,
+
+  /// Let the hall offer the warm-up to a player with no workouts. Off by default,
+  /// or it would sit over every first-time test.
+  bool warmUpOffers = false,
   StoreGateway? store,
 
   /// The pretend ad system. By default a test never reaches Google, and there is
@@ -72,6 +76,7 @@ Future<void> bootApp(
       showTitleOnLaunchProvider.overrideWithValue(showTitle),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),
+      warmUpAutoOfferProvider.overrideWithValue(warmUpOffers),
       // Never reach a real store from a test.
       storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
       adGatewayProvider.overrideWithValue(ads ?? TestAdGateway()),

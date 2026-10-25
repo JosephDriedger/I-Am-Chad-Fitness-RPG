@@ -69,6 +69,10 @@ final storyStatusProvider = Provider<StoryStatus?>((ref) {
 /// Whether the hall offers an unread chapter by itself. Tests switch it off.
 final storyAutoOfferProvider = Provider<bool>((_) => true);
 
+/// Whether the hall offers Chad's warm-up to someone who has not logged a workout
+/// yet. Tests switch it off.
+final warmUpAutoOfferProvider = Provider<bool>((_) => true);
+
 /// What the player's saved store purchases unlock (cosmetics only).
 final entitlementsProvider = StreamProvider<Entitlements>(
     (ref) => ref.watch(repositoryProvider).watchEntitlements());

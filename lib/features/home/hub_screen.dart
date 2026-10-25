@@ -10,6 +10,7 @@ import '../../app/widgets.dart';
 import '../../domain/chad.dart';
 import '../../domain/cosmetics.dart';
 import '../../domain/expedition.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/player_state.dart';
 import '../../domain/quests.dart';
 import '../../domain/story.dart';
@@ -24,6 +25,7 @@ import '../settings/settings_screen.dart';
 import 'hud_legend_dialog.dart';
 import '../story/chronicle_screen.dart';
 import '../story/pack_download.dart';
+import '../workout/warmup_screen.dart';
 import '../workout/workout_screen.dart';
 
 /// The home screen: a living guild hall you tap around in, with a HUD that
@@ -43,6 +45,9 @@ class _HubScreenState extends ConsumerState<HubScreen> {
   /// Chapters already offered this session, so "Later" is respected.
   final _offered = <int>{};
 
+  /// The warm-up is offered once per launch, so "Not Now" is respected.
+  bool _warmUpOffered = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +62,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     );
     // A returning player can already have a chapter waiting when the hall appears
     // (the title screen comes first, so the story status has long since loaded).
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOfferStory());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _maybeOfferStory();
+      await _maybeOfferWarmUp();
+    });
   }
 
   HubState _stateFor(PlayerStatus p) {
@@ -186,6 +194,51 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     if (opened) await _maybeOfferStory();
   }
 
+  /// Offers Chad's warm-up once per launch, only to someone who has not saved a
+  /// workout yet and only while the hall is what they are looking at. It never
+  /// blocks anything: "Not Now" leaves everything as it was, and the warm-up
+  /// stays on the Train screen.
+  Future<void> _maybeOfferWarmUp() async {
+    if (!mounted || _navigating || _warmUpOffered || !ref.read(warmUpAutoOfferProvider)) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    // Null while the journal is still loading, which is not the same as empty.
+    final workouts = ref.read(workoutsProvider).value;
+    if (workouts == null || workouts.isNotEmpty) return;
+    _warmUpOffered = true;
+    _navigating = true;
+    final start = await showGameDialog<bool>(
+      context: context,
+      title: FirstSteps.warmUpOfferTitle,
+      content: const Text(FirstSteps.warmUpOfferText),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            key: const Key('warmup_offer_yes'),
+            label: 'Warm Up',
+            icon: Icons.self_improvement_rounded,
+            kind: GameButtonKind.positive,
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ),
+        Builder(
+          builder: (ctx) => GameButton(
+            key: const Key('warmup_offer_no'),
+            label: 'Not Now',
+            kind: GameButtonKind.secondary,
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+        ),
+      ],
+    );
+    if (!mounted) return;
+    if (start == true) {
+      await Navigator.of(context).push(gameRoute<void>(const WarmUpScreen()));
+      if (!mounted) return;
+    }
+    _navigating = false;
+    await _scene.resume();
+  }
+
   /// Plays the "you earned something" moments after returning to the hall.
   Future<void> _celebrate(PlayerStatus before) async {
     // Saved data reaches the screen a beat after the page closes, so give it
@@ -223,6 +276,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     // The story status arrives a beat after launch; offer once it has.
     ref.listen(storyStatusProvider, (prev, next) {
       if (prev == null && next != null) _maybeOfferStory();
+    });
+    // The journal arrives a beat after launch too.
+    ref.listen(workoutsProvider, (prev, next) {
+      if (prev?.value == null && next.value != null) _maybeOfferWarmUp();
     });
     // Rebuild whenever anything the hall shows changes.
     ref.watch(workoutsProvider);
