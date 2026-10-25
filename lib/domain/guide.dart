@@ -78,6 +78,10 @@ class Guide {
             'Active Days and Streaks',
             'Any movement makes a day active. A streak is active days in a row, with quiet days allowed in between. A longer run pays small one-time rewards, and if it ends, you keep everything you earned and simply begin a fresh one.',
           ),
+          const GuideEntry(
+            'Ideas for Today',
+            'Beside the quests, the quest board offers a few ideas: something that goes with a quest, and exercises you may not have tried. They are only ideas, and what you pick is up to you. For anything you have done before, you will see your last time and your own best marks, just to look back on.',
+          ),
           GuideEntry(
             'Weekly Goal',
             'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like.',

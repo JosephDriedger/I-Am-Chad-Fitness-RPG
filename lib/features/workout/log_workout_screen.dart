@@ -21,6 +21,7 @@ import '../../domain/streaks.dart';
 import '../../domain/workout.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/look.dart';
+import '../history/past_marks.dart';
 import 'camera_reps_screen.dart';
 import 'exercise_demo_card.dart';
 import 'pose_camera.dart';
@@ -442,6 +443,15 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
               ],
             ),
           ),
+          // An exercise they have done before shows their own marks, so they can see where they are.
+          if (ref.watch(workoutsProvider).value case final journal? when journal.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            PastMarks(
+              recap: ExerciseRecap.of(journal, a.id, excludingId: widget.editing?.id),
+              entries: journal,
+              metric: prefs.useMetric,
+            ),
+          ],
           if (!editing && (ref.watch(workoutsProvider).value?.isEmpty ?? false)) ...[
             const SizedBox(height: 10),
             Semantics(

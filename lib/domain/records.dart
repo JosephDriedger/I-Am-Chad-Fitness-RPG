@@ -154,3 +154,38 @@ class MarkHistory {
     return top;
   }
 }
+
+/// What the journal says about one exercise: the last time it was done, how many
+/// days, and the player's own marks for it. Shown when they are about to do it
+/// again, and beside a suggestion for something they have done before. Like the
+/// bests it is only for looking back on, is derived each time, and never changes
+/// a reward.
+class ExerciseRecap {
+  const ExerciseRecap({required this.last, required this.days, required this.bests});
+
+  /// The most recent entry, or null if it has never been logged.
+  final WorkoutEntry? last;
+
+  /// On how many different days it has been logged.
+  final int days;
+
+  /// One mark per kind, in the order heaviest, most in a set, longest, farthest.
+  final List<PersonalBest> bests;
+
+  bool get hasHistory => last != null;
+
+  /// [excludingId] leaves out an entry being edited, so it is not compared with itself.
+  static ExerciseRecap of(Iterable<WorkoutEntry> entries, String activityId, {int? excludingId}) {
+    final mine = [
+      for (final e in entries)
+        if (e.activityId == activityId && (excludingId == null || e.id != excludingId) && PersonalBests._usable(e)) e,
+    ]..sort((a, b) => b.performedAt.compareTo(a.performedAt));
+    if (mine.isEmpty) return const ExerciseRecap(last: null, days: 0, bests: []);
+    final marks = PersonalBests.of(mine)..sort((a, b) => a.kind.index.compareTo(b.kind.index));
+    return ExerciseRecap(
+      last: mine.first,
+      days: {for (final e in mine) dayKey(e.performedAt)}.length,
+      bests: marks,
+    );
+  }
+}

@@ -64,7 +64,8 @@ void main() {
     await _logPress(tester, '12.5');
     expect(find.text('Workout Saved!'), findsOneWidget);
     expect(find.text('New Personal Best!'), findsOneWidget);
-    expect(find.text('Heaviest: 12.5 kg × 8'), findsOneWidget);
+    // Named in the dialog, and now also among the marks on the log screen behind it.
+    expect(find.text('Heaviest: 12.5 kg × 8'), findsWidgets);
     // 3 sets of 8 is the same effort whatever the weight (REWARD_RULES).
     final after = await tester.runAsync(() => repo.rewardForDay(_now));
     expect(after!.xp, RewardRules.v1.rewardForDay([_press(0, 99)]).xp);

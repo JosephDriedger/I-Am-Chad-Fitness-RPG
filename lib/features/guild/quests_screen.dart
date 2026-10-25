@@ -6,11 +6,13 @@ import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/quests.dart';
+import '../../domain/recommendations.dart';
 import '../../domain/recap.dart';
 import '../../domain/rewards.dart';
 import '../../domain/workout.dart';
 import '../../game/core.dart' show Haptic;
 import '../story/chronicle_screen.dart';
+import 'recommendations_panel.dart';
 import '../workout/log_workout_screen.dart';
 import '../workout/workout_screen.dart';
 
@@ -37,6 +39,14 @@ class QuestsScreen extends ConsumerWidget {
       preferred: player.hero.preferredCategories,
       hasDumbbells: player.hero.hasDumbbells,
       count: 4,
+    );
+    final recommendations = Recommendations.forDay(
+      level: player.hero.experience,
+      day: now,
+      preferred: player.hero.preferredCategories,
+      hasDumbbells: player.hero.hasDumbbells,
+      quests: quests,
+      history: workouts,
     );
     final goal = QuestBoard.weeklyGoal(
       level: player.hero.experience,
@@ -83,6 +93,13 @@ class QuestsScreen extends ConsumerWidget {
               'Totally optional. Do one, do all, or do something else entirely.',
               style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w700),
             ),
+          ),
+          const SizedBox(height: 16),
+          RecommendationsPanel(
+            recommendations: recommendations,
+            journal: workouts,
+            today: today,
+            metric: ref.watch(prefsProvider).useMetric,
           ),
           const SizedBox(height: 16),
           const _StreakPanel(),

@@ -59,6 +59,15 @@ The quest board suggests three quests a day, rotated from a pool for the player'
 - beginner quests stay gentle (at most two sets, ten reps and ten minutes);
 - the words are kind and each description is one finished sentence.
 
+Beside the board, **Try Something Today** (`Recommendations` in `lib/domain/recommendations.dart`) offers three ideas: one that goes with a quest on today's board (from a different part of fitness, so a day is balanced), and exercises the player has not logged before, with an old favourite that has had a rest of two weeks or more when little is new. They are ideas, not tasks, and `test/domain/recommendations_test.dart` requires that:
+
+- they only use what most homes have (dumbbells only for players who have them), and nothing too demanding for someone just starting;
+- the same day always gives the same list, even after one of them is logged (what counts as new is judged from before today), and other days give other lists;
+- none repeats a quest already on the board, and the new ones are spread across kinds of exercise, the player's preferred kinds first;
+- each suggests a gentle amount (the easiest version unless the player is already active) and the words never mention what has not been done, only offer: "Goes well with ...", "Something new to try", "An old favourite, if you fancy it".
+
+For anything the player has done before, the suggestion and the log screen show **their own marks** (`ExerciseRecap`, `PastMarks`): the last time, on how many days, and their personal bests, each opening its progress line. They are only for looking back on and never change a reward.
+
 Below the weekly goal, the board also looks back at **last week** (`WeeklyRecap` in `lib/domain/recap.dart`): active days against the player's own goal, effort minutes and what they logged most, with a line from Chad. It describes only the player's own week, never compares it with anyone or with an earlier week, counts only workouts logged on the day (as the goal does), calls a quiet week a rest week, and stays hidden until there is history from before this week. `test/domain/recap_test.dart` lints the words.
 
 ## Enemies
