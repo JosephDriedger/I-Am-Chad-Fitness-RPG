@@ -11,7 +11,7 @@
 /// it is also a gentle thank-you for everything that came before.
 library;
 
-import 'story.dart';
+import 'package:i_am_chad/domain/story.dart';
 
 const _n = StorySpeaker.narrator;
 const _chad = StorySpeaker.chad;

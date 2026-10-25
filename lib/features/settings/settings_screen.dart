@@ -127,8 +127,9 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'Your workouts, progress and story choices are stored only on this device, and there is no account. '
-                  'The only things that use the internet are the store, and the one ad at the start of a story chapter, '
-                  'which Premium removes.',
+                  'The only things that use the internet are the store, the one ad at the start of a story chapter '
+                  '(which Premium removes), and downloading a later story season once, when you choose to. '
+                  'That download sends nothing about you.',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),

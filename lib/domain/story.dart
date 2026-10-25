@@ -9,10 +9,6 @@
 /// read again. A few choices are remembered and echoed later.
 library;
 
-import 'story_season_four.dart';
-import 'story_season_three.dart';
-import 'story_season_two.dart';
-
 /// Who is talking. [hero] is the player, who speaks only through choices.
 enum StorySpeaker {
   narrator(''),
@@ -140,7 +136,7 @@ class StoryChapter {
     required this.title,
     required this.unlockLevel,
     required this.summary,
-    required this.scenes,
+    this.scenes = const [],
     this.season = 1,
   });
 
@@ -157,7 +153,23 @@ class StoryChapter {
 
   /// A line for the Chronicle once it has been read, with no spoilers for later.
   final String summary;
+
+  /// What is read. Empty for a chapter of a downloaded season until that season
+  /// has been downloaded (see [Story.chapters] and lib/app/content_packs.dart).
   final List<StoryScene> scenes;
+
+  /// Whether the script is here to read.
+  bool get hasScenes => scenes.isNotEmpty;
+
+  /// This chapter's place and wording, with [scenes] filled in from a download.
+  StoryChapter withScenes(List<StoryScene> scenes) => StoryChapter(
+        season: season,
+        number: number,
+        title: title,
+        unlockLevel: unlockLevel,
+        summary: summary,
+        scenes: scenes,
+      );
 
   /// Where this chapter sits in its own season: 0 is the prologue.
   int get numberInSeason => number - Story.seasonOf(season).firstChapter;
@@ -182,6 +194,10 @@ class StorySeason {
 
   /// The [StoryChapter.number] of this season's prologue.
   final int firstChapter;
+
+  /// Season One is part of the app. The later seasons are downloaded the first
+  /// time they are read, so a first install stays small.
+  bool get isDownloaded => number > 1;
 
   String get name => switch (number) {
         1 => 'Season One',
@@ -300,7 +316,215 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwoChapters, ...seasonThreeChapters, ...seasonFourChapters];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour];
+
+  // Seasons Two to Four are downloaded the first time they are read (see
+  // docs/CONTENT_PACKS.md). The app keeps only what the Chronicle and the unlock
+  // rules need: each chapter's place, title, level and summary, with no scenes.
+  // The scripts live in tool/story_content, and tool/build_packs.dart turns them
+  // into the files that get downloaded. test/domain/story_packs_test.dart fails
+  // if this list and the scripts disagree.
+  static const seasonTwo = <StoryChapter>[
+    StoryChapter(
+      season: 2,
+      number: 8,
+      title: 'A Hall Full of Strangers',
+      unlockLevel: 18,
+      summary:
+          'The hall is busier than ever, a newcomer called Pip needs a friend, and a light is calling from the west.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 9,
+      title: 'The Road West',
+      unlockLevel: 20,
+      summary:
+          'A signpost with eleven arrows, a rival with a lot of energy, and a lesson about which way is behind.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 10,
+      title: 'The Slowest Ferry in the World',
+      unlockLevel: 23,
+      summary:
+          'The river between the road and the coast has a ferry, and the ferry has a tortoise.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 11,
+      title: 'The Keeper Who Forgot to Rest',
+      unlockLevel: 26,
+      summary:
+          'In the harbour, a keeper is carrying a lantern with the last of her strength.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 12,
+      title: 'What the Tide Brings',
+      unlockLevel: 30,
+      summary:
+          'At low tide, the shards of the lamp are waiting, and so is someone very worried about tomorrow.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 13,
+      title: 'A Letter from Oakhelm',
+      unlockLevel: 34,
+      summary:
+          'The lamp needs a new frame, and help arrives by cart, very slowly written.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 14,
+      title: 'The Night Before the Light',
+      unlockLevel: 38,
+      summary:
+          'Under the stars at the foot of the tower, everyone is a little nervous, and someone walks a very long way.',
+    ),
+    StoryChapter(
+      season: 2,
+      number: 15,
+      title: 'The Answering Light',
+      unlockLevel: 42,
+      summary:
+          'The lamp is lit, the fleet comes home, and something far away answers.',
+    ),
+  ];
+
+  static const seasonThree = <StoryChapter>[
+    StoryChapter(
+      season: 3,
+      number: 16,
+      title: 'A Letter from Above',
+      unlockLevel: 45,
+      summary:
+          'The first post in two winters comes down from the mountains, and it is addressed to the guild.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 17,
+      title: 'The Foot of the Pass',
+      unlockLevel: 47,
+      summary:
+          'A courier who only knows one speed, a rival with two flags, and a climb that can be taken any way you like.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 18,
+      title: 'Soup at the Snow Line',
+      unlockLevel: 50,
+      summary:
+          'A hut with one rule, a very large host, and a pot of soup that has been waiting for two winters.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 19,
+      title: 'The Echo in the Ice',
+      unlockLevel: 54,
+      summary:
+          'A cave of blue ice gives back whatever is said to it, only a little slower, and a lot kinder.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 20,
+      title: 'The Weatherkeeper\'s Stair',
+      unlockLevel: 58,
+      summary:
+          'At the top of the pass, a tall tower and a long stair, and someone sitting at the bottom of it.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 21,
+      title: 'A Very Small Storm',
+      unlockLevel: 62,
+      summary:
+          'At the top of the heights, a very small wizard is doing his best with a very large storm.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 22,
+      title: 'The Night Before the Chime',
+      unlockLevel: 66,
+      summary:
+          'Above the clouds, around a small fire, everyone says what they have come back with.',
+    ),
+    StoryChapter(
+      season: 3,
+      number: 23,
+      title: 'The Weather Chime',
+      unlockLevel: 70,
+      summary:
+          'The seven bells are rung, the storm settles, and three lights and three sounds answer each other.',
+    ),
+  ];
+
+  static const seasonFour = <StoryChapter>[
+    StoryChapter(
+      season: 4,
+      number: 24,
+      title: 'A Table That Does Not Fit',
+      unlockLevel: 74,
+      summary:
+          'The hall has a very good table and nowhere to put it, and a new member has arrived with a notebook.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 25,
+      title: 'Letters on Every Road',
+      unlockLevel: 77,
+      summary:
+          'Forty-one invitations, four roads, and a tortoise who does not have appointments.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 26,
+      title: 'Soup for Forty',
+      unlockLevel: 80,
+      summary:
+          'A very large host, a very large pot, and a promise that there will always be soup.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 27,
+      title: 'Chairs, Slowly',
+      unlockLevel: 83,
+      summary:
+          'A very old tree is asked for a very large number of chairs, and says yes, eventually.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 28,
+      title: 'The Edge of the Dunes',
+      unlockLevel: 86,
+      summary:
+          'A riddle, a very loud hello, and two guests who will need rather a lot of chair.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 29,
+      title: 'The Weatherkeeper Comes Down',
+      unlockLevel: 89,
+      summary:
+          'Four hundred and twelve steps, taken one landing at a time, and a forecast for the feast.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 30,
+      title: 'The Night Before the Table',
+      unlockLevel: 93,
+      summary:
+          'Everyone is arriving, the lanterns are going up, and someone has counted the chairs again.',
+    ),
+    StoryChapter(
+      season: 4,
+      number: 31,
+      title: 'The Long Table',
+      unlockLevel: 97,
+      summary:
+          'The table is laid, the chairs are full, and there is room for one more.',
+    ),
+  ];
+
 
   static const seasonOne = <StoryChapter>[
     // ---------------------------------------------------------------------------

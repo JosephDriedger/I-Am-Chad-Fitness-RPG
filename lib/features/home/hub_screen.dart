@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/content_packs.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
@@ -139,7 +140,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     final readNow = await showGameDialog<bool>(
       context: context,
       title: 'A New Chapter!',
-      content: Text('${chapter.label}: ${chapter.title}\n\n${chapter.summary}'),
+      content: Text(
+        '${chapter.label}: ${chapter.title}\n\n${chapter.summary}'
+        '${ref.read(installedPacksProvider).loaded && !ref.read(installedPacksProvider).hasSeason(chapter.season) ? '\n\nThis season downloads once, the first time you read it.' : ''}',
+      ),
       actions: [
         Builder(
           builder: (ctx) => GameButton(

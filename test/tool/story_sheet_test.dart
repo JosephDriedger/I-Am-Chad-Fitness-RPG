@@ -10,6 +10,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/domain/story.dart';
+import '../../tool/story_content/content.dart';
 import 'package:i_am_chad/game/art/story_art.dart';
 import 'package:i_am_chad/game/look.dart';
 
@@ -22,7 +23,7 @@ void main() {
 
   testWidgets('draw the story scenes', (tester) async {
     final cells = <(String, StoryScene)>[
-      for (final c in Story.chapters)
+      for (final c in StoryContent.chapters)
         for (var i = 0; i < c.scenes.length; i++) ('S${c.season} ${c.label} scene ${i + 1}: ${c.scenes[i].backdrop.name}', c.scenes[i]),
     ];
     await tester.runAsync(() async {

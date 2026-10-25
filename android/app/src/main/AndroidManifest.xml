@@ -7,6 +7,8 @@
          phone put the planned reminders back after a restart. No exact-alarm
          permission is used: a reminder a few minutes late is fine. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Downloading a later story season, once, when the player chooses to. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="I Am Chad"
         android:name="${applicationName}"

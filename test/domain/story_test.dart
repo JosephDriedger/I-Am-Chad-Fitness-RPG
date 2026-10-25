@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/domain/story.dart';
+import '../../tool/story_content/content.dart';
 
 /// Every line in a chapter, including the replies to choices.
 Iterable<StoryLine> _lines(StoryChapter c) sync* {
@@ -26,20 +27,20 @@ Iterable<StoryChoice> _choices(StoryChapter c) sync* {
 }
 
 void main() {
-  final chapters = Story.chapters;
+  final chapters = StoryContent.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
     expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4]);
     expect(chapters.length, 32);
     expect([for (final c in chapters) c.number], [for (var i = 0; i < 32; i++) i]);
-    expect([for (final c in Story.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
-    expect([for (final c in Story.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
+    expect([for (final c in StoryContent.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
+    expect([for (final c in StoryContent.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
     expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four']);
-    expect([for (final c in Story.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
-    expect([for (final c in Story.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
+    expect([for (final c in StoryContent.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
+    expect([for (final c in StoryContent.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
-      expect(Story.inSeason(season.number).first.number, season.firstChapter);
-      expect(Story.inSeason(season.number).first.label, 'Prologue');
+      expect(StoryContent.inSeason(season.number).first.number, season.firstChapter);
+      expect(StoryContent.inSeason(season.number).first.label, 'Prologue');
       expect(season.title.trim(), isNotEmpty);
       expect(season.blurb.trim(), isNotEmpty);
     }
@@ -47,7 +48,7 @@ void main() {
     expect(chapters[11].label, 'Chapter 3', reason: 'Season Two counts from its own prologue');
     expect(chapters[15].label, 'Chapter 7');
     for (final c in chapters) {
-      expect(Story.byNumber(c.number), same(c));
+      expect(Story.byNumber(c.number)!.title, c.title);
     }
     expect(Story.byNumber(99), isNull);
   });
@@ -59,16 +60,16 @@ void main() {
     }
     // Early chapters come quickly; the last is a few months of regular use away.
     expect(chapters[1].unlockLevel, lessThanOrEqualTo(3));
-    expect(Story.inSeason(1).last.unlockLevel, inInclusiveRange(12, 25));
+    expect(StoryContent.inSeason(1).last.unlockLevel, inInclusiveRange(12, 25));
     // Season Two starts after Season One is done and goes further up the curve.
-    expect(Story.inSeason(2).first.unlockLevel, greaterThan(Story.inSeason(1).last.unlockLevel));
-    expect(Story.inSeason(2).last.unlockLevel, inInclusiveRange(30, 60));
+    expect(StoryContent.inSeason(2).first.unlockLevel, greaterThan(StoryContent.inSeason(1).last.unlockLevel));
+    expect(StoryContent.inSeason(2).last.unlockLevel, inInclusiveRange(30, 60));
     // Season Three starts after Season Two and reaches higher still.
-    expect(Story.inSeason(3).first.unlockLevel, greaterThan(Story.inSeason(2).last.unlockLevel));
-    expect(Story.inSeason(3).last.unlockLevel, inInclusiveRange(55, 90));
+    expect(StoryContent.inSeason(3).first.unlockLevel, greaterThan(StoryContent.inSeason(2).last.unlockLevel));
+    expect(StoryContent.inSeason(3).last.unlockLevel, inInclusiveRange(55, 90));
     // Season Four starts after Season Three and ends by the level cap.
-    expect(Story.inSeason(4).first.unlockLevel, greaterThan(Story.inSeason(3).last.unlockLevel));
-    expect(Story.inSeason(4).last.unlockLevel, inInclusiveRange(80, 99));
+    expect(StoryContent.inSeason(4).first.unlockLevel, greaterThan(StoryContent.inSeason(3).last.unlockLevel));
+    expect(StoryContent.inSeason(4).last.unlockLevel, inInclusiveRange(80, 99));
   });
 
   test('what is open depends only on level, and never shrinks as the hero levels up', () {
@@ -86,8 +87,8 @@ void main() {
     expect(StoryRules.next(15)!.number, 7);
     expect(StoryRules.next(16)!.number, 8, reason: 'Season Two opens once Season One is done');
     expect(StoryRules.next(42)!.number, 16, reason: 'Season Three opens once Season Two is done');
-    expect(StoryRules.next(Story.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
-    expect(StoryRules.next(Story.chapters.last.unlockLevel), isNull);
+    expect(StoryRules.next(StoryContent.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
+    expect(StoryRules.next(StoryContent.chapters.last.unlockLevel), isNull);
   });
 
   test('every chapter has a title, a summary and scenes with something in them', () {
@@ -231,7 +232,7 @@ void main() {
     final first = chapters.first.scenes.expand((s) => s.nodes).whereType<StoryChoice>().first;
     expect(first.key, 'motivation');
     for (final season in Story.seasons) {
-      final last = Story.inSeason(season.number).last.scenes.last;
+      final last = StoryContent.inSeason(season.number).last.scenes.last;
       final conditional = [for (final n in last.nodes) if (n.only != null) n.only!];
       expect({for (final c in conditional) c.option}, {for (var i = 0; i < first.options.length; i++) i}, reason: season.title);
     }
@@ -239,7 +240,7 @@ void main() {
 
   test('visible() filters lines by earlier choices, and shows plain lines to everyone', () {
     for (final season in Story.seasons) {
-      final last = Story.inSeason(season.number).last.scenes.last;
+      final last = StoryContent.inSeason(season.number).last.scenes.last;
       for (var option = 0; option < 3; option++) {
         final shown = StoryText.visible(last, {'motivation': option});
         final farewells = shown.whereType<StoryLine>().where((l) => l.text.startsWith('Come by when you like')).toList();
@@ -277,10 +278,10 @@ void main() {
   });
 
   group('Season Two, The Lantern Coast', () {
-    final two = Story.inSeason(2);
+    final two = StoryContent.inSeason(2);
 
     test('it picks up where Season One ends and goes west to the coast', () {
-      final seasonOneEnd = [for (final l in _lines(Story.inSeason(1).last)) l.text].join(' ');
+      final seasonOneEnd = [for (final l in _lines(StoryContent.inSeason(1).last)) l.text].join(' ');
       expect(seasonOneEnd, contains('lantern'));
       expect(seasonOneEnd, contains('west'));
       final all = [for (final c in two) for (final l in _lines(c)) l.text].join(' ');
@@ -301,7 +302,7 @@ void main() {
     });
 
     test('it asks its own questions, with fresh keys', () {
-      final seasonOneKeys = {for (final c in Story.inSeason(1)) for (final ch in _choices(c)) ch.key};
+      final seasonOneKeys = {for (final c in StoryContent.inSeason(1)) for (final ch in _choices(c)) ch.key};
       final keys = [for (final c in two) for (final ch in _choices(c)) ch.key];
       expect(keys.length, greaterThanOrEqualTo(6));
       expect(keys.toSet().intersection(seasonOneKeys), isEmpty);
@@ -331,10 +332,10 @@ void main() {
   });
 
   group('Season Three, The Weather Chime', () {
-    final three = Story.inSeason(3);
+    final three = StoryContent.inSeason(3);
 
     test('it picks up from the bell and the lamp and goes up into the mountains', () {
-      final seasonTwoEnd = [for (final l in _lines(Story.inSeason(2).last)) l.text].join(' ');
+      final seasonTwoEnd = [for (final l in _lines(StoryContent.inSeason(2).last)) l.text].join(' ');
       expect(seasonTwoEnd, contains('Dawn Bell'));
       final all = [for (final c in three) for (final l in _lines(c)) l.text].join(' ');
       expect(all, contains('Thunder Heights'));
@@ -355,7 +356,7 @@ void main() {
     });
 
     test('it asks its own questions, with fresh keys', () {
-      final earlier = {for (final c in [...Story.inSeason(1), ...Story.inSeason(2)]) for (final ch in _choices(c)) ch.key};
+      final earlier = {for (final c in [...StoryContent.inSeason(1), ...StoryContent.inSeason(2)]) for (final ch in _choices(c)) ch.key};
       final keys = [for (final c in three) for (final ch in _choices(c)) ch.key];
       expect(keys.length, greaterThanOrEqualTo(6));
       expect(keys.toSet().intersection(earlier), isEmpty);
@@ -393,7 +394,7 @@ void main() {
   });
 
   group('Season Four, The Long Table', () {
-    final four = Story.inSeason(4);
+    final four = StoryContent.inSeason(4);
 
     test('it brings back the people the story has met, and the table is the point', () {
       final speakers = {for (final c in four) for (final l in _lines(c)) l.speaker};
@@ -425,7 +426,7 @@ void main() {
     });
 
     test('it asks its own questions, with fresh keys', () {
-      final earlier = {for (final c in [...Story.inSeason(1), ...Story.inSeason(2), ...Story.inSeason(3)]) for (final ch in _choices(c)) ch.key};
+      final earlier = {for (final c in [...StoryContent.inSeason(1), ...StoryContent.inSeason(2), ...StoryContent.inSeason(3)]) for (final ch in _choices(c)) ch.key};
       final keys = [for (final c in four) for (final ch in _choices(c)) ch.key];
       expect(keys.length, greaterThanOrEqualTo(7));
       expect(keys.toSet().intersection(earlier), isEmpty);
@@ -456,7 +457,7 @@ void main() {
 
     test('it ends at the level cap or just short of it, so the story finishes before the game does', () {
       expect(four.last.unlockLevel, lessThanOrEqualTo(99));
-      expect(four.first.unlockLevel, greaterThan(Story.inSeason(3).last.unlockLevel));
+      expect(four.first.unlockLevel, greaterThan(StoryContent.inSeason(3).last.unlockLevel));
     });
   });
 }

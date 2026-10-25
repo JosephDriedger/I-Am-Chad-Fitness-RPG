@@ -89,7 +89,7 @@ Enemies are whimsical obstacles such as a sleepy slime or a gear golem. They mus
 - Collect only what a feature needs. Onboarding asks experience level, preferred categories and whether the player has dumbbells, nothing about body measurements, age or health conditions.
 - No public body measurements, leaderboards, or compulsory social features.
 - Local export and deletion must always work.
-- No analytics SDK, and no advertising anywhere except the single ad at the start of a story chapter ([Decision 33](DECISIONS.md#33-one-ad-at-the-start-of-a-story-chapter-and-premium-removes-it)), without a new decision first. The network is used by the platform store (when the Patron's Hall is open or a purchase is being delivered) and by that one ad, which is requested non-personalized and family-friendly after the player's choices where the law requires, and never for Premium owners.
+- No analytics SDK, and no advertising anywhere except the single ad at the start of a story chapter ([Decision 33](DECISIONS.md#33-one-ad-at-the-start-of-a-story-chapter-and-premium-removes-it)), without a new decision first. The network is used by the platform store (when the Patron's Hall is open or a purchase is being delivered), by a one-time, player-chosen download of a later story season (a plain request for a static file, nothing about the player sent), and by that one ad, which is requested non-personalized and family-friendly after the player's choices where the law requires, and never for Premium owners.
 - Any future health integration (HealthKit, Health Connect) requires an explicit permission screen explaining what data is read and why.
 
 ## Art, audio and licensing

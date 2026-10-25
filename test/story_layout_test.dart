@@ -5,6 +5,7 @@ import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/data/repository.dart';
 import 'package:i_am_chad/domain/hero.dart';
 import 'package:i_am_chad/domain/story.dart';
+import '../tool/story_content/content.dart';
 import 'package:i_am_chad/features/story/chronicle_screen.dart';
 
 import 'helpers.dart';
@@ -43,10 +44,10 @@ List<StoryChapter> _chapters() {
       ].fold(0, (a, b) => a > b ? a : b);
   final picked = <StoryChapter>{};
   for (final season in Story.seasons) {
-    final inSeason = Story.inSeason(season.number);
+    final inSeason = StoryContent.inSeason(season.number);
     picked.add(inSeason.reduce((a, b) => choices(b) > choices(a) ? b : a));
   }
-  picked.add(Story.chapters.reduce((a, b) => longest(b) > longest(a) ? b : a));
+  picked.add(StoryContent.chapters.reduce((a, b) => longest(b) > longest(a) ? b : a));
   return picked.toList();
 }
 

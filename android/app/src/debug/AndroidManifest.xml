@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Debug builds only: allows plain http to a local server, to try story-season
+         downloads without publishing anything (see docs/CONTENT_PACKS.md). Release
+         builds use https only. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>

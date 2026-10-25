@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/content_packs.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/story.dart';
+import 'pack_download.dart';
 import 'story_screen.dart';
 
 /// Opens a chapter. Anything already unlocked can be read again at any time.
-Future<void> openChapter(BuildContext context, StoryChapter chapter) =>
-    Navigator.of(context).push<bool>(gameRoute(StoryScreen(chapter: chapter)));
+///
+/// A chapter of a later season is first downloaded (see pack_download.dart). If
+/// the player is not ready for that, nothing happens and it stays unread.
+Future<void> openChapter(BuildContext context, StoryChapter chapter) async {
+  final readable = await readableChapter(context, chapter);
+  if (readable == null || !context.mounted) return;
+  await Navigator.of(context).push<bool>(gameRoute(StoryScreen(chapter: readable)));
+}
 
 /// Every chapter of the season: the ones that have opened, and a hint of when
 /// the next one will. Nothing in here is timed or can be missed.
@@ -58,14 +66,16 @@ class ChronicleScreen extends ConsumerWidget {
   }
 }
 
-class _ChapterCard extends StatelessWidget {
+class _ChapterCard extends ConsumerWidget {
   const _ChapterCard({required this.chapter, required this.status});
 
   final StoryChapter chapter;
   final StoryStatus status;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final packs = ref.watch(installedPacksProvider);
+    final needsDownload = packs.loaded && !packs.hasSeason(chapter.season);
     final open = status.isUnlocked(chapter);
     final read = status.isRead(chapter);
     final String stateText;
@@ -122,6 +132,13 @@ class _ChapterCard extends StatelessWidget {
                   chapter.summary,
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
+                if (needsDownload) ...[
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Downloads once, the first time you read it.',
+                    style: TextStyle(fontWeight: FontWeight.w600, color: GameColors.inkSoft),
+                  ),
+                ],
                 const SizedBox(height: 10),
                 GameButton(
                   label: read ? 'Read Again' : 'Read',

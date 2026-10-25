@@ -5,11 +5,19 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/app/ads.dart';
 import 'package:i_am_chad/app/app.dart';
 import 'package:i_am_chad/app/feedback.dart';
+import 'package:i_am_chad/app/content_packs.dart';
 import 'package:i_am_chad/app/providers.dart';
 import 'package:i_am_chad/app/reminders.dart';
 import 'package:i_am_chad/app/store.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/domain/player_state.dart';
+import '../tool/story_content/content.dart';
+
+/// The packs as they would be published, by season.
+Map<int, String> publishedPacks() => {
+      for (final e in StoryContent.files().entries)
+        if (e.key != 'manifest.json') int.parse(RegExp(r'\d+').firstMatch(e.key)!.group(0)!): e.value,
+    };
 
 /// Drift streams and Flame scenes both advance on frames; pump a few.
 Future<void> settle(WidgetTester tester, {int frames = 12}) async {
@@ -47,6 +55,12 @@ Future<void> bootApp(
   /// The pretend notification service. By default a test runs on a platform that
   /// cannot send reminders, so Settings does not offer them.
   ReminderGateway? reminders,
+
+  /// Where the later story seasons are downloaded from, and where they are kept.
+  /// By default every season is already on the phone, so a test can read any
+  /// chapter; pass an empty [packStore] to start with none downloaded.
+  PackSource? packSource,
+  PackStore? packStore,
 }) async {
   final clock = now ?? DateTime(2026, 10, 22, 10);
   await tester.pumpWidget(ProviderScope(
@@ -62,6 +76,8 @@ Future<void> bootApp(
       storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
       adGatewayProvider.overrideWithValue(ads ?? TestAdGateway()),
       if (reminders != null) reminderGatewayProvider.overrideWithValue(reminders),
+      packSourceProvider.overrideWithValue(packSource ?? TestPackSource(packs: publishedPacks())),
+      packStoreProvider.overrideWithValue(packStore ?? MemoryPackStore(publishedPacks())),
       ...overrides,
     ],
     child: const IAmChadApp(),

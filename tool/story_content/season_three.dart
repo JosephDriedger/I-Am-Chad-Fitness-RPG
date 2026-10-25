@@ -8,7 +8,7 @@
 /// after a break is a smaller thing than it looks from the bottom of the stairs.
 library;
 
-import 'story.dart';
+import 'package:i_am_chad/domain/story.dart';
 
 const _n = StorySpeaker.narrator;
 const _chad = StorySpeaker.chad;

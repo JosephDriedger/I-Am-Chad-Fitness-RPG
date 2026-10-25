@@ -5,7 +5,7 @@
 /// ordinary part of the work. It is free for everyone, like Season One.
 library;
 
-import 'story.dart';
+import 'package:i_am_chad/domain/story.dart';
 
 const _n = StorySpeaker.narrator;
 const _chad = StorySpeaker.chad;

@@ -157,10 +157,10 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 
 | What | Where |
 | --- | --- |
-| Seasons, cast, unlock rules, conditions, Season One's script | `lib/domain/story.dart` (pure Dart) |
-| Season Two's script | `lib/domain/story_season_two.dart` |
-| Season Three's script | `lib/domain/story_season_three.dart` |
-| Season Four's script | `lib/domain/story_season_four.dart` |
+| Seasons, cast, unlock rules, conditions, the chapter catalog and Season One's script | `lib/domain/story.dart` (pure Dart) |
+| Season Two's script, downloaded as a pack ([Content packs](CONTENT_PACKS.md)) | `tool/story_content/season_two.dart` |
+| Season Three's script | `tool/story_content/season_three.dart` |
+| Season Four's script | `tool/story_content/season_four.dart` |
 | Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
@@ -171,6 +171,6 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 
 ## Writing more
 
-Add a `StoryChapter` in order, with the next free `number` (chapter numbers are what is saved, so they must never be reused or renumbered), the right `season`, and an unlock level that is higher than the last one. A new season also needs an entry in `Story.seasons`. Every line is checked by `story_test.dart`: no shaming or pressure words, no body talk, each season must say that rest, your own pace and no deadlines are welcome, conditions must refer to choices that exist, and the numbering and levels must stay in order. Read the [content guidelines](CONTENT_GUIDELINES.md) first. New places need a `StoryBackdrop` and a painter in `story_art.dart`, and new characters a `StorySpeaker` and a painter.
+A season after the first is written in `tool/story_content` and published as a download, so follow [Content packs](CONTENT_PACKS.md#writing-a-season) for the steps. Add a `StoryChapter` in order, with the next free `number` (chapter numbers are what is saved, so they must never be reused or renumbered), the right `season`, and an unlock level that is higher than the last one. A new season also needs an entry in `Story.seasons`. Every line is checked by `story_test.dart`: no shaming or pressure words, no body talk, each season must say that rest, your own pace and no deadlines are welcome, conditions must refer to choices that exist, and the numbering and levels must stay in order. Read the [content guidelines](CONTENT_GUIDELINES.md) first. New places need a `StoryBackdrop` and a painter in `story_art.dart`, and new characters a `StorySpeaker` and a painter.
 
 Ideas for what comes next live in the [roadmap](ROADMAP.md).
