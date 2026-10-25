@@ -26,7 +26,7 @@ class FirstSteps {
 
   /// Under the battle buttons in the first fight, until an expedition has been won.
   static const battleHint =
-      'First fight? Attack and Guard each build focus, Power Strike spends 2 of it, and Potion heals. Guarding softens a big blow.';
+      'First fight? Attack and Guard build focus, Power Strike spends it, and Potion heals. Guarding softens a big blow.';
 
   /// Chad on the quest board before anything has been logged.
   static const questsLine =

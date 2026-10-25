@@ -39,9 +39,21 @@ Each turn the player picks one action, then the enemy answers. **The enemy's nex
 | Power Strike | Costs 2 focus. About double damage, plus 1. |
 | Potion | Heal one third of max HP. Uses a potion (2 per expedition, plus up to 3 from the pouch). Only usable when hurt. |
 
-- Focus is capped at 5 and resets between battles (a bard's tune starts the next one with 2).
+- Focus is capped at 5 (in every style) and resets between battles (a bard's tune starts the next one with 2).
 - Damage: `max(1, attack − defense ÷ 2) + random(0..2)`, then multiplied, minimum 1.
 - A battle ends when either side reaches 0 HP.
+
+### Fighting styles
+
+On the Hero screen the player picks how their hero fights. It is free, it can be changed at any time (even between battles of the same expedition, since a new battle reads it), and it never adds power: it only shifts how focus is built and spent. The default is Steady, which is exactly how the game fought before styles existed.
+
+| Style | Attack builds | Guard builds | Power Strike costs | Power Strike hits for |
+| --- | --- | --- | --- | --- |
+| Steady | 1 focus | 1 focus | 2 | 2.0 times a blow |
+| Guardian | 1 focus | 2 focus | 3 | 2.3 times a blow |
+| Striker | 2 focus | 0 focus | 2 | 1.9 times a blow |
+
+`test/domain/styles_test.dart` plays 250 expeditions in each of four regions with a scripted player who knows their style, and fails if any style's win rate drifts more than 6 points from Steady's on average, or 12 in any one region. At the tuned numbers they are within a few points of each other. The buttons and the guide say what the chosen style does.
 
 ### Enemy moves
 

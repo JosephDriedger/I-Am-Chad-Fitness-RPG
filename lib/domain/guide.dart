@@ -122,11 +122,15 @@ class Guide {
           ),
           const GuideEntry(
             'Your Moves',
-            'Attack builds focus. Guard halves the damage you take this turn and also builds focus. Power Strike spends 2 focus for a big hit. Potion heals about a third of your health.',
+            'Attack builds focus. Guard halves the damage you take this turn and also builds focus. Power Strike spends focus for a big hit. Potion heals about a third of your health.',
+          ),
+          const GuideEntry(
+            'Fighting Styles',
+            'On the Hero screen you can pick how you fight: Steady, Guardian (guarding builds more focus, and Power Strike costs more but hits harder) or Striker (attacking builds more focus, guarding builds none, and Power Strike hits a little lighter). It is free, you can change it any time, and no style is stronger than another.',
           ),
           const GuideEntry(
             'Focus',
-            'You gain 1 focus each time you attack or guard, up to ${BattleState.maxFocus}, and it resets at the start of every battle.',
+            'In the Steady style you gain 1 focus each time you attack or guard, and a Power Strike costs 2. You can hold up to ${BattleState.maxFocus}, and it resets at the start of every battle.',
           ),
           GuideEntry(
             'Potions',

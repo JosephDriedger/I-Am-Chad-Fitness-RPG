@@ -52,7 +52,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 
 - ~~Personal-baseline reward scaling~~ Built as the weekly goal following the player's own usual week; rewards stay the same for everyone ([decision 48](DECISIONS.md#48-the-weekly-goal-follows-the-players-own-usual-week)).
 - ~~Per-day limit on minimum-effort entries~~ Done: reward rules version 2 ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)).
-- Character skills and stat choices; more equipment.
+- Character styles are built (three ways to fight, see [decision 53](DECISIONS.md#53-three-fighting-styles-and-none-of-them-is-stronger)). Stat choices are deliberately not: workouts and levels do not shape stats. More skills and more equipment would still fit.
 - Reminder notifications are built and delivered through `flutter_local_notifications` (see [decision 38](DECISIONS.md#38-reminders-are-opt-in-rare-and-run-out-by-themselves)). Checked on an Android emulator: the permission prompt, scheduling and cancelling. Still to check: an iOS device, a real phone's battery-saver behaviour, and that the plan survives a restart.
 - Done: workouts can be saved as a spreadsheet (CSV) for looking at or sharing with a coach ([decision 51](DECISIONS.md#51-workouts-can-be-saved-as-a-spreadsheet-and-it-is-not-a-backup)).
 - Recovery-friendly mini-games beyond the practice duel: Chad's calm minute (slow breathing, [decision 50](DECISIONS.md#50-a-calm-minute-sits-beside-the-warm-up)) is built. More would be welcome, as long as they pay nothing and never time the player.
@@ -86,7 +86,7 @@ Carried over from GDD section 17, with the current stance:
 | Question | Current stance |
 | --- | --- |
 | Exact reward formula and daily caps | Proposal in [Reward rules](REWARD_RULES.md); needs fairness testing across abilities |
-| Combat class and skill design; do workouts influence specific stats | Single class, one skill; workouts do not influence stats |
+| Combat class and skill design; do workouts influence specific stats | Single class, one Power Strike, and a free choice of three fighting styles that shift how focus is built and spent; workouts do not influence stats |
 | Age rating and minors | Decided: aimed at teens and adults (13 and over), not at younger children. Set the stores' target audience and age rating to match (see [Monetization](MONETIZATION.md#children-and-families)). Ads are G-rated and non-personalized, with no child signal. Onboarding collects no age |
 | Weightlifting in early release | Included as basic logging (sets, reps, load); no progression tracking |
 | Original art pipeline and licensing budget | Procedural art in code for now; a hand-made pass is a later decision |

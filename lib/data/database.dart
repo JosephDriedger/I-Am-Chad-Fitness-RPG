@@ -74,6 +74,9 @@ class Heroes extends Table {
   /// Days a week the player has chosen to aim for (1 to 7, schema v9). Zero
   /// means they have not chosen, so the suggestion for their experience is used.
   IntColumn get weeklyGoalDays => integer().withDefault(const Constant(0))();
+
+  /// How the hero fights (an id from `FightingStyle`, schema v13).
+  TextColumn get fightingStyle => text().withDefault(const Constant('steady'))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override
@@ -231,7 +234,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.connection);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -271,6 +274,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 10) {
             await m.addColumn(appSettings, appSettings.musicOn);
+          }
+          if (from < 13) {
+            await m.addColumn(heroes, heroes.fightingStyle);
           }
           if (from < 12) {
             await m.addColumn(appSettings, appSettings.reminderOn);

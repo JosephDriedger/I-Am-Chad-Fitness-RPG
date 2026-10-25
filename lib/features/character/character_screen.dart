@@ -5,6 +5,7 @@ import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
+import '../../domain/combat.dart' show FightingStyle;
 import '../../domain/cosmetics.dart';
 import '../../domain/hero.dart';
 import '../../domain/items.dart';
@@ -111,6 +112,8 @@ class CharacterScreen extends ConsumerWidget {
             ],
           ),
         ),
+        const SizedBox(height: 14),
+        _StylePanel(current: h.style),
         const SizedBox(height: 14),
         GameButton(
           label: 'Visit the Guild Shop',
@@ -592,6 +595,79 @@ class _CollectionTile extends ConsumerWidget {
 // ---------------------------------------------------------------------------
 // Bars and rows
 // ---------------------------------------------------------------------------
+
+/// The three ways to fight. A free choice, changed any time, that never adds power:
+/// it only shifts how focus is built and spent.
+class _StylePanel extends ConsumerWidget {
+  const _StylePanel({required this.current});
+
+  final FightingStyle current;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return GamePanel(
+      title: 'Fighting Style',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'A free choice you can change any time. No style is stronger than another; each just plays a little differently.',
+            style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 10),
+          for (final s in FightingStyle.values)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Semantics(
+                button: true,
+                selected: s == current,
+                label: '${s.label}. ${s.blurb}${s == current ? ' Chosen.' : ''}',
+                child: ExcludeSemantics(
+                  child: InkWell(
+                    key: Key('style_${s.id}'),
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () {
+                      ref.read(feedbackProvider).haptic(Haptic.select);
+                      ref.read(repositoryProvider).setFightingStyle(s.id);
+                    },
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 56),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: s == current ? GameColors.cream : GameColors.parchment,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: s == current ? GameColors.gold : GameColors.parchmentDark, width: 3),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            s == current ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                            color: s == current ? GameColors.goldDark : GameColors.inkSoft,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(s.label, style: gameTitle(18)),
+                                const SizedBox(height: 2),
+                                Text(s.blurb, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 class _LevelBadge extends StatelessWidget {
   const _LevelBadge({required this.level});

@@ -980,6 +980,9 @@ class ExpeditionRun {
       );
 
   Combatant hero;
+
+  /// How the hero fights, from the hero's saved choice.
+  FightingStyle style = FightingStyle.steady;
   int potions = 2;
   int focus = 0;
   int stepIndex = 0;
@@ -1002,6 +1005,7 @@ class ExpeditionRun {
       rng: rng,
       focus: focus,
       potions: potions,
+      style: style,
     );
   }
 

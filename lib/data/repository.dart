@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../domain/activity.dart';
+import '../domain/combat.dart' show FightingStyle;
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/items.dart';
@@ -182,6 +183,13 @@ class GameRepository {
     if (!valid) return;
     await (_db.update(_db.heroes)..where((h) => h.id.equals(1)))
         .write(HeroesCompanion(weeklyGoalDays: Value(days)));
+  }
+
+  /// Sets how the hero fights. An id that is not a style is ignored.
+  Future<void> setFightingStyle(String id) async {
+    if (!FightingStyle.values.any((s) => s.id == id)) return;
+    await (_db.update(_db.heroes)..where((h) => h.id.equals(1)))
+        .write(HeroesCompanion(fightingStyle: Value(id)));
   }
 
   Future<void> spendEnergy(int amount) async {
@@ -570,6 +578,7 @@ class GameRepository {
           'cape': hero.cape,
           'hairDye': hero.hairDye,
           'weeklyGoalDays': hero.weeklyGoalDays,
+          'fightingStyle': hero.fightingStyle,
         },
       'purchases': [
         for (final r in receipts) {'productId': r.productId, 'grantedAt': r.grantedAt.toIso8601String()}
@@ -742,5 +751,6 @@ class GameRepository {
         cape: r.cape,
         hairDye: r.hairDye,
         weeklyGoalDays: r.weeklyGoalDays,
+        fightingStyle: r.fightingStyle,
       );
 }

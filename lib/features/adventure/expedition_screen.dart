@@ -82,7 +82,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     );
     final saved = widget.progress;
     if (!widget.practice && saved != null) {
-      _run = ExpeditionRun.restore(progress: saved, hero: freshHero);
+      _run = ExpeditionRun.restore(progress: saved, hero: freshHero)..style = player.hero.style;
     } else {
       final expedition = widget.practice
           ? Expedition.practice(seed: widget.seed, heroLevel: player.level)
@@ -91,7 +91,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
         expedition: expedition,
         hero: freshHero,
         rng: GameRng(widget.seed ^ 0x5bd1e995),
-      );
+      )..style = player.hero.style;
     }
     final resumed = saved != null && saved.stepIndex > 0;
     _chadStart = resumed
@@ -435,10 +435,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
             for (final a in BattleAction.values)
               _ActionButton(
                 action: a,
+                style: b.style,
                 enabled: !_busy && b.canAct(a),
                 badge: switch (a) {
                   BattleAction.item => '${b.potions}',
-                  BattleAction.skill => '${b.focus}/${BattleState.skillCost}',
+                  BattleAction.skill => '${b.focus}/${b.style.skillCost}',
                   _ => null,
                 },
                 onTap: () => _act(a),
@@ -653,9 +654,11 @@ class _ActionButton extends StatelessWidget {
     required this.action,
     required this.enabled,
     required this.onTap,
+    required this.style,
     this.badge,
   });
 
+  final FightingStyle style;
   final BattleAction action;
   final bool enabled;
   final VoidCallback onTap;
@@ -681,7 +684,7 @@ class _ActionButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: '${action.label}. ${action.help}${badge != null ? ' ($badge)' : ''}',
+      label: '${action.label}. ${action.helpFor(style)}${badge != null ? ' ($badge)' : ''}',
       child: ExcludeSemantics(
         child: FilledButton(
           onPressed: enabled ? onTap : null,
