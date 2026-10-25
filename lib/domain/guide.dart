@@ -87,6 +87,10 @@ class Guide {
             'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like. Until you do, Chad suggests about what you have been doing lately, once you have a few weeks behind you.',
           ),
           const GuideEntry(
+            'Warm-Up and Calm Minute',
+            'On the Train screen Chad offers a one-minute warm-up and a minute of slow breathing. Both are optional, pay nothing, save nothing, and you can stop whenever you like.',
+          ),
+          const GuideEntry(
             'Last Week',
             'Once you have been around for a week, the quest board looks back at the one just gone: how many days you moved, your effort minutes and what you logged most. It only ever looks at your own week, never compares you with anyone, and a quiet week is simply a rest week.',
           ),

@@ -44,7 +44,7 @@ void main() {
     expect(find.text('Train'), findsWidgets);
     await tester.tap(find.text('Train'));
     await settle(tester, frames: 30);
-    expect(find.text(WarmUp.title), findsOneWidget);
+    expect(find.byKey(const Key('warmup_start')), findsOneWidget);
     // Going round again does not bring the offer back.
     await tester.pageBack();
     await settle(tester, frames: 20);

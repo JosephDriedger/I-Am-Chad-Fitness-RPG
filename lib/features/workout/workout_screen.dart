@@ -7,12 +7,12 @@ import '../../app/providers.dart';
 import '../../app/widgets.dart';
 import '../../domain/activity.dart';
 import '../../domain/first_steps.dart';
-import '../../domain/warmup.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/demo/exercise_demo.dart';
 import '../../game/look.dart';
 import 'do_it_again.dart';
 import 'log_workout_screen.dart';
+import 'calm_screen.dart';
 import 'warmup_screen.dart';
 
 /// The training yard: pick an exercise card. Every card shows the exercise
@@ -83,23 +83,39 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
         const SizedBox(height: 12),
         DoItAgainShelf(journal: ref.watch(workoutsProvider).value ?? const [], metric: ref.watch(prefsProvider).useMetric),
         GamePanel(
-          title: WarmUp.title,
+          title: 'Warm Up or Wind Down',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'One minute, four gentle moves. Stop any time. No rewards, just a nice start.',
+                'A minute with Chad, before or after. Four gentle moves, or some slow breathing. Stop any time. No rewards.',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 10),
-              GameButton(
-                key: const Key('warmup_start'),
-                label: 'Start Warm-Up',
-                icon: Icons.self_improvement_rounded,
-                kind: GameButtonKind.secondary,
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(builder: (_) => const WarmUpScreen()),
-                ),
+              // Side by side when there is room, one under the other at large text.
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  GameButton(
+                    key: const Key('warmup_start'),
+                    label: 'Start Warm-Up',
+                    icon: Icons.self_improvement_rounded,
+                    kind: GameButtonKind.secondary,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const WarmUpScreen()),
+                    ),
+                  ),
+                  GameButton(
+                    key: const Key('calm_start'),
+                    label: 'Calm Minute',
+                    icon: Icons.spa_rounded,
+                    kind: GameButtonKind.secondary,
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const CalmScreen()),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

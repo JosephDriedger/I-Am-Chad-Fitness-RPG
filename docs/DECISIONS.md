@@ -294,6 +294,13 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 ## 49. The newest content has earned looks, and the trophy shelf grows to two rows
 
 **Decision:** Finishing Season Four and Season Five each earn a mantle (Table and Hearth), levels 50 and 66 earn the hair dyes Comet and Cinder, and three more trophies join the Journal shelf: The Long Table, Level 100 and The Banked Fire. The shelf now has two rows of six.
-**Why:** [Decision 36](DECISIONS.md#36-every-kind-of-look-has-an-earned-one-beside-the-paid-ones) promised that every kind of look keeps an earned choice beside the paid ones, and the story, the level cap and the eighth region had all moved on since it was written.
+**Why:** [Decision 36](DECISIONS.md#36-earned-looks-sit-beside-paid-ones-and-trophies-are-for-the-long-haul) promised that every kind of look keeps an earned choice beside the paid ones, and the story, the level cap and the eighth region had all moved on since it was written.
 **Trade-off:** The bunting still has ten slots and stays full. The shelf's open ledger moved down a shelf to keep the second row clear.
 **Consequence:** All earned, none sold (`Cosmetics` in `lib/domain/cosmetics.dart`, drawn in `hub_scene.dart`). New cape and dye ids never reuse an old one. Tests are in `test/domain/patronage_test.dart`.
+
+## 50. A calm minute sits beside the warm-up
+
+**Decision:** The Train screen offers a second optional, reward-free practice beside the warm-up: "A Calm Minute With Chad", five slow breaths (in for 4, rest for 2, out for 6) with a circle that swells and settles, a cue for each breath, a pause button and a finish button. Like the warm-up it pays nothing, saves nothing, has no timer against the player and can be left at any moment.
+**Why:** The roadmap asked for recovery-friendly mini-games beyond the practice duel, and the game's own line is that rest is training. Slow breathing is the smallest thing that fits: no equipment, no body talk, and nothing to get right.
+**Trade-off:** The circle only sets a pace, so it never asks for a particular depth of breath, and the words say to go smaller or just breathe normally if dizzy. It is not medical advice and not a feature that measures anything. With Reduce Motion the circle changes size without animating, and the word on it still says what to do.
+**Consequence:** `Calm` and `CalmPhase` (`lib/domain/calm.dart`), `CalmScreen` (`lib/features/workout/calm_screen.dart`), one shared "Warm Up or Wind Down" panel on the Train screen (so the exercise list does not move further down) and a guide entry. Tests: `test/domain/calm_test.dart` and `test/calm_flow_test.dart` (which includes the real animation at the smallest phone and largest text).

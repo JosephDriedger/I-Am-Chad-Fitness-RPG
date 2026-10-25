@@ -57,7 +57,7 @@ The hall is the app's home. The HUD and menu are Flutter widgets (so they work w
 | Quest board | Quests (with a look back at last week) | An alert marker bounces while a suggestion is still undone |
 | Bookshelf | Journal (history) | Nothing yet. Its top shelf holds the earned trophies, if any |
 | Gate | Adventure | Glows teal when you have the 2 energy an expedition costs; shows a padlock otherwise |
-| Training dummy | Train (log a workout, or take Chad's one-minute warm-up) | Wobbles when the hero hits it |
+| Training dummy | Train (log a workout, or take Chad's one-minute warm-up or calm minute) | Wobbles when the hero hits it |
 | Armour stand | Hero | Shows your outfit and equipped gear; sparkles once you own loot |
 | Chad | Tap for another line | His speech bubble follows your day: first visit, after a workout, a rest day, idle |
 

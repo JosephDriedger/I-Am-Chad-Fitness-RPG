@@ -111,7 +111,12 @@ Future<void> openExercise(WidgetTester tester, String name) async {
   await settle(tester);
   // The search box also contains this text, so only look at card titles. With a journal, the
   // "Do It Again" shelf above the cards may name it too, so take the last (the card).
-  final card = find.byWidgetPredicate((w) => w is Text && w.data == name).last;
+  final titles = find.byWidgetPredicate((w) => w is Text && w.data == name);
+  // The panels above the list push it down, and a lazy list has not built what is far off screen.
+  if (titles.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(titles, 300, scrollable: find.byType(Scrollable).first);
+  }
+  final card = titles.last;
   await tester.ensureVisible(card);
   await settle(tester, frames: 3);
   await tester.tap(card);

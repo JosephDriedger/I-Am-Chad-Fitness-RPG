@@ -118,6 +118,8 @@ void main() {
     expect(find.text('No Exercises Match'), findsOneWidget);
     expect(find.text('0 Exercises'), findsOneWidget);
 
+    await tester.ensureVisible(find.text('Clear Filters'));
+    await settle(tester, frames: 3);
     await tester.tap(find.text('Clear Filters'));
     await settle(tester);
     expect(find.text('No Exercises Match'), findsNothing);

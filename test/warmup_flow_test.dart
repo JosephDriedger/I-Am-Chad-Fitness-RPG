@@ -34,7 +34,7 @@ Future<void> _tapLabel(WidgetTester tester, String label) async {
 void main() {
   testWidgets('the warm-up is offered on the Train screen and plays through to the end', (tester) async {
     final db = await _openTrain(tester);
-    expect(find.text(WarmUp.title), findsOneWidget);
+    expect(find.byKey(const Key('warmup_start')), findsOneWidget);
 
     await tester.ensureVisible(find.byKey(const Key('warmup_start')));
     await tester.tap(find.byKey(const Key('warmup_start')));
@@ -69,7 +69,7 @@ void main() {
     expect(find.text(WarmUp.finish), findsOneWidget);
 
     await _tapLabel(tester, 'Back to the Yard');
-    expect(find.text(WarmUp.title), findsOneWidget, reason: 'back on the Train screen');
+    expect(find.byKey(const Key('warmup_start')), findsOneWidget, reason: 'back on the Train screen');
     await shutDown(tester, db);
   });
 
@@ -84,7 +84,7 @@ void main() {
     final before = await tester.runAsync(() => GameRepository(db).watchHero().first);
     await tester.pageBack();
     await settle(tester, frames: 20);
-    expect(find.text(WarmUp.title), findsOneWidget);
+    expect(find.byKey(const Key('warmup_start')), findsOneWidget);
     // The timer died with the screen: time passing does nothing.
     await tester.pump(const Duration(seconds: 90));
     final after = await tester.runAsync(() => GameRepository(db).watchHero().first);
