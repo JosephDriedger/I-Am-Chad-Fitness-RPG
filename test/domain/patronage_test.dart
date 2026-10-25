@@ -187,7 +187,7 @@ void main() {
     test('trophies are earned by playing, none is sold, and the shelf has room for all', () {
       expect(Cosmetics.trophies.map((t) => t.id).toSet(), hasLength(Cosmetics.trophies.length));
       expect(Cosmetics.trophies.every((t) => t.unlock.isEarned), isTrue);
-      expect(Cosmetics.trophies.length, lessThanOrEqualTo(6));
+      expect(Cosmetics.trophies.length, lessThanOrEqualTo(12), reason: 'two rows of six on the shelf');
       expect({for (final t in Cosmetics.trophies) t.shape}, hasLength(Cosmetics.trophies.length), reason: 'each looks different');
     });
 
@@ -219,10 +219,38 @@ void main() {
       expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_three').unlock.n, Story.inSeason(3).last.number);
     });
 
+    test('the later seasons and the new top levels have looks of their own, all earned', () {
+      final table = Story.inSeason(4).last.number;
+      final hearth = Story.inSeason(5).last.number;
+      expect(Cosmetics.capeById('table').unlock.n, table);
+      expect(Cosmetics.capeById('hearth').unlock.n, hearth);
+      expect(Cosmetics.capeById('table').unlock.isEarned, isTrue);
+      expect(Cosmetics.capeById('hearth').unlock.isEarned, isTrue);
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_four').unlock.n, table);
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_five').unlock.n, hearth);
+      expect(Cosmetics.dyeById('comet')!.unlock.n, 50);
+      expect(Cosmetics.dyeById('cinder')!.unlock.n, 66);
+      // Level 100 is a level the game could not reach before the cap moved to 120.
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'level_100').unlock.n, 100);
+      expect(Cosmetics.earnedTrophies(const CosmeticContext(level: 100)).map((t) => t.id), contains('level_100'));
+      expect(Cosmetics.earnedTrophies(const CosmeticContext(level: 99)).map((t) => t.id), isNot(contains('level_100')));
+      expect(
+        Cosmetics.earnedTrophies(CosmeticContext(level: 120, chaptersRead: {table, hearth})).map((t) => t.id),
+        containsAll(['story_four', 'story_five', 'level_100']),
+      );
+    });
+
+    test('capes keep their saved ids, and no cape or dye id repeats', () {
+      expect(Cosmetics.capes.map((c) => c.id).toSet(), hasLength(Cosmetics.capes.length));
+      expect(Cosmetics.dyes.map((d) => d.id).toSet(), hasLength(Cosmetics.dyes.length));
+      expect(Cosmetics.capes.take(4).map((c) => c.id), [Cosmetics.classicCapeId, 'dawn', 'lantern', 'chime']);
+    });
+
     test('hints for a finished season name the season', () {
       expect(Unlock.chapter(Story.inSeason(1).last.number).hint, 'Earned by finishing the Season One story');
       expect(Unlock.chapter(Story.inSeason(2).last.number).hint, 'Earned by finishing the Season Two story');
       expect(Unlock.chapter(Story.inSeason(3).last.number).hint, 'Earned by finishing the Season Three story');
+      expect(Unlock.chapter(Story.inSeason(5).last.number).hint, 'Earned by finishing the Season Five story');
       expect(Unlock.chapter(3).hint, 'Earned by reading chapter 3');
     });
 

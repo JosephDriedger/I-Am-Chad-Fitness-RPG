@@ -391,10 +391,11 @@ class HubScene extends GameScene {
     for (var row = 0; row < 4; row++) {
       final y = r.top + 10 + row * 50;
       rrect(c, r.left + 6, y + 40, r.width - 12, 5, 0, const Color(0xFF6F4727));
-      if (row == 0 && trophies.isNotEmpty) {
-        // The top shelf holds the trophies instead of books.
-        for (var t = 0; t < trophies.length && t < 6; t++) {
-          _trophy(c, trophies[t], r.left + 20 + t * 14.5, y + 40);
+      // The top shelf holds the first six trophies instead of books, and the second the next six.
+      final firstOnRow = row * 6;
+      if (row < 2 && trophies.length > firstOnRow) {
+        for (var t = firstOnRow; t < trophies.length && t < firstOnRow + 6; t++) {
+          _trophy(c, trophies[t], r.left + 20 + (t - firstOnRow) * 14.5, y + 40);
         }
         continue;
       }
@@ -408,12 +409,13 @@ class HubScene extends GameScene {
         i++;
       }
     }
-    // Open ledger on the second shelf, glowing a little when there is history.
-    rrect(c, r.center.dx - 18, r.top + 70, 36, 10, 2, const Color(0xFFF6EED8));
-    line(c, r.center.dx, r.top + 70, r.center.dx, r.top + 80, 1.2, const Color(0xFF8D6E63));
+    // Open ledger on the third shelf, so the trophies' two rows stay clear. It glows a little when
+    // there is history.
+    rrect(c, r.center.dx - 18, r.top + 120, 36, 10, 2, const Color(0xFFF6EED8));
+    line(c, r.center.dx, r.top + 120, r.center.dx, r.top + 130, 1.2, const Color(0xFF8D6E63));
     if (s.wobble > 0) {
       final w = math.sin(s.wobble * math.pi * 5) * 1.5 * s.wobble;
-      oval(c, r.center.dx + w, r.top + 66, 3, 2, const Color(0xFFFFF59D));
+      oval(c, r.center.dx + w, r.top + 116, 3, 2, const Color(0xFFFFF59D));
     }
   }
 
@@ -497,6 +499,48 @@ class HubScene extends GameScene {
             Paint()..color = const Color(0xFFD9A441),
           );
         }
+      case TrophyShape.table:
+        // A long table with a cloth, two plates and a candle.
+        rrect(c, x - 7, b - 12, 14, 3, 1, const Color(0xFFF6EED8));
+        rrect(c, x - 6, b - 9, 2, 8, 0, const Color(0xFF8D5E3C));
+        rrect(c, x + 4, b - 9, 2, 8, 0, const Color(0xFF8D5E3C));
+        circle(c, x - 3.5, b - 13.5, 1.8, const Color(0xFFFFFFFF));
+        circle(c, x + 3.5, b - 13.5, 1.8, const Color(0xFFFFFFFF));
+        rrect(c, x - 0.8, b - 19, 1.6, 6, 0, const Color(0xFFFFF3D6));
+        final f = 1 + math.sin(clock * 6) * 0.15;
+        oval(c, x, b - 20.5, 1.5 * f, 2.4 * f, const Color(0xFFFFB300));
+      case TrophyShape.crown:
+        rrect(c, x - 1.5, b - 7, 3, 7, 0, goldDark);
+        c.drawPath(
+          Path()
+            ..moveTo(x - 8, b - 10)
+            ..lineTo(x - 8, b - 24)
+            ..lineTo(x - 4, b - 18)
+            ..lineTo(x, b - 26)
+            ..lineTo(x + 4, b - 18)
+            ..lineTo(x + 8, b - 24)
+            ..lineTo(x + 8, b - 10)
+            ..close(),
+          Paint()..color = gold,
+        );
+        rrect(c, x - 8, b - 12, 16, 3, 1, goldDark);
+        circle(c, x, b - 17, 1.6, const Color(0xFFE53935));
+      case TrophyShape.flame:
+        // A small banked fire in a stone cradle: a low red glow with one steady flame.
+        final glow = 0.7 + 0.3 * math.sin(clock * 2.4);
+        oval(c, x, b - 5, 7, 4, const Color(0xFF6D5A4A));
+        oval(c, x, b - 7, 5, 2.4, Color.lerp(const Color(0xFFBF360C), const Color(0xFFFF7043), glow)!);
+        final flick = math.sin(clock * 7) * 0.8;
+        c.drawPath(
+          Path()
+            ..moveTo(x, b - 25 + flick)
+            ..quadraticBezierTo(x + 6, b - 15, x + 4, b - 9)
+            ..quadraticBezierTo(x, b - 6, x - 4, b - 9)
+            ..quadraticBezierTo(x - 6, b - 15, x, b - 25 + flick)
+            ..close(),
+          Paint()..color = const Color(0xFFFF7043),
+        );
+        oval(c, x, b - 12, 2.2, 4, const Color(0xFFFFCA28));
     }
   }
 

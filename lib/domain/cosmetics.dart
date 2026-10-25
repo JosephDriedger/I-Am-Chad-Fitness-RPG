@@ -122,7 +122,7 @@ class Pennant {
 }
 
 /// What a trophy on the Journal shelf looks like.
-enum TrophyShape { lantern, chime, cup, star, shield, sun }
+enum TrophyShape { lantern, chime, cup, star, shield, sun, table, crown, flame }
 
 /// A trophy on the Journal shelf, for the bigger milestones. Earned by playing,
 /// never sold, and never taken away.
@@ -156,6 +156,8 @@ class Cosmetics {
     Cape('dawn', 'Dawn Mantle', Unlock.chapter(7), color: 0xFFF2A65A, trim: 0xFFFFE9B0),
     Cape('lantern', 'Lantern Mantle', Unlock.chapter(15), color: 0xFF1F7A8C, trim: 0xFFFFC857),
     Cape('chime', 'Chime Mantle', Unlock.chapter(23), color: 0xFF6A7FBF, trim: 0xFFE6EEF8),
+    Cape('table', 'Table Mantle', Unlock.chapter(31), color: 0xFF8E3B46, trim: 0xFFFFF3D6),
+    Cape('hearth', 'Hearth Mantle', Unlock.chapter(39), color: 0xFF9A3412, trim: 0xFFFFB74D),
     Cape('crimson', 'Crimson Mantle', Unlock.patron, color: 0xFFB3202F, trim: 0xFFF2C94C),
     Cape('starlit', 'Starlit Mantle', Unlock.patron, color: 0xFF1F2F66, trim: 0xFFB9C7FF, stars: true),
     Cape('aurora', 'Aurora Mantle', Unlock.patron, color: 0xFF1F8F86, trim: 0xFFC9A6FF),
@@ -167,6 +169,8 @@ class Cosmetics {
     HairDye('ember', 'Ember', Unlock.level(20), 0xFFD84B2A),
     HairDye('glacier', 'Glacier', Unlock.level(30), 0xFF8FD3F4),
     HairDye('sunstone', 'Sunstone', Unlock.level(40), 0xFFFFB627),
+    HairDye('comet', 'Comet', Unlock.level(50), 0xFF9FB4FF),
+    HairDye('cinder', 'Cinder', Unlock.level(66), 0xFFFF7043),
     HairDye('mint', 'Mint', Unlock.patron, 0xFF5FD3A5),
     HairDye('sky', 'Sky', Unlock.patron, 0xFF4FA8E8),
     HairDye('rose', 'Rose', Unlock.patron, 0xFFE26A9B),
@@ -188,7 +192,7 @@ class Cosmetics {
   ];
 
   /// The Journal shelf's trophies, in the order they are set out. The shelf has
-  /// room for six. All earned; none sold.
+  /// room for twelve, in two rows of six. All earned; none sold.
   static const trophies = <Trophy>[
     Trophy('story_two', 'The Lantern Coast', Unlock.chapter(15), TrophyShape.lantern),
     Trophy('level_40', 'Level 40', Unlock.level(40), TrophyShape.cup),
@@ -196,6 +200,9 @@ class Cosmetics {
     Trophy('streak_90', 'Season of Strength', Unlock.streak(90), TrophyShape.sun),
     Trophy('story_three', 'The Weather Chime', Unlock.chapter(23), TrophyShape.chime),
     Trophy('level_50', 'Level 50', Unlock.level(50), TrophyShape.star),
+    Trophy('story_four', 'The Long Table', Unlock.chapter(31), TrophyShape.table),
+    Trophy('level_100', 'Level 100', Unlock.level(100), TrophyShape.crown),
+    Trophy('story_five', 'The Banked Fire', Unlock.chapter(39), TrophyShape.flame),
   ];
 
   static Cape capeById(String id) => capes.firstWhere((c) => c.id == id, orElse: () => capes.first);
