@@ -24,6 +24,7 @@ bool _isPlayerFacing(String path) {
         'lib/domain/reminders.dart',
         'lib/domain/recommendations.dart',
         'lib/domain/chad.dart',
+        'lib/domain/hud_legend.dart',
       }.contains(p);
 }
 

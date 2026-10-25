@@ -92,7 +92,7 @@ void main() {
   testWidgets('the streak shows on the hall HUD and on the quest board', (tester) async {
     final semantics = tester.ensureSemantics();
     final (db, repo) = await _boot(tester, [0, 1, 2]);
-    expect(find.bySemanticsLabel('Streak: 3 active days in a row'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Streak: 3 active days in a row')), findsOneWidget);
 
     await tester.tap(find.text('Quests'));
     await settle(tester, frames: 30);

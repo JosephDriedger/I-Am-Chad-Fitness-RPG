@@ -21,6 +21,7 @@ import '../character/character_screen.dart';
 import '../guild/quests_screen.dart';
 import '../history/history_screen.dart';
 import '../settings/settings_screen.dart';
+import 'hud_legend_dialog.dart';
 import '../story/chronicle_screen.dart';
 import '../story/pack_download.dart';
 import '../workout/workout_screen.dart';
@@ -243,6 +244,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       goalTarget: state.weeklyGoal,
       streak: ref.watch(streakProvider)?.current ?? 0,
       onSettings: () => Navigator.of(context).push(gameRoute<void>(const SettingsScreen())),
+      onLegend: () => showHudLegend(context),
     );
     Widget menu(bool vertical) => _MenuBar(
           vertical: vertical,
@@ -312,6 +314,7 @@ class _Hud extends StatelessWidget {
     required this.goalTarget,
     required this.streak,
     required this.onSettings,
+    required this.onLegend,
   });
 
   final PlayerStatus player;
@@ -320,6 +323,9 @@ class _Hud extends StatelessWidget {
   final int goalTarget;
   final int streak;
   final VoidCallback onSettings;
+
+  /// Opens the plain-words explanation of the numbers.
+  final VoidCallback onLegend;
 
   @override
   Widget build(BuildContext context) {
@@ -350,7 +356,14 @@ class _Hud extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: Column(
+              child: Semantics(
+                button: true,
+                label: 'What these numbers mean',
+                child: InkWell(
+                  key: const Key('hud_info'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: onLegend,
+                  child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
@@ -391,9 +404,13 @@ class _Hud extends StatelessWidget {
                       _Stat(Icons.calendar_today, '$goalDone/$goalTarget', const Color(0xFFFFB067), 'Active days this week: $goalDone of $goalTarget'),
                       if (streak > 0)
                         _Stat(Icons.local_fire_department_rounded, '$streak', const Color(0xFFFF7043), 'Streak: $streak active days in a row'),
+                      // A hint that the numbers can be tapped to find out what they mean.
+                      ExcludeSemantics(child: Icon(Icons.info_outline_rounded, size: 15, color: _cream.withValues(alpha: 0.7))),
                     ],
                   ),
                 ],
+              ),
+                ),
               ),
             ),
             IconButton(

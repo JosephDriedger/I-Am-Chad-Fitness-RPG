@@ -65,7 +65,7 @@ void main() {
     await bootApp(tester, db, now: now);
 
     // No energy yet: the hall shows it, the expedition is locked, practice is free.
-    expect(find.bySemanticsLabel('Adventure energy: 0'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Adventure energy: 0')), findsOneWidget);
     await tester.tap(find.text('Adventure'));
     await settle(tester, frames: 30);
     expect(find.text('Need 2 Energy'), findsOneWidget);

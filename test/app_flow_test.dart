@@ -61,7 +61,7 @@ void main() {
     for (final label in ['Train', 'Quests', 'Adventure', 'Hero', 'Journal']) {
       expect(find.text(label), findsOneWidget, reason: label);
     }
-    expect(find.bySemanticsLabel('Adventure energy: 0'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Adventure energy: 0')), findsOneWidget);
 
     // Train: the hero walks to the dummy, then the log screen opens.
     await tester.tap(find.text('Train'));
@@ -90,7 +90,7 @@ void main() {
     final popups = scene.world.children.whereType<FloatingText>().length;
     expect(popups, greaterThanOrEqualTo(1), reason: 'no +XP popup after logging a workout');
     await settle(tester, frames: 40);
-    expect(find.bySemanticsLabel('Adventure energy: 2'), findsOneWidget);
+    expect(find.bySemanticsLabel(RegExp('Adventure energy: 2')), findsOneWidget);
 
     // The journal lists it with its reward.
     await tester.tap(find.text('Journal'));
