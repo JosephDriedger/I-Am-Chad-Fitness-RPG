@@ -10,6 +10,7 @@ import '../../domain/records.dart';
 import '../../domain/workout.dart';
 import '../workout/log_workout_screen.dart';
 import 'mark_progress.dart';
+import 'month_panel.dart';
 
 /// The journal: a chronicle of everything you have done.
 class HistoryScreen extends ConsumerWidget {
@@ -84,6 +85,8 @@ class HistoryScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             _WeekChart(now: now, grants: grants),
+            const SizedBox(height: 14),
+            MonthPanel(entries: workouts, now: now),
             const SizedBox(height: 14),
             _BestsPanel(bests: PersonalBests.of(workouts), entries: workouts, metric: metric),
             const SizedBox(height: 14),
