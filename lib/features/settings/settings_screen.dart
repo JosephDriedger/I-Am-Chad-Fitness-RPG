@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../app/ads.dart';
+import '../../app/backup_files.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
@@ -135,6 +137,21 @@ class SettingsScreen extends ConsumerWidget {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 14),
+                // Where the phone has a share sheet: save the backup to Files or a drive, or send it to oneself.
+                if (ref.watch(backupFilesProvider).isSupported) ...[
+                  GameButton(
+                    key: const Key('send_backup'),
+                    label: 'Save or Send a Backup',
+                    icon: Icons.ios_share_rounded,
+                    kind: GameButtonKind.secondary,
+                    onPressed: () async {
+                      final text = await repo.backupJson();
+                      final day = DateFormat('yyyy-MM-dd').format(ref.read(clockProvider)());
+                      await ref.read(backupFilesProvider).send('I-Am-Chad-backup-$day.txt', text);
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                ],
                 GameButton(
                   key: const Key('copy_backup'),
                   label: 'Copy a Full Backup',
@@ -157,7 +174,7 @@ class SettingsScreen extends ConsumerWidget {
                   icon: Icons.restore_rounded,
                   kind: GameButtonKind.secondary,
                   onPressed: () async {
-                    final name = await showRestoreBackup(context, repo);
+                    final name = await showRestoreBackup(context, repo, ref.read(backupFilesProvider));
                     if (name != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restored. Welcome back, $name.')));
                       Navigator.of(context).popUntil((r) => r.isFirst);

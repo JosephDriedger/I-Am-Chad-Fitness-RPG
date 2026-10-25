@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/app.dart';
+import 'app/backup_files.dart';
 import 'app/local_reminders.dart';
 import 'app/providers.dart';
 import 'app/reminders.dart';
@@ -15,6 +16,8 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(ProviderScope(
     overrides: [
+      // Sharing a backup and choosing one, where the phone has a share sheet and a file chooser.
+      if (DeviceBackupFiles.platformCanShare) backupFilesProvider.overrideWithValue(const DeviceBackupFiles()),
       // Real reminders where the phone can send them; everywhere else the switch is hidden.
       if (LocalReminderGateway.platformCanNotify) reminderGatewayProvider.overrideWith((_) => LocalReminderGateway()),
       // Dev previews run in a throttled browser pane: skip animation and sound.

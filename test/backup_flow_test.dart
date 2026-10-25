@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/app/backup_files.dart';
 import 'package:i_am_chad/data/database.dart';
 import 'package:i_am_chad/data/repository.dart';
 import 'package:i_am_chad/domain/activity.dart';
@@ -38,7 +39,7 @@ Future<String> _otherPhonesBackup(WidgetTester tester) async {
   return text!;
 }
 
-Future<(AppDatabase, GameRepository)> _boot(WidgetTester tester, {bool phoneSurface = true}) async {
+Future<(AppDatabase, GameRepository)> _boot(WidgetTester tester, {bool phoneSurface = true, BackupFiles? files}) async {
   if (phoneSurface) usePhone(tester);
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   final repo = GameRepository(db);
@@ -46,7 +47,7 @@ Future<(AppDatabase, GameRepository)> _boot(WidgetTester tester, {bool phoneSurf
     await repo.createHero(_hero('Bo'));
     await repo.addWorkout(WorkoutEntry(activityId: 'dumbbell_press', performedAt: DateTime(2026, 10, 19, 9), sets: 3, reps: 8, loadKg: 10));
   });
-  await bootApp(tester, db, now: _now);
+  await bootApp(tester, db, now: _now, overrides: [if (files != null) backupFilesProvider.overrideWithValue(files)]);
   return (db, repo);
 }
 
@@ -234,5 +235,87 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byKey(const Key('restore_summary')), findsOneWidget);
     await shutDown(tester, db);
+  });
+
+  group('saving the backup to a file and bringing it back', () {
+    testWidgets('where the phone cannot share files, only copy and paste are offered', (tester) async {
+      _mockClipboard(tester);
+      final (db, _) = await _boot(tester);
+      await _openSettings(tester);
+      await _reveal(tester, const Key('restore_backup'));
+      expect(find.byKey(const Key('send_backup')), findsNothing);
+      await tester.tap(find.byKey(const Key('restore_backup')));
+      await settle(tester, frames: 20);
+      expect(find.byKey(const Key('restore_file')), findsNothing);
+      expect(find.textContaining('Paste a backup you copied from Settings'), findsOneWidget);
+      await shutDown(tester, db);
+    });
+
+    testWidgets('Save or Send a Backup shares the whole game as a plain file named for the day', (tester) async {
+      _mockClipboard(tester);
+      final files = TestBackupFiles();
+      final (db, repo) = await _boot(tester, files: files);
+      await _openSettings(tester);
+      await _reveal(tester, const Key('send_backup'));
+      await tester.tap(find.byKey(const Key('send_backup')));
+      await settle(tester, frames: 15);
+
+      expect(files.sent.length, 1);
+      expect(files.sent.single.fileName, 'I-Am-Chad-backup-2026-10-22.txt', reason: 'a plain text file, not a technical one');
+      final backup = repo.readBackup(files.sent.single.text);
+      expect(backup.rows('heroes').single['name'], 'Bo');
+      await shutDown(tester, db);
+    });
+
+    testWidgets('Choose a Backup File reads it and goes straight to showing what it holds', (tester) async {
+      _mockClipboard(tester);
+      final other = await _otherPhonesBackup(tester);
+      final files = TestBackupFiles(toChoose: other);
+      final (db, repo) = await _boot(tester, files: files);
+      await _openSettings(tester);
+      await _reveal(tester, const Key('restore_backup'));
+      await tester.tap(find.byKey(const Key('restore_backup')));
+      await settle(tester, frames: 20);
+      expect(find.textContaining('Choose the backup file you saved'), findsOneWidget);
+
+      await _tap(tester, const Key('restore_file'));
+      expect(files.chooseCalls, 1);
+      expect(find.textContaining('A backup of Ada'), findsOneWidget);
+      expect((await tester.runAsync(() => repo.watchHero().first))!.name, 'Bo', reason: 'still not restored');
+      await _tap(tester, const Key('restore_go'));
+      await settle(tester, frames: 40);
+      expect((await tester.runAsync(() => repo.watchHero().first))!.name, 'Ada');
+      await shutDown(tester, db);
+    });
+
+    testWidgets('changing their mind in the file chooser changes nothing and says nothing', (tester) async {
+      _mockClipboard(tester);
+      final files = TestBackupFiles(toChoose: null);
+      final (db, _) = await _boot(tester, files: files);
+      await _openSettings(tester);
+      await _reveal(tester, const Key('restore_backup'));
+      await tester.tap(find.byKey(const Key('restore_backup')));
+      await settle(tester, frames: 20);
+      await _tap(tester, const Key('restore_file'));
+      expect(files.chooseCalls, 1);
+      expect(find.byKey(const Key('restore_text')), findsOneWidget);
+      expect(find.byKey(const Key('restore_problem')), findsNothing);
+      await shutDown(tester, db);
+    });
+
+    testWidgets('choosing a file that is not a backup is refused kindly', (tester) async {
+      _mockClipboard(tester);
+      final files = TestBackupFiles(toChoose: 'Shopping list: milk, eggs');
+      final (db, repo) = await _boot(tester, files: files);
+      await _openSettings(tester);
+      await _reveal(tester, const Key('restore_backup'));
+      await tester.tap(find.byKey(const Key('restore_backup')));
+      await settle(tester, frames: 20);
+      await _tap(tester, const Key('restore_file'));
+      expect(find.textContaining('does not look like a backup from this game'), findsOneWidget);
+      expect(find.byKey(const Key('restore_go')), findsNothing);
+      expect((await tester.runAsync(() => repo.watchHero().first))!.name, 'Bo');
+      await shutDown(tester, db);
+    });
   });
 }

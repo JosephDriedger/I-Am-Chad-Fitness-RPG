@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../app/backup_files.dart';
 import '../../app/game_ui.dart';
 import '../../data/backup.dart';
 import '../../data/repository.dart';
@@ -10,8 +11,8 @@ import '../../data/repository.dart';
 /// backup is read and checked first (nothing on the phone is touched), the player
 /// sees what it holds, and only then is it restored. Returns the hero's name once
 /// the restore is done, or null if they stopped.
-Future<String?> showRestoreBackup(BuildContext context, GameRepository repo) async {
-  final restore = _Restore(repo);
+Future<String?> showRestoreBackup(BuildContext context, GameRepository repo, BackupFiles files) async {
+  final restore = _Restore(repo, files);
   final result = await showGameDialog<String>(
     context: context,
     title: 'Restore a Backup',
@@ -32,9 +33,10 @@ Future<String?> showRestoreBackup(BuildContext context, GameRepository repo) asy
 enum _Step { paste, confirm, working, failed }
 
 class _Restore extends ChangeNotifier {
-  _Restore(this.repo);
+  _Restore(this.repo, this.files);
 
   final GameRepository repo;
+  final BackupFiles files;
   final text = TextEditingController();
 
   _Step step = _Step.paste;
@@ -55,6 +57,14 @@ class _Restore extends ChangeNotifier {
       text.text = data!.text!;
       notifyListeners();
     }
+  }
+
+  /// Lets the player choose a backup file, then checks it straight away.
+  Future<void> chooseFile() async {
+    final chosen = await files.choose();
+    if (chosen == null || _disposed) return;
+    text.text = chosen;
+    check();
   }
 
   /// Reads the backup without changing anything.
@@ -111,7 +121,10 @@ class _Body extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Paste a backup you copied from Settings. Nothing changes until you have seen what it holds and said yes.'),
+            Text(
+              '${r.files.isSupported ? 'Choose the backup file you saved, or paste a backup you copied from Settings.' : 'Paste a backup you copied from Settings.'} '
+              'Nothing changes until you have seen what it holds and said yes.',
+            ),
             const SizedBox(height: 10),
             TextField(
               key: const Key('restore_text'),
@@ -170,6 +183,16 @@ class _Actions extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (r.files.isSupported) ...[
+              GameButton(
+                key: const Key('restore_file'),
+                label: 'Choose a Backup File',
+                icon: Icons.folder_open_rounded,
+                kind: GameButtonKind.positive,
+                onPressed: r.chooseFile,
+              ),
+              const SizedBox(height: 8),
+            ],
             GameButton(
               key: const Key('restore_paste'),
               label: 'Paste From Clipboard',
