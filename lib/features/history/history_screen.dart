@@ -9,6 +9,7 @@ import '../../domain/player_state.dart';
 import '../../domain/records.dart';
 import '../../domain/workout.dart';
 import '../workout/log_workout_screen.dart';
+import 'mark_progress.dart';
 
 /// The journal: a chronicle of everything you have done.
 class HistoryScreen extends ConsumerWidget {
@@ -84,7 +85,7 @@ class HistoryScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             _WeekChart(now: now, grants: grants),
             const SizedBox(height: 14),
-            _BestsPanel(bests: PersonalBests.of(workouts), metric: metric),
+            _BestsPanel(bests: PersonalBests.of(workouts), entries: workouts, metric: metric),
             const SizedBox(height: 14),
             for (final day in days) ...[
               _DayHeader(day: day, grant: grants[day]),
@@ -100,9 +101,10 @@ class HistoryScreen extends ConsumerWidget {
 
 /// The player's own best marks, newest first. Collapsed to a few until asked.
 class _BestsPanel extends StatefulWidget {
-  const _BestsPanel({required this.bests, required this.metric});
+  const _BestsPanel({required this.bests, required this.entries, required this.metric});
 
   final List<PersonalBest> bests;
+  final List<WorkoutEntry> entries;
   final bool metric;
 
   @override
@@ -124,31 +126,45 @@ class _BestsPanelState extends State<_BestsPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final b in visible)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  const Icon(Icons.workspace_premium_rounded, color: GameColors.teal, size: 22),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      '${ActivityCatalog.byId(b.activityId)?.name ?? 'Unknown'}: ${b.kind.label}',
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+            Semantics(
+              button: true,
+              label: '${ActivityCatalog.byId(b.activityId)?.name ?? 'Unknown'}, ${b.kind.label}, '
+                  '${b.describe(metric: widget.metric)}. Show your progress.',
+              child: ExcludeSemantics(
+                child: InkWell(
+                  key: Key('best_${b.activityId}_${b.kind.name}'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => showMarkProgress(context, entries: widget.entries, best: b, metric: widget.metric),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.workspace_premium_rounded, color: GameColors.teal, size: 22),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            '${ActivityCatalog.byId(b.activityId)?.name ?? 'Unknown'}: ${b.kind.label}',
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // May wrap onto a second line when text is large, rather than run off the edge.
+                        Expanded(
+                          flex: 2,
+                          child: Text(b.describe(metric: widget.metric), textAlign: TextAlign.end, style: gameTitle(17)),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(Icons.chevron_right_rounded, color: GameColors.inkSoft),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // May wrap onto a second line when text is large, rather than run off the edge.
-                  Flexible(
-                    flex: 2,
-                    child: Text(b.describe(metric: widget.metric), textAlign: TextAlign.end, style: gameTitle(17)),
-                  ),
-                ],
+                ),
               ),
             ),
           const SizedBox(height: 4),
           const Text(
-            'Your own marks. They are only for looking back on, and never change what you earn.',
+            'Your own marks. Tap one to see how it has moved. They are only for looking back on, and never change what you earn.',
             style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
           ),
           if (bests.length > _shown)

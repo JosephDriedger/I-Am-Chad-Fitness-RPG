@@ -110,3 +110,47 @@ class PersonalBests {
     if ((e.distanceMeters ?? 0) > 0) yield mark(RecordKind.farthest, e.distanceMeters!);
   }
 }
+
+/// How one mark has moved over the days it was done, for a small "progress"
+/// chart. One point per day (that day's best), oldest first, and only the latest
+/// [maxPoints] so the line stays readable. Like the bests, it is derived from the
+/// journal each time and never changes a reward. A line goes down as well as up,
+/// because lighter days and rest weeks are part of getting stronger, so nothing
+/// here compares the player with a target or with anyone else.
+class MarkHistory {
+  const MarkHistory(this.points);
+
+  /// One point per day, oldest first.
+  final List<PersonalBest> points;
+
+  static const maxPoints = 24;
+
+  static MarkHistory of(Iterable<WorkoutEntry> entries, {required String activityId, required RecordKind kind}) {
+    final byDay = <String, PersonalBest>{};
+    for (final e in entries) {
+      if (e.activityId != activityId || !PersonalBests._usable(e)) continue;
+      for (final m in PersonalBests._marksOf(e)) {
+        if (m.kind != kind) continue;
+        final key = dayKey(e.performedAt);
+        final held = byDay[key];
+        if (held == null || m.value > held.value) byDay[key] = m;
+      }
+    }
+    final all = byDay.values.toList()..sort((a, b) => a.achievedAt.compareTo(b.achievedAt));
+    return MarkHistory(all.length > maxPoints ? all.sublist(all.length - maxPoints) : all);
+  }
+
+  /// A line needs at least two days to be a line.
+  bool get hasLine => points.length >= 2;
+
+  PersonalBest? get first => points.isEmpty ? null : points.first;
+  PersonalBest? get latest => points.isEmpty ? null : points.last;
+
+  PersonalBest? get best {
+    PersonalBest? top;
+    for (final p in points) {
+      if (top == null || p.value > top.value) top = p;
+    }
+    return top;
+  }
+}

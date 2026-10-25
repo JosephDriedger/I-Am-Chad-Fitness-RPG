@@ -98,6 +98,61 @@ void main() {
     await shutDown(tester, db);
   });
 
+  Future<void> openBest(WidgetTester tester, String key) async {
+    await tester.tap(find.text('Journal'));
+    await settle(tester, frames: 30);
+    await tester.scrollUntilVisible(find.byKey(Key(key)), 300, scrollable: find.byType(Scrollable).first);
+    await tester.ensureVisible(find.byKey(Key(key)));
+    await settle(tester, frames: 2);
+    await tester.tap(find.byKey(Key(key)));
+    await settle(tester, frames: 20);
+  }
+
+  testWidgets('tapping a personal best shows how it has moved, and a lighter day is just shown', (tester) async {
+    final (db, _) = await _boot(tester, before: [_press(10, 10), _press(6, 12), _press(3, 14), _press(1, 13)]);
+    await openBest(tester, 'best_dumbbell_press_heaviest');
+
+    expect(find.text('Your Progress'), findsOneWidget);
+    expect(find.text('Dumbbell Shoulder Press: Heaviest'), findsWidgets);
+    expect(find.byKey(const Key('progress_chart')), findsOneWidget);
+    expect(find.text('10 kg × 8 (Oct 12)'), findsOneWidget, reason: 'the first day');
+    expect(find.text('13 kg × 8 (Oct 21)'), findsOneWidget, reason: 'the latest day, lighter than the best');
+    expect(find.text('14 kg × 8 (Oct 19)'), findsOneWidget, reason: 'the best day');
+    expect(find.textContaining('A line wobbles, and that is normal'), findsOneWidget);
+    expect(find.textContaining('never changes what you earn'), findsOneWidget);
+    // Nothing that compares, grades or pushes.
+    for (final word in ['behind', 'target', 'goal', 'improve', 'should', 'beat', 'drop']) {
+      expect(find.textContaining(word), findsNothing, reason: word);
+    }
+
+    await tester.tap(find.byKey(const Key('progress_close')));
+    await settle(tester, frames: 20);
+    expect(find.text('Your Progress'), findsNothing);
+    await shutDown(tester, db);
+  });
+
+  testWidgets('one day is not a line yet, and says so kindly', (tester) async {
+    final (db, _) = await _boot(tester, before: [_press(2, 12)]);
+    await openBest(tester, 'best_dumbbell_press_heaviest');
+    expect(find.byKey(const Key('progress_chart')), findsNothing);
+    expect(find.byKey(const Key('progress_empty')), findsOneWidget);
+    expect(find.textContaining('Do it again and a line will start to appear'), findsOneWidget);
+    await shutDown(tester, db);
+  });
+
+  testWidgets('the progress card fits a small phone at large text', (tester) async {
+    final (db, _) = await _boot(tester, before: [_press(10, 10), _press(6, 12), _press(3, 14), _press(1, 13)]);
+    tester.view.physicalSize = const Size(640, 1136);
+    tester.view.devicePixelRatio = 2.0;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.8;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await settle(tester, frames: 10);
+    await openBest(tester, 'best_dumbbell_press_heaviest');
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('progress_chart')), findsOneWidget);
+    await shutDown(tester, db);
+  });
+
   testWidgets('the weekly goal can be changed on the quest board and goes back to the suggestion', (tester) async {
     final (db, repo) = await _boot(tester);
     await tester.tap(find.text('Quests'));

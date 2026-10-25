@@ -190,6 +190,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 - **The first time is not a record.** Only a mark that already had a holder can be beaten, and matching a mark does not count. A tie keeps the earlier one.
 - **Editing is safe.** An entry being edited is not measured against its old self, and a typo is fixed by editing or deleting the entry, after which the marks are recalculated from the journal.
 - **Nothing is stored.** The marks are derived each time, so they can never disagree with the journal.
+- **Progress lines.** Tapping a personal best in the journal opens a small chart of how that mark has moved: one dot per day it was done (that day's best), the latest 24 days, with the first, latest and best marks written out (`MarkHistory` in `records.dart`, `mark_progress.dart`). The line goes down as well as up and the card says so. It never shows a target, a percentage, a streak or a comparison, it never changes a reward, and like the bests it is derived from the journal, so nothing is stored.
 
 ## Weekly goal
 

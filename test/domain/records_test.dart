@@ -114,4 +114,57 @@ void main() {
       expect(of(RecordKind.mostReps, 25).describe(), '25 reps');
     });
   });
+
+  group('MarkHistory', () {
+    MarkHistory press(List<WorkoutEntry> e, {RecordKind kind = RecordKind.heaviest}) =>
+        MarkHistory.of(e, activityId: 'dumbbell_press', kind: kind);
+
+    test('is one point per day, oldest first, whatever order the journal is in', () {
+      final h = press([_lift(9, 15, 8), _lift(1, 10, 12), _lift(5, 12.5, 10)]);
+      expect([for (final p in h.points) p.value], [10, 12.5, 15]);
+      expect([for (final p in h.points) p.achievedAt.day], [1, 5, 9]);
+      expect(h.hasLine, isTrue);
+      expect(h.first!.value, 10);
+      expect(h.latest!.value, 15);
+      expect(h.best!.value, 15);
+    });
+
+    test('a day with several entries counts once, at its best', () {
+      final h = press([_lift(3, 10, 8), _lift(3, 14, 6), _lift(3, 12, 8)]);
+      expect(h.points.length, 1);
+      expect(h.points.single.value, 14);
+      expect(h.points.single.reps, 6, reason: 'the reps done at that weight');
+      expect(h.hasLine, isFalse, reason: 'one day is not a line yet');
+    });
+
+    test('the line can go down: a lighter day is simply shown, and the best stays the best', () {
+      final h = press([_lift(1, 20, 8), _lift(4, 15, 8), _lift(8, 17.5, 8)]);
+      expect([for (final p in h.points) p.value], [20, 15, 17.5]);
+      expect(h.best!.value, 20);
+      expect(h.latest!.value, 17.5);
+    });
+
+    test('follows one exercise and one kind of mark only', () {
+      final entries = [_lift(1, 10, 12), _lift(2, 12, 10), _walk(3, 30, 2.5), _walk(6, 40, 3.5)];
+      expect(press(entries).points.length, 2);
+      expect(press(entries, kind: RecordKind.mostReps).points.map((p) => p.value), [12, 10]);
+      final walks = MarkHistory.of(entries, activityId: 'walking', kind: RecordKind.farthest);
+      expect(walks.points.map((p) => p.value), [2500, 3500]);
+      expect(press(entries, kind: RecordKind.longest).points, isEmpty, reason: 'no lift was timed');
+    });
+
+    test('keeps only the latest days, so the line stays readable', () {
+      final h = press([for (var d = 1; d <= 28; d++) _lift(d, 10 + d.toDouble(), 8)]);
+      expect(h.points.length, MarkHistory.maxPoints);
+      expect(h.points.last.value, 38);
+      expect(h.points.first.achievedAt.day, 28 - MarkHistory.maxPoints + 1);
+    });
+
+    test('is empty when there is nothing, and never needs a stored value', () {
+      expect(press(const []).points, isEmpty);
+      expect(press(const []).best, isNull);
+      expect(press(const []).first, isNull);
+      expect(press(const []).latest, isNull);
+    });
+  });
 }
