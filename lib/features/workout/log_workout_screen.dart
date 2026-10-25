@@ -109,6 +109,30 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
     }
   }
 
+  /// Fills the numbers from the last time this was done, so someone who repeats
+  /// the same session does not retype it. Notes, effort and the camera mark are
+  /// not copied, because they belong to that day; the date stays today's.
+  void _useLast(WorkoutEntry last, bool metric) {
+    setState(() {
+      for (final c in [_sets, _reps, _minutes, _seconds, _distance, _load]) {
+        c.clear();
+      }
+      _setIfPositive(_sets, last.sets);
+      _setIfPositive(_reps, last.reps);
+      _setDuration(last.durationSeconds);
+      if ((last.distanceMeters ?? 0) > 0) {
+        final km = last.distanceMeters! / 1000;
+        _distance.text = _fmt(metric ? km : km / _kmPerMile);
+      }
+      if ((last.loadKg ?? 0) > 0) {
+        _load.text = _fmt(metric ? last.loadKg! : last.loadKg! * _lbPerKg);
+      }
+      _variant = last.variant;
+      _camSets = null;
+      _camReps = null;
+    });
+  }
+
   bool get _cameraCounted =>
       _camSets != null && _camReps != null && _int(_sets) == _camSets && _int(_reps) == _camReps;
 
@@ -446,11 +470,16 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
           // An exercise they have done before shows their own marks, so they can see where they are.
           if (ref.watch(workoutsProvider).value case final journal? when journal.isNotEmpty) ...[
             const SizedBox(height: 10),
-            PastMarks(
-              recap: ExerciseRecap.of(journal, a.id, excludingId: widget.editing?.id),
-              entries: journal,
-              metric: prefs.useMetric,
-            ),
+            Builder(builder: (context) {
+              final recap = ExerciseRecap.of(journal, a.id, excludingId: widget.editing?.id);
+              return PastMarks(
+                recap: recap,
+                entries: journal,
+                metric: prefs.useMetric,
+                // Repeating a session should not mean retyping it; editing has its own numbers already.
+                onUseLast: editing || !recap.hasHistory ? null : () => _useLast(recap.last!, prefs.useMetric),
+              );
+            }),
           ],
           if (!editing && (ref.watch(workoutsProvider).value?.isEmpty ?? false)) ...[
             const SizedBox(height: 10),

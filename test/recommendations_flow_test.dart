@@ -203,4 +203,86 @@ void main() {
     expect(tester.takeException(), isNull);
     await shutDown(tester, db);
   });
+
+  group('repeating a session', () {
+    String text(WidgetTester tester, String label) => tester.widget<TextField>(find.widgetWithText(TextField, label)).controller!.text;
+
+    Future<void> openLog(WidgetTester tester, String name) async {
+      await tester.tap(find.text('Train'));
+      await settle(tester, frames: 30);
+      await openExercise(tester, name);
+    }
+
+    testWidgets('one tap fills in last time\'s numbers, and the entry saves as they were', (tester) async {
+      final (db, repo) = await _boot(tester, before: [
+        WorkoutEntry(activityId: 'dumbbell_press', performedAt: DateTime(2026, 10, 19, 9), sets: 3, reps: 8, loadKg: 15),
+        WorkoutEntry(activityId: 'dumbbell_press', performedAt: DateTime(2026, 10, 21, 9), sets: 4, reps: 10, loadKg: 14, notes: 'felt great', perceivedEffort: 2),
+      ]);
+      await openLog(tester, 'Dumbbell Shoulder Press');
+      await tester.ensureVisible(find.byKey(const Key('past_use_last')));
+      await settle(tester, frames: 2);
+      expect(text(tester, 'Sets'), isEmpty, reason: 'nothing is filled until they ask');
+      await tester.tap(find.byKey(const Key('past_use_last')));
+      await settle(tester, frames: 5);
+
+      expect(text(tester, 'Sets'), '4');
+      expect(text(tester, 'Reps per Set'), '10');
+      expect(text(tester, 'Weight (Optional)'), '14');
+      expect(find.widgetWithText(TextField, 'Notes (Optional)').evaluate().isEmpty || text(tester, 'Notes (Optional)').isEmpty, isTrue,
+          reason: 'notes belong to that day, so they are not copied');
+
+      await tester.scrollUntilVisible(find.text('Save Workout'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('Save Workout'));
+      await tester.pump();
+      await tester.ensureVisible(find.text('Save Workout'));
+      await tester.tap(find.text('Save Workout'));
+      await settle(tester);
+      final all = (await tester.runAsync(() => repo.watchWorkouts().first))!;
+      final newest = all.firstWhere((e) => e.performedAt.isAfter(DateTime(2026, 10, 22)));
+      expect([newest.sets, newest.reps, newest.loadKg], [4, 10, 14]);
+      expect(newest.notes, anyOf(isNull, isEmpty));
+      expect(newest.perceivedEffort, isNull);
+      await shutDown(tester, db);
+    });
+
+    testWidgets('it fills time and distance too, and replaces what was typed', (tester) async {
+      final (db, _) = await _boot(tester, before: [
+        WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, 10, 21, 18), durationSeconds: 25 * 60 + 30, distanceMeters: 2100),
+      ]);
+      await openLog(tester, 'Walking');
+      await tester.enterText(find.widgetWithText(TextField, 'Minutes'), '99');
+      await tester.ensureVisible(find.byKey(const Key('past_use_last')));
+      await settle(tester, frames: 2);
+      await tester.tap(find.byKey(const Key('past_use_last')));
+      await settle(tester, frames: 5);
+      expect(text(tester, 'Minutes'), '25');
+      expect(text(tester, 'Seconds'), '30');
+      expect(text(tester, 'Distance (Optional)'), '2.10', reason: 'formatted the way editing formats it');
+      await shutDown(tester, db);
+    });
+
+    testWidgets('there is no button for something never done, or while editing an entry', (tester) async {
+      final (db, _) = await _boot(tester, before: [
+        WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, 10, 20, 9), durationSeconds: 600),
+        WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, 10, 21, 9), durationSeconds: 900),
+      ]);
+      await openLog(tester, 'Dumbbell Shoulder Press');
+      expect(find.byKey(const Key('past_use_last')), findsNothing);
+      await tester.pageBack();
+      await settle(tester, frames: 20);
+      await tester.pageBack();
+      await settle(tester, frames: 20);
+
+      // Editing the newest walk: it is compared with the earlier one, but its numbers are already filled in.
+      await tester.tap(find.text('Journal'));
+      await settle(tester, frames: 30);
+      await tester.scrollUntilVisible(find.byType(ListTile).first, 300, scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.byType(ListTile).first);
+      await settle(tester, frames: 2);
+      await tester.tap(find.byType(ListTile).first);
+      await settle(tester, frames: 30);
+      expect(find.byKey(const Key('past_use_last')), findsNothing);
+      await shutDown(tester, db);
+    });
+  });
 }

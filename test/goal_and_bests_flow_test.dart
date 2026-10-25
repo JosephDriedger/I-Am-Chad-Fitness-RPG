@@ -45,6 +45,8 @@ Future<void> _logPress(WidgetTester tester, String kg) async {
   await tester.tap(find.text('Train'));
   await settle(tester, frames: 30);
   await openExercise(tester, 'Dumbbell Shoulder Press');
+  // With earlier lifts, the marks panel sits above the form, so the fields may need scrolling to.
+  await tester.scrollUntilVisible(find.widgetWithText(TextField, 'Sets'), 300, scrollable: find.byType(Scrollable).first);
   await tester.enterText(find.widgetWithText(TextField, 'Sets'), '3');
   await tester.enterText(find.widgetWithText(TextField, 'Reps per Set'), '8');
   await tester.enterText(find.widgetWithText(TextField, 'Weight (Optional)'), kg);

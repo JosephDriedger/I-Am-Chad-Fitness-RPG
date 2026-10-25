@@ -66,6 +66,8 @@ Beside the board, **Try Something Today** (`Recommendations` in `lib/domain/reco
 - none repeats a quest already on the board, and the new ones are spread across kinds of exercise, the player's preferred kinds first;
 - each suggests a gentle amount (the easiest version unless the player is already active) and the words never mention what has not been done, only offer: "Goes well with ...", "Something new to try", "An old favourite, if you fancy it".
 
+On the log screen a button, **Fill In Last Time's Numbers**, copies the sets, reps, weight, time, distance and version from the last entry so a repeated session is not retyped (notes, effort and the camera mark stay behind, and it is not offered while editing).
+
 For anything the player has done before, the suggestion and the log screen show **their own marks** (`ExerciseRecap`, `PastMarks`): the last time, on how many days, and their personal bests, each opening its progress line. They are only for looking back on and never change a reward.
 
 Below the weekly goal, the board also looks back at **last week** (`WeeklyRecap` in `lib/domain/recap.dart`): active days against the player's own goal, effort minutes and what they logged most, with a line from Chad. It describes only the player's own week, never compares it with anyone or with an earlier week, counts only workouts logged on the day (as the goal does), calls a quiet week a rest week, and stays hidden until there is history from before this week. `test/domain/recap_test.dart` lints the words.

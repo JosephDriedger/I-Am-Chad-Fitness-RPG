@@ -18,6 +18,7 @@ class PastMarks extends StatelessWidget {
     required this.entries,
     required this.metric,
     this.compact = false,
+    this.onUseLast,
   });
 
   final ExerciseRecap recap;
@@ -28,6 +29,9 @@ class PastMarks extends StatelessWidget {
 
   /// Fewer words, for a card in a list.
   final bool compact;
+
+  /// If set, a button fills in last time's numbers (on the log screen).
+  final VoidCallback? onUseLast;
 
   @override
   Widget build(BuildContext context) {
@@ -62,6 +66,18 @@ class PastMarks extends StatelessWidget {
                   onPressed: () => showMarkProgress(context, entries: entries, best: b, metric: metric),
                 ),
             ],
+          ),
+        ],
+        if (!compact && onUseLast != null) ...[
+          const SizedBox(height: 6),
+          GameButton(
+            key: const Key('past_use_last'),
+            label: "Fill In Last Time's Numbers",
+            icon: Icons.history_rounded,
+            kind: GameButtonKind.secondary,
+            small: true,
+            expanded: false,
+            onPressed: onUseLast,
           ),
         ],
         if (!compact) ...[
