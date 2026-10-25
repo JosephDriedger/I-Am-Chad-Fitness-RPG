@@ -19,6 +19,29 @@ final Map<String, DemoConfig Function()> _extra = {
         pose: _lunge,
         keyTimes: const [0.0, 0.46],
       ),
+  'reverse_lunge': () => DemoConfig(
+        title: 'Reverse Lunges',
+        cues: const [
+          'Stand tall with your feet together, hands by your sides.',
+          'Step one foot back and lower until both knees bend. Keep your front knee over your ankle.',
+          'Push through your front foot to stand and bring your feet together. Alternate legs.',
+        ],
+        note: 'Hold a chair or wall for balance, and take a shorter step if you need to.',
+        pose: _reverseLunge,
+        keyTimes: const [0.0, 0.46],
+      ),
+  'skater_hop': () => DemoConfig(
+        title: 'Skater Hops',
+        cues: const [
+          'Stand on one foot with the other leg tucked behind you and your knee soft.',
+          'Hop sideways to the other foot, swinging your arms across for balance.',
+          'Land softly with a bent knee, then hop back. Step instead of hopping if you prefer.',
+        ],
+        note: 'Seen from the side, so the hop shows as a sway across the screen. Step it out if jumping bothers your joints.',
+        seconds: 2.2,
+        pose: _skaterHop,
+        keyTimes: const [0.0, 0.25, 0.5],
+      ),
   'side_lunge': () => DemoConfig(
         title: 'Side Lunges',
         cues: const [
@@ -525,6 +548,42 @@ final Map<String, DemoConfig Function()> _extra = {
         front: (c, p, t) => _bothDumbbells(c, p, t),
         keyTimes: const [0.0, 0.46],
       ),
+  'front_raise': () => DemoConfig(
+        title: 'Dumbbell Front Raises',
+        cues: const [
+          'Stand tall with light weights in front of your thighs.',
+          'Lift your arms in front of you to shoulder height, elbows soft.',
+          'Lower slowly. Keep your shoulders relaxed.',
+        ],
+        note: 'Go light: small weights are plenty.',
+        pose: _frontRaise,
+        front: (c, p, t) => _bothDumbbells(c, p, t),
+        keyTimes: const [0.0, 0.46],
+      ),
+  'good_morning': () => DemoConfig(
+        title: 'Good Mornings',
+        cues: const [
+          'Stand tall with your hands behind your head and soft knees.',
+          'Push your hips back and lean forward with a flat back.',
+          'Squeeze your hips forward to stand tall again.',
+        ],
+        note: 'Start with no weight and go only as far as feels comfortable.',
+        seconds: 3.2,
+        pose: _goodMorning,
+        keyTimes: const [0.0, 0.45],
+      ),
+  'dumbbell_lunge': () => DemoConfig(
+        title: 'Dumbbell Lunges',
+        cues: const [
+          'Stand tall with a light weight in each hand.',
+          'Step forward and lower until both knees bend. Keep your front knee over your ankle.',
+          'Push through your front foot to come back. Alternate legs.',
+        ],
+        note: 'Practise without weights first, or hold a chair for balance.',
+        pose: _dumbbellLunge,
+        front: (c, p, t) => _bothDumbbells(c, p, t),
+        keyTimes: const [0.0, 0.46],
+      ),
   'lateral_raise': () => DemoConfig(
         title: 'Lateral Raises',
         cues: const [
@@ -819,6 +878,31 @@ final Map<String, DemoConfig Function()> _extra = {
         seconds: 5,
         pose: _sideBend,
         keyTimes: const [0.0, 0.55],
+      ),
+  'arm_circles': () => DemoConfig(
+        title: 'Arm Circles',
+        cues: const [
+          'Stand tall with your arms out to the sides.',
+          'Make slow, small circles with both arms.',
+          'Make them a little bigger if it feels good, then reverse direction.',
+        ],
+        note: 'Seen from the side, so each circle shows as an arm sweeping up and over.',
+        seconds: 4,
+        pose: _armCircles,
+        keyTimes: const [0.0, 0.5],
+      ),
+  'calf_stretch': () => DemoConfig(
+        title: 'Calf Stretch',
+        cues: const [
+          'Stand facing a wall with your hands on it at chest height.',
+          'Step one foot back, heel down, and bend your front knee until you feel a mild pull.',
+          'Hold and breathe normally, then switch legs.',
+        ],
+        note: 'Lean only as far as feels comfortable. Any hold counts.',
+        seconds: 6,
+        pose: _calfStretch,
+        back: (c, p, t) => _wall(c, 150),
+        keyTimes: const [0.0, 0.5],
       ),
   'hip_circles': () => DemoConfig(
         title: 'Hip Circles',

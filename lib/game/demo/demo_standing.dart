@@ -132,3 +132,46 @@ final _pullUp = _rig([
   _K(0.55, hip: const Offset(122, 72), foot: const Offset(106, 94), footB: const Offset(100, 92), hand: const Offset(124, 20), handB: const Offset(120, 20)),
   _K(0.95, hip: const Offset(122, 87), foot: const Offset(106, 108), footB: const Offset(100, 106), hand: const Offset(124, 20), handB: const Offset(120, 20)),
 ]);
+
+final _reverseLunge = _rig([
+  _K(0.0, hip: _stand, foot: _fl(124), footB: _fl(116)),
+  _K(0.4, hip: const Offset(112, 93), lean: 0.04, foot: _fl(128), footB: const Offset(86, 109)),
+  _K(0.52, hip: const Offset(112, 93), lean: 0.04, foot: _fl(128), footB: const Offset(86, 109)),
+  _K(0.92, hip: _stand, foot: _fl(124), footB: _fl(116)),
+]);
+
+final _skaterHop = _rig([
+  _K(0.0, hip: const Offset(104, 74), lean: -0.1, foot: _fl(108), footB: const Offset(82, 104), arm: const Offset(-12, 18), armB: const Offset(20, 14)),
+  _K(0.25, hip: const Offset(124, 62), lean: 0.0, foot: const Offset(130, 92), footB: const Offset(112, 96), arm: const Offset(8, 22), armB: const Offset(10, 22)),
+  _K(0.5, hip: const Offset(142, 74), lean: 0.1, foot: _fl(146), footB: const Offset(118, 104), arm: const Offset(20, 14), armB: const Offset(-12, 18)),
+  _K(0.75, hip: const Offset(124, 62), lean: 0.0, foot: const Offset(130, 92), footB: const Offset(112, 96), arm: const Offset(8, 22), armB: const Offset(10, 22)),
+  _K(0.96, hip: const Offset(104, 74), lean: -0.1, foot: _fl(108), footB: const Offset(82, 104), arm: const Offset(-12, 18), armB: const Offset(20, 14)),
+]);
+
+final _calfStretch = _rig([
+  _K(0.0, hip: const Offset(118, 72), foot: _fl(130), footB: _fl(122), hand: const Offset(146, 54), handB: const Offset(146, 58)),
+  _K(0.4, hip: const Offset(122, 80), lean: 0.3, foot: _fl(136), footB: _fl(96), hand: const Offset(146, 56), handB: const Offset(146, 60)),
+  _K(0.6, hip: const Offset(122, 80), lean: 0.3, foot: _fl(136), footB: _fl(96), hand: const Offset(146, 56), handB: const Offset(146, 60)),
+  _K(0.92, hip: const Offset(118, 72), foot: _fl(130), footB: _fl(122), hand: const Offset(146, 54), handB: const Offset(146, 58)),
+]);
+
+final _frontRaise = _rig([
+  _K(0.0, hip: _stand, foot: _fl(124), footB: _fl(116), arm: _hang, armB: const Offset(-1, 31)),
+  _K(0.4, hip: _stand, foot: _fl(124), footB: _fl(116), arm: const Offset(30, -5), armB: const Offset(28, -3)),
+  _K(0.52, hip: _stand, foot: _fl(124), footB: _fl(116), arm: const Offset(30, -5), armB: const Offset(28, -3)),
+  _K(0.92, hip: _stand, foot: _fl(124), footB: _fl(116), arm: _hang, armB: const Offset(-1, 31)),
+]);
+
+final _goodMorning = _rig([
+  _K(0.0, hip: _stand, foot: _fl(124), footB: _fl(116), arm: const Offset(-4, -14), armB: const Offset(-6, -12)),
+  _K(0.4, hip: const Offset(100, 78), lean: 1.1, foot: _fl(118), footB: _fl(110), arm: const Offset(-4, -14), armB: const Offset(-6, -12)),
+  _K(0.52, hip: const Offset(100, 78), lean: 1.1, foot: _fl(118), footB: _fl(110), arm: const Offset(-4, -14), armB: const Offset(-6, -12)),
+  _K(0.92, hip: _stand, foot: _fl(124), footB: _fl(116), arm: const Offset(-4, -14), armB: const Offset(-6, -12)),
+]);
+
+final _dumbbellLunge = _rig([
+  _K(0.0, hip: _stand, foot: _fl(124), footB: _fl(116), arm: _hang, armB: const Offset(-1, 31)),
+  _K(0.4, hip: const Offset(122, 93), lean: 0.04, foot: _fl(152), footB: const Offset(92, 109), arm: _hang, armB: const Offset(-1, 31)),
+  _K(0.52, hip: const Offset(122, 93), lean: 0.04, foot: _fl(152), footB: const Offset(92, 109), arm: _hang, armB: const Offset(-1, 31)),
+  _K(0.92, hip: _stand, foot: _fl(124), footB: _fl(116), arm: _hang, armB: const Offset(-1, 31)),
+]);
