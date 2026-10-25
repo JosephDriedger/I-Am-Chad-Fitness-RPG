@@ -10,7 +10,7 @@ Legend: **Done** means implemented and covered by automated tests. **Partial** m
 | --- | --- | --- | --- |
 | 1 | Project skeleton, data models, wireframes | Launches on emulator; records persist locally | **Done**, apart from wireframes (none were produced). Launched and played end to end on an Android emulator (Pixel 10 Pro, Android 17): onboarding, logging, rewards, expeditions and loot, with the save surviving an emulator restart |
 | 2 | Workout catalog and logging | Can log, edit, delete and review workouts | **Done.** 79 exercises in 6 categories (searchable, with equipment tags and an at-home filter), timer, units, history, an animated demonstration with form cues for every exercise, and a gentle [honesty check](REWARD_RULES.md#honesty-check) on implausible entries |
-| 3 | Onboarding, quests, rewards | Personalised beginner goals and bounded XP work | **Done**, with tuning open. Reward rules are capped and versioned. Personal-baseline scaling is not implemented |
+| 3 | Onboarding, quests, rewards | Personalised beginner goals and bounded XP work | **Done**, with tuning open. Reward rules are capped and versioned. Personal-baseline scaling is built as the weekly goal's suggestion ([decision 48](DECISIONS.md#48-the-weekly-goal-follows-the-players-own-usual-week)), and deliberately not as a change to any reward |
 | 4 | Character, guild, Chad dialogue | Core screens connected with placeholder art | **Done, beyond placeholder.** The guild hall is an animated Flame scene; the hero (hair, outfit, skin tone, equipped gear) and Chad are drawn in code. The Chad tutorial is a welcome screen plus contextual lines, not an interactive intro activity |
 | 5 | Combat and expeditions | One complete repeatable adventure loop | **Done.** Animated Flame battle scenes with effects, a camp event, a boss and a chest finale; synthesized sound and haptics |
 | 6 | Polish, accessibility, testing | Stable playable prototype on Android and iOS test devices | **Not started.** Needs device testing |
@@ -50,7 +50,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 
 ## Backlog
 
-- Personal-baseline reward scaling, so consistency is recognised relative to the individual.
+- ~~Personal-baseline reward scaling~~ Built as the weekly goal following the player's own usual week; rewards stay the same for everyone ([decision 48](DECISIONS.md#48-the-weekly-goal-follows-the-players-own-usual-week)).
 - ~~Per-day limit on minimum-effort entries~~ Done: reward rules version 2 ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)).
 - Character skills and stat choices; more equipment.
 - Reminder notifications are built and delivered through `flutter_local_notifications` (see [decision 38](DECISIONS.md#38-reminders-are-opt-in-rare-and-run-out-by-themselves)). Checked on an Android emulator: the permission prompt, scheduling and cancelling. Still to check: an iOS device, a real phone's battery-saver behaviour, and that the plan survives a restart.

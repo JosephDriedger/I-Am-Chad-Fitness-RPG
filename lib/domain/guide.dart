@@ -84,7 +84,7 @@ class Guide {
           ),
           GuideEntry(
             'Weekly Goal',
-            'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like.',
+            'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like. Until you do, Chad suggests about what you have been doing lately, once you have a few weeks behind you.',
           ),
           const GuideEntry(
             'Last Week',

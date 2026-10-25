@@ -181,7 +181,17 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 
 - The 3-minute floor used to let someone log many tiny entries to reach the cap quickly. Version 2 limits the floor to 3 entries a day ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)); the [honesty check](#honesty-check) still flags the pattern.
 - Camera-based rep recognition could verify reps, but it has real privacy, accessibility and accuracy costs. See the [roadmap](ROADMAP.md).
-- Weekly or personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is not implemented yet. See the [roadmap](ROADMAP.md).
+- Personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is built as a suggestion for the weekly goal and not as a change to any reward: see [Personal baseline](#personal-baseline). XP, energy, quests and streaks are not scaled to the individual, on purpose.
+
+## Personal baseline
+
+`PersonalBaseline` in `lib/domain/quests.dart` works out how often the player really moves, and the weekly goal follows it. This is how "consistency relative to the individual" is recognised without ever changing what a workout earns.
+
+- **What it reads.** The active days in each of the last four complete Monday-to-Sunday weeks (only workouts that count for rewards, so back-dated entries are not part of it). Weeks before the player's first workout are not counted. A quiet week counts as zero.
+- **What it says.** The middle value of those weeks, rounded, kept between 1 and 5 days (rest days are part of the plan). With fewer than three complete weeks of history it says nothing, and the suggestion for the player's experience (2, 3 or 4 days) is used instead.
+- **Where it is used.** Only as the goal the player has not picked: the quest board's weekly goal and its chips, the hall's weekly count, the weekly look back and the gentle reminders (which stay quiet in a week whose goal is met). A goal the player chose always wins. The quest board says when the suggestion comes from their own recent weeks.
+- **It is never a step up.** The suggestion is what the player already does, not a bit more, so it cannot nudge anyone to do more than is right for them. It also goes down: someone who had a quiet spell is suggested a gentler week, with no message about it.
+- **Rewards are untouched.** The reward rules above, the daily limit, streaks, quests and personal bests do not read it, and a test checks that the same workouts earn the same with or without a history.
 
 ## Personal bests
 

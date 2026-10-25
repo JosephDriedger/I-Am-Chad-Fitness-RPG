@@ -48,14 +48,16 @@ class QuestsScreen extends ConsumerWidget {
       quests: quests,
       history: workouts,
     );
+    final suggestion = PersonalBaseline.suggest(level: player.hero.experience, now: now, entries: workouts);
+    final goalDays = QuestBoard.goalTarget(hero: player.hero, now: now, entries: workouts);
     final goal = QuestBoard.weeklyGoal(
       level: player.hero.experience,
       now: now,
       entries: workouts,
-      target: player.hero.weeklyGoalTarget,
+      target: goalDays,
     );
     final active = QuestBoard.activeWeekdays(now: now, entries: workouts);
-    final recap = WeeklyRecap.lastWeek(now: now, entries: workouts, goalDays: player.hero.weeklyGoalTarget, rules: rules);
+    final recap = WeeklyRecap.lastWeek(now: now, entries: workouts, goalDays: goalDays, rules: rules);
 
     return GameScaffold(
       title: 'Quests',
@@ -123,7 +125,8 @@ class QuestsScreen extends ConsumerWidget {
                 const SizedBox(height: 14),
                 _GoalPicker(
                   chosen: player.hero.weeklyGoalDays,
-                  suggested: player.hero.experience.weeklyDaysGoal,
+                  suggested: suggestion.days,
+                  fromHistory: suggestion.fromHistory,
                   onChanged: (days) {
                     ref.read(feedbackProvider).haptic(Haptic.select);
                     ref.read(repositoryProvider).setWeeklyGoalDays(days);
@@ -168,11 +171,14 @@ class QuestsScreen extends ConsumerWidget {
 /// Lets the player pick how many days a week to aim for. The goal never costs
 /// anything to miss, so there is no wrong answer; it can be changed any time.
 class _GoalPicker extends StatelessWidget {
-  const _GoalPicker({required this.chosen, required this.suggested, required this.onChanged});
+  const _GoalPicker({required this.chosen, required this.suggested, required this.fromHistory, required this.onChanged});
 
   /// The player's own choice, or 0 if they have not made one.
   final int chosen;
   final int suggested;
+
+  /// The suggestion is the player's own usual week, not the one for their experience.
+  final bool fromHistory;
   final ValueChanged<int> onChanged;
 
   @override
@@ -200,7 +206,9 @@ class _GoalPicker extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           chosen == 0
-              ? 'Chad suggests $suggested for you. Pick any number that suits your week.'
+              ? (fromHistory
+                  ? 'Chad suggests $suggested, which is about what you have been doing lately. Pick any number that suits your week.'
+                  : 'Chad suggests $suggested for you. Pick any number that suits your week.')
               : 'Your own goal. Tap $suggested to go back to Chad\'s suggestion.',
           style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13),
         ),

@@ -78,7 +78,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       level: p.hero.experience,
       now: now,
       entries: workouts,
-      target: p.hero.weeklyGoalTarget,
+      target: QuestBoard.goalTarget(hero: p.hero, now: now, entries: workouts),
     );
     final quests = QuestBoard.dailySuggestions(
       level: p.hero.experience,

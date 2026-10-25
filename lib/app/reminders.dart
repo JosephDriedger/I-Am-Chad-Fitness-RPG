@@ -111,7 +111,7 @@ final reminderSyncProvider = Provider<void>((ref) {
     level: player.hero.experience,
     now: now,
     entries: workouts,
-    target: player.hero.weeklyGoalTarget,
+    target: QuestBoard.goalTarget(hero: player.hero, now: now, entries: workouts),
   );
   final plan = ReminderPlanner.plan(prefs: prefs, now: now, movedToday: movedToday, goalMetThisWeek: goal.met);
   unawaited(gateway.replaceAll(plan).catchError(swallow));
