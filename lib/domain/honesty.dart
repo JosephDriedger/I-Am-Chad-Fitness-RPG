@@ -21,7 +21,7 @@ class HonestyNote {
 
 class HonestyCheck {
   const HonestyCheck({
-    this.rules = RewardRules.v1,
+    this.rules = RewardRules.current,
     this.quickSeconds = 20,
     this.tinySeconds = 60,
     this.tinyEntriesPerDay = 4,

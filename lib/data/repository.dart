@@ -19,7 +19,7 @@ import 'database.dart';
 /// Single access point for saved data. Workouts are written first and
 /// rewards are re-derived from them, never the other way around.
 class GameRepository {
-  GameRepository(this._db, {this.rules = RewardRules.v1});
+  GameRepository(this._db, {this.rules = RewardRules.current});
 
   final AppDatabase _db;
   final RewardRules rules;

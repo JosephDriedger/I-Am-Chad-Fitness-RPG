@@ -1,4 +1,4 @@
-# Reward rules (version 1)
+# Reward rules (version 2)
 
 How a logged workout becomes **XP** and **adventure energy**. The code is `RewardRules` in [`lib/domain/rewards.dart`](../lib/domain/rewards.dart); the numbers below are the `RewardRules.v1` defaults.
 
@@ -22,7 +22,7 @@ Every entry is converted to **effort minutes**, a common currency across activit
 | Distance only | `km × minutes per km × factor` |
 | None of these | 0 (the entry cannot be saved) |
 
-Each entry is worth **at least 3 effort minutes**, so showing up always counts.
+Each entry is worth **at least 3 effort minutes**, so showing up counts. In version 2 this minimum is given to the **first 3 short entries of a day** (oldest first). A fourth or later entry under 3 minutes counts for its real length. Entries of 3 minutes or more are never affected, and an honest small day (three short moves and a walk) earns exactly what it did before.
 
 Activity factors:
 
@@ -161,7 +161,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 
 ## Versioning and history
 
-- `RewardRules.version` is stored on each day's row in `reward_grants`.
+- `RewardRules.version` is stored on each day's row in `reward_grants`.  Version 1 days (before the floor limit) keep their rewards; only days touched later are recomputed under version 2.
 - A day is recomputed (with the *current* rules) only when its workouts are added, edited or deleted. Untouched days keep the rules they were granted under.
 - Balance changes therefore never alter anyone's recorded exercise, and never retroactively change days they did not touch.
 - To change the numbers: add a new `RewardRules` constant with a bumped `version`, switch `GameRepository`'s default, and update this document and the tests.
@@ -178,7 +178,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 
 ## Known gaps and ideas
 
-- The 3-minute floor lets someone log many tiny entries to reach the cap quickly. The cap bounds the damage and the game is single-player, and the [honesty check](#honesty-check) now flags the pattern, but a per-day limit on floored entries is a possible tightening.
+- The 3-minute floor used to let someone log many tiny entries to reach the cap quickly. Version 2 limits the floor to 3 entries a day ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)); the [honesty check](#honesty-check) still flags the pattern.
 - Camera-based rep recognition could verify reps, but it has real privacy, accessibility and accuracy costs. See the [roadmap](ROADMAP.md).
 - Weekly or personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is not implemented yet. See the [roadmap](ROADMAP.md).
 

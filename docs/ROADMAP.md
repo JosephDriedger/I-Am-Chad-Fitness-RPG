@@ -51,7 +51,7 @@ The original thinking, still the guide for what comes next: use the phone camera
 ## Backlog
 
 - Personal-baseline reward scaling, so consistency is recognised relative to the individual.
-- Per-day limit on minimum-effort entries (see [Reward rules](REWARD_RULES.md), known gaps).
+- ~~Per-day limit on minimum-effort entries~~ Done: reward rules version 2 ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)).
 - Character skills and stat choices; more equipment.
 - Reminder notifications are built and delivered through `flutter_local_notifications` (see [decision 38](DECISIONS.md#38-reminders-are-opt-in-rare-and-run-out-by-themselves)). Checked on an Android emulator: the permission prompt, scheduling and cancelling. Still to check: an iOS device, a real phone's battery-saver behaviour, and that the plan survives a restart.
 - Recovery-friendly mini-games beyond the practice duel.

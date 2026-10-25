@@ -30,7 +30,7 @@ class HudLegend {
   /// Every number at the top of the hall. The streak is listed even when it is not
   /// showing yet, because it appears once there is one.
   static List<HudLegendEntry> entries() {
-    final r = RewardRules.v1;
+    final r = RewardRules.current;
     return [
       const HudLegendEntry(
         HudIcon.level,

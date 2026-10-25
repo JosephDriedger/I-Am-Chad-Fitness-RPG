@@ -40,13 +40,13 @@ class Guide {
 
   static String _n(num x) => x == x.roundToDouble() ? '${x.round()}' : x.toStringAsFixed(1);
 
-  static final _r = RewardRules.v1;
+  static final _r = RewardRules.current;
 
   static List<GuideSection> get sections => [
         GuideSection('Moving and Rewards', [
           GuideEntry(
             'Effort Minutes',
-            'A common measure, so a walk, a stretch and a set of push-ups can sit side by side. Every entry is worth at least ${_n(_r.minEffortPerEntry)} of them, because showing up counts.',
+            'A common measure, so a walk, a stretch and a set of push-ups can sit side by side. Every entry is worth at least ${_n(_r.minEffortPerEntry)} of them, because showing up counts. That holds for the first ${_r.maxFlooredEntriesPerDay} short entries of a day; after that, a very short one counts for its real length.',
           ),
           const GuideEntry(
             'Easier Versions',
