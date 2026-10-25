@@ -276,7 +276,9 @@ void main() {
       // Editing the newest walk: it is compared with the earlier one, but its numbers are already filled in.
       await tester.tap(find.text('Journal'));
       await settle(tester, frames: 30);
-      await tester.scrollUntilVisible(find.byType(ListTile).first, 300, scrollable: find.byType(Scrollable).first);
+      // The workouts sit below the overview panels, so scroll down to them.
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -1500));
+      await settle(tester, frames: 10);
       await tester.ensureVisible(find.byType(ListTile).first);
       await settle(tester, frames: 2);
       await tester.tap(find.byType(ListTile).first);

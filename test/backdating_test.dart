@@ -260,6 +260,9 @@ void main() {
       await settle(tester, frames: 20);
       await tester.tap(find.text('Journal'));
       await settle(tester, frames: 30);
+      // The workouts sit below the overview panels, so scroll down to them.
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -1500));
+      await settle(tester, frames: 10);
       expect(find.textContaining('Journal Only'), findsOneWidget);
 
       await shutDown(tester, db);

@@ -21,6 +21,9 @@ class _MonthPanelState extends State<MonthPanel> {
   late int _year = widget.now.year;
   late int _month = widget.now.month;
 
+  /// Collapsed to a line to begin with, so the workouts below stay close to the top of the Journal.
+  bool _open = false;
+
   void _step(int by) => setState(() {
         final d = DateTime(_year, _month + by);
         _year = d.year;
@@ -44,6 +47,7 @@ class _MonthPanelState extends State<MonthPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (_open) ...[
           Row(
             children: [
               IconButton(
@@ -91,6 +95,7 @@ class _MonthPanelState extends State<MonthPanel> {
               ),
             ),
           ),
+          ],
           const SizedBox(height: 8),
           Text(
             n == 0
@@ -98,6 +103,15 @@ class _MonthPanelState extends State<MonthPanel> {
                 : '$n ${n == 1 ? 'day' : 'days'} you moved in $monthWord. Rest days are part of the plan.',
             key: const Key('month_summary'),
             style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w700, fontSize: 12.5),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton.icon(
+              key: const Key('month_toggle'),
+              onPressed: () => setState(() => _open = !_open),
+              icon: Icon(_open ? Icons.expand_less_rounded : Icons.calendar_month_rounded),
+              label: Text(_open ? 'Hide Calendar' : 'Show Calendar'),
+            ),
           ),
         ],
       ),

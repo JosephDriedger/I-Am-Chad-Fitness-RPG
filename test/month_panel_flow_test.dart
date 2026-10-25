@@ -14,7 +14,7 @@ final _now = DateTime(2026, 10, 22, 10);
 
 WorkoutEntry _on(int m, int d) => WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, m, d, 9), durationSeconds: 600);
 
-Future<AppDatabase> _boot(WidgetTester tester, List<WorkoutEntry> entries, {bool phoneSurface = true}) async {
+Future<AppDatabase> _boot(WidgetTester tester, List<WorkoutEntry> entries, {bool phoneSurface = true, bool open = true}) async {
   if (phoneSurface) usePhone(tester);
   final db = AppDatabase.forTesting(NativeDatabase.memory());
   await tester.runAsync(() async {
@@ -37,6 +37,11 @@ Future<AppDatabase> _boot(WidgetTester tester, List<WorkoutEntry> entries, {bool
   await tester.scrollUntilVisible(find.text('Your Month'), 300, scrollable: find.byType(Scrollable).first);
   await tester.ensureVisible(find.text('Your Month'));
   await settle(tester, frames: 3);
+  if (open) {
+    await tester.ensureVisible(find.byKey(const Key('month_toggle')));
+    await tester.tap(find.byKey(const Key('month_toggle')));
+    await settle(tester, frames: 5);
+  }
   return db;
 }
 
@@ -47,6 +52,22 @@ bool _gold(WidgetTester tester, String key) {
 }
 
 void main() {
+  testWidgets('the month starts as one line, so the workouts stay near the top, and opens when asked', (tester) async {
+    final db = await _boot(tester, [_on(10, 5), _on(10, 19)], open: false);
+    expect(find.text('2 days you moved in October. Rest days are part of the plan.'), findsOneWidget);
+    expect(find.byKey(const Key('month_grid')), findsNothing);
+    expect(find.text('Show Calendar'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('month_toggle')));
+    await tester.tap(find.byKey(const Key('month_toggle')));
+    await settle(tester, frames: 5);
+    expect(find.byKey(const Key('month_grid')), findsOneWidget);
+    expect(find.text('Hide Calendar'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('month_toggle')));
+    await settle(tester, frames: 5);
+    expect(find.byKey(const Key('month_grid')), findsNothing);
+    await shutDown(tester, db);
+  });
+
   testWidgets('the month shows a gold dot on each day moved, and counts them kindly', (tester) async {
     final db = await _boot(tester, [_on(10, 5), _on(10, 19), _on(10, 21), _on(9, 14)]);
     expect(find.text('October 2026'), findsOneWidget);
