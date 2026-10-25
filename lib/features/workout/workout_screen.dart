@@ -11,6 +11,7 @@ import '../../domain/warmup.dart';
 import '../../game/core.dart' show Haptic, Sfx;
 import '../../game/demo/exercise_demo.dart';
 import '../../game/look.dart';
+import 'do_it_again.dart';
 import 'log_workout_screen.dart';
 import 'warmup_screen.dart';
 
@@ -80,6 +81,7 @@ class _WorkoutScreenState extends ConsumerState<WorkoutScreen> {
               : 'Pick what you did. Any version counts, and you can edit or delete it later.',
         ),
         const SizedBox(height: 12),
+        DoItAgainShelf(journal: ref.watch(workoutsProvider).value ?? const [], metric: ref.watch(prefsProvider).useMetric),
         GamePanel(
           title: WarmUp.title,
           child: Column(

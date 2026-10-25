@@ -104,7 +104,11 @@ void usePhone(WidgetTester tester) {
 Future<void> openExercise(WidgetTester tester, String name) async {
   await tester.enterText(find.byType(TextField).first, name);
   await settle(tester);
-  // The search box also contains this text, so only look at card titles.
-  await tester.tap(find.byWidgetPredicate((w) => w is Text && w.data == name));
+  // The search box also contains this text, so only look at card titles. With a journal, the
+  // "Do It Again" shelf above the cards may name it too, so take the last (the card).
+  final card = find.byWidgetPredicate((w) => w is Text && w.data == name).last;
+  await tester.ensureVisible(card);
+  await settle(tester, frames: 3);
+  await tester.tap(card);
   await settle(tester);
 }

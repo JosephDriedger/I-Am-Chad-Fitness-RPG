@@ -36,11 +36,15 @@ class LogWorkoutScreen extends ConsumerStatefulWidget {
     required this.activity,
     this.quest,
     this.editing,
+    this.repeatOf,
   });
 
   final ActivityType activity;
   final QuestSuggestion? quest;
   final WorkoutEntry? editing;
+
+  /// Start from this earlier entry's numbers (a "do it again" from the Train screen).
+  final WorkoutEntry? repeatOf;
 
   @override
   ConsumerState<LogWorkoutScreen> createState() => _LogWorkoutScreenState();
@@ -83,6 +87,8 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
       _setDuration(q.durationSeconds);
       _variant = q.variant;
     }
+    final again = widget.repeatOf;
+    if (again != null && widget.editing == null) _fillFrom(again, ref.read(prefsProvider).useMetric);
   }
 
   /// Distance and load are stored metric; fill them once units are known.
@@ -112,25 +118,25 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
   /// Fills the numbers from the last time this was done, so someone who repeats
   /// the same session does not retype it. Notes, effort and the camera mark are
   /// not copied, because they belong to that day; the date stays today's.
-  void _useLast(WorkoutEntry last, bool metric) {
-    setState(() {
-      for (final c in [_sets, _reps, _minutes, _seconds, _distance, _load]) {
-        c.clear();
-      }
-      _setIfPositive(_sets, last.sets);
-      _setIfPositive(_reps, last.reps);
-      _setDuration(last.durationSeconds);
-      if ((last.distanceMeters ?? 0) > 0) {
-        final km = last.distanceMeters! / 1000;
-        _distance.text = _fmt(metric ? km : km / _kmPerMile);
-      }
-      if ((last.loadKg ?? 0) > 0) {
-        _load.text = _fmt(metric ? last.loadKg! : last.loadKg! * _lbPerKg);
-      }
-      _variant = last.variant;
-      _camSets = null;
-      _camReps = null;
-    });
+  void _useLast(WorkoutEntry last, bool metric) => setState(() => _fillFrom(last, metric));
+
+  void _fillFrom(WorkoutEntry last, bool metric) {
+    for (final c in [_sets, _reps, _minutes, _seconds, _distance, _load]) {
+      c.clear();
+    }
+    _setIfPositive(_sets, last.sets);
+    _setIfPositive(_reps, last.reps);
+    _setDuration(last.durationSeconds);
+    if ((last.distanceMeters ?? 0) > 0) {
+      final km = last.distanceMeters! / 1000;
+      _distance.text = _fmt(metric ? km : km / _kmPerMile);
+    }
+    if ((last.loadKg ?? 0) > 0) {
+      _load.text = _fmt(metric ? last.loadKg! : last.loadKg! * _lbPerKg);
+    }
+    _variant = last.variant;
+    _camSets = null;
+    _camReps = null;
   }
 
   bool get _cameraCounted =>

@@ -69,6 +69,8 @@ Beside the board, **Try Something Today** (`Recommendations` in `lib/domain/reco
 
 On the log screen a button, **Fill In Last Time's Numbers**, copies the sets, reps, weight, time, distance and version from the last entry so a repeated session is not retyped (notes, effort and the camera mark stay behind, and it is not offered while editing).
 
+At the top of the Train screen, **Do It Again** lists the last four different exercises (`RecentExercises` in `lib/domain/records.dart`, `DoItAgainShelf`), each with its last numbers and date. Tapping one opens the log screen with the same sets, reps, weight, time, distance and version filled in, so a repeated session is one tap and a save; notes, effort and the camera mark are not carried over, and everything can still be changed. It appears only once something has been logged, never mentions what was not done, and never changes a reward.
+
 For anything the player has done before, the suggestion and the log screen show **their own marks** (`ExerciseRecap`, `PastMarks`): the last time, on how many days, and their personal bests, each opening its progress line. They are only for looking back on and never change a reward.
 
 Below the weekly goal, the board also looks back at **last week** (`WeeklyRecap` in `lib/domain/recap.dart`): active days against the player's own goal, effort minutes and what they logged most, with a line from Chad. It describes only the player's own week, never compares it with anyone or with an earlier week, counts only workouts logged on the day (as the goal does), calls a quiet week a rest week, and stays hidden until there is history from before this week. `test/domain/recap_test.dart` lints the words.

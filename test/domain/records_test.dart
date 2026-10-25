@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/domain/activity.dart';
 import 'package:i_am_chad/domain/records.dart';
 import 'package:i_am_chad/domain/workout.dart';
 
@@ -165,6 +166,41 @@ void main() {
       expect(press(const []).best, isNull);
       expect(press(const []).first, isNull);
       expect(press(const []).latest, isNull);
+    });
+  });
+
+  group('RecentExercises', () {
+    test('is the latest entry of each of the last few different exercises, newest first', () {
+      final recent = RecentExercises.of([
+        _walk(1, 20, 1.5),
+        _lift(2, 10, 8),
+        _walk(3, 30, 2.5),
+        _lift(5, 12.5, 8),
+        _lift(8, 15, 8),
+      ]);
+      expect([for (final e in recent) e.activityId], ['dumbbell_press', 'walking']);
+      expect(recent.first.performedAt.day, 8, reason: 'the newest lift, which is the newest of all');
+      expect(recent.last.performedAt.day, 3, reason: 'the newest walk');
+    });
+
+    test('shows at most the requested number, one entry per exercise', () {
+      final entries = [
+        for (var i = 0; i < 8; i++) WorkoutEntry(activityId: ActivityCatalog.all[i].id, performedAt: DateTime(2026, 10, 1 + i, 9), durationSeconds: 600),
+        _walk(20, 10, 1),
+      ];
+      final recent = RecentExercises.of(entries);
+      expect(recent.length, RecentExercises.defaultCount);
+      expect({for (final e in recent) e.activityId}.length, recent.length);
+      expect(RecentExercises.of(entries, count: 2).length, 2);
+      expect(RecentExercises.of(entries, count: 20).length, {for (final e in entries) e.activityId}.length);
+    });
+
+    test('ignores entries with nothing measured, and is empty with no history', () {
+      expect(RecentExercises.of(const []), isEmpty);
+      expect(
+        RecentExercises.of([WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, 10, 3, 9))]),
+        isEmpty,
+      );
     });
   });
 }

@@ -189,3 +189,27 @@ class ExerciseRecap {
     );
   }
 }
+
+/// The exercises someone did most recently, one entry each, for a "do it again"
+/// shelf on the Train screen. Only a convenience: it never changes a reward, and
+/// nothing is stored. It looks only at what was done, never at what was not.
+class RecentExercises {
+  const RecentExercises._();
+
+  /// How many to show.
+  static const defaultCount = 4;
+
+  /// The most recent entry of each of the last [count] different exercises,
+  /// newest first.
+  static List<WorkoutEntry> of(Iterable<WorkoutEntry> entries, {int count = defaultCount}) {
+    final sorted = entries.where(PersonalBests._usable).toList()
+      ..sort((a, b) => b.performedAt.compareTo(a.performedAt));
+    final seen = <String>{};
+    final out = <WorkoutEntry>[];
+    for (final e in sorted) {
+      if (seen.add(e.activityId)) out.add(e);
+      if (out.length >= count) break;
+    }
+    return out;
+  }
+}
