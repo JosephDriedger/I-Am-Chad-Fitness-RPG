@@ -5,6 +5,7 @@ import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../app/widgets.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/quests.dart';
 import '../../domain/recommendations.dart';
 import '../../domain/recap.dart';
@@ -64,6 +65,11 @@ class QuestsScreen extends ConsumerWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 28),
         children: [
+          // Until the first workout is saved, a line says what the board is for. Never after.
+          if (workouts.isEmpty) ...[
+            const ChadBubble(key: Key('quests_first_line'), text: FirstSteps.questsLine),
+            const SizedBox(height: 12),
+          ],
           _Board(
             children: [
               for (var i = 0; i < quests.length; i++)

@@ -28,6 +28,10 @@ class FirstSteps {
   static const battleHint =
       'First fight? Attack and Guard each build focus, Power Strike spends 2 of it, and Potion heals. Guarding softens a big blow.';
 
+  /// Chad on the quest board before anything has been logged.
+  static const questsLine =
+      'These are ideas for today, not orders. Tap one to log it, or do something else entirely. Anything you do counts.';
+
   static const logTitle = 'Your First Log';
 
   static const logIntro = 'Rough numbers are fine, and you can edit or delete it later.';
@@ -44,6 +48,7 @@ class FirstSteps {
         warmUpOfferTitle,
         warmUpOfferText,
         battleHint,
+        questsLine,
         logTitle,
         logIntro,
         for (final s in logSteps) ...[s.title, s.text],
