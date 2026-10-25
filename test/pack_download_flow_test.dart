@@ -20,6 +20,8 @@ Future<AppDatabase> _boot(
   TestPackSource? source,
   PackStore? store,
   bool usePhoneSurface = true,
+  bool offers = false,
+  bool showTitle = false,
 }) async {
   if (usePhoneSurface) usePhone(tester);
   final db = AppDatabase.forTesting(NativeDatabase.memory());
@@ -39,7 +41,14 @@ Future<AppDatabase> _boot(
       await repo.markChapterRead(n, at: DateTime(2026, 10, 1));
     }
   });
-  await bootApp(tester, db, packSource: source ?? TestPackSource(packs: publishedPacks()), packStore: store ?? MemoryPackStore());
+  await bootApp(
+    tester,
+    db,
+    storyOffers: offers,
+    showTitle: showTitle,
+    packSource: source ?? TestPackSource(packs: publishedPacks()),
+    packStore: store ?? MemoryPackStore(),
+  );
   return db;
 }
 
@@ -179,6 +188,95 @@ void main() {
     await tester.scrollUntilVisible(find.text(_chapter.title), 300, scrollable: find.byType(Scrollable).last);
     expect(find.text('Downloads once, the first time you read it.'), findsNothing);
     await shutDown(tester, installed);
+  });
+
+  group('reaching a new season in the hall', () {
+    // The hero is level 99 with Season One read, so Season Two's prologue is the chapter waiting.
+    Future<void> pastTitle(WidgetTester tester) async {
+      await settle(tester, frames: 10);
+      await tester.tap(find.text('Tap to Continue'));
+      await settle(tester, frames: 30);
+    }
+
+    testWidgets('on launch the hall offers it, and offering fetches nothing', (tester) async {
+      final source = TestPackSource(packs: publishedPacks());
+      final db = await _boot(tester, source: source, offers: true, showTitle: true);
+      await pastTitle(tester);
+
+      expect(find.text('A New Chapter!'), findsOneWidget);
+      expect(find.textContaining(_chapter.title), findsOneWidget);
+      expect(find.textContaining('downloads once, the first time you read it'), findsOneWidget);
+      expect(source.manifestRequests + source.fileRequests, 0, reason: 'nothing is fetched by being offered');
+
+      await tester.tap(find.text('Later'));
+      await settle(tester, frames: 20);
+      expect(find.text('A New Chapter!'), findsNothing);
+      expect(source.manifestRequests + source.fileRequests, 0, reason: 'Later fetches nothing either');
+      await shutDown(tester, db);
+    });
+
+    testWidgets('Read Now leads to the download card, then the story', (tester) async {
+      final store = MemoryPackStore();
+      final source = TestPackSource(packs: publishedPacks());
+      final db = await _boot(tester, source: source, store: store, offers: true, showTitle: true);
+      await pastTitle(tester);
+
+      await tester.tap(find.text('Read Now'));
+      await settle(tester, frames: 20);
+      expect(find.text('Download Season Two?'), findsOneWidget);
+      expect(source.fileRequests, 0, reason: 'the card asks first');
+
+      await tester.tap(find.byKey(const Key('pack_download')));
+      await settle(tester, frames: 40);
+      expect(find.text(_chapter.title), findsOneWidget);
+      expect(find.text('Tap to begin'), findsOneWidget);
+      expect(store.files.keys, [2]);
+      expect(source.fileRequests, 1);
+      await shutDown(tester, db);
+    });
+
+    testWidgets('saying Not Now to the download is respected for the whole season this session', (tester) async {
+      final store = MemoryPackStore();
+      final source = TestPackSource(packs: publishedPacks());
+      final db = await _boot(tester, source: source, store: store, offers: true, showTitle: true);
+      await pastTitle(tester);
+
+      await tester.tap(find.text('Read Now'));
+      await settle(tester, frames: 20);
+      await tester.tap(find.byKey(const Key('pack_not_now')));
+      await settle(tester, frames: 30);
+      expect(find.text('A New Chapter!'), findsNothing, reason: 'the next chapter of that season is not pushed on them');
+      expect(find.text('Download Season Two?'), findsNothing);
+      expect(store.files, isEmpty);
+      expect(source.fileRequests, 0);
+
+      // Visiting another page and coming back does not bring it back this session either.
+      await tester.tap(find.text('Quests'));
+      await settle(tester, frames: 30);
+      await tester.pageBack();
+      await settle(tester, frames: 40);
+      // A level 99 hero also has Seasons Three and Four open, so the hall may offer those; Season Two stays out of it.
+      for (final c in Story.inSeason(2)) {
+        expect(find.textContaining(c.title), findsNothing, reason: c.title);
+      }
+      expect(source.fileRequests, 0);
+      expect(source.manifestRequests, 1, reason: 'only the one look at the manifest, to say how big it is');
+      await shutDown(tester, db);
+    });
+
+    testWidgets('when the season is already on the phone the offer is just an offer', (tester) async {
+      final source = TestPackSource(packs: publishedPacks());
+      final db = await _boot(tester, source: source, store: MemoryPackStore(publishedPacks()), offers: true, showTitle: true);
+      await pastTitle(tester);
+
+      expect(find.text('A New Chapter!'), findsOneWidget);
+      expect(find.textContaining('downloads once'), findsNothing);
+      await tester.tap(find.text('Read Now'));
+      await settle(tester, frames: 30);
+      expect(find.text('Tap to begin'), findsOneWidget);
+      expect(source.manifestRequests + source.fileRequests, 0);
+      await shutDown(tester, db);
+    });
   });
 
   testWidgets('the download card fits a small phone at large text, in every state', (tester) async {

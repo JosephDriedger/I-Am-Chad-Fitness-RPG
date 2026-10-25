@@ -14,7 +14,7 @@ import '../../domain/story_pack.dart';
 /// chapter simply stays unread until they are ready.
 Future<StoryChapter?> readableChapter(BuildContext context, StoryChapter chapter) async {
   final container = ProviderScope.containerOf(context);
-  await _untilLoaded(container);
+  await untilPacksLoaded(container);
   final have = container.read(installedPacksProvider).readable(chapter);
   if (have != null) return have;
   if (!context.mounted) return null;
@@ -25,7 +25,7 @@ Future<StoryChapter?> readableChapter(BuildContext context, StoryChapter chapter
 
 /// The phone's stored packs are read a moment after launch; wait for that so a
 /// season that is already downloaded is never offered again.
-Future<void> _untilLoaded(ProviderContainer container) async {
+Future<void> untilPacksLoaded(ProviderContainer container) async {
   if (container.read(installedPacksProvider).loaded) return;
   final done = Completer<void>();
   final sub = container.listen(installedPacksProvider, (_, s) {

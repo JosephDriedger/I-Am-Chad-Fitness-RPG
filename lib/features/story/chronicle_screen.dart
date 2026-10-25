@@ -12,10 +12,12 @@ import 'story_screen.dart';
 ///
 /// A chapter of a later season is first downloaded (see pack_download.dart). If
 /// the player is not ready for that, nothing happens and it stays unread.
-Future<void> openChapter(BuildContext context, StoryChapter chapter) async {
+/// Returns whether the story was actually shown.
+Future<bool> openChapter(BuildContext context, StoryChapter chapter) async {
   final readable = await readableChapter(context, chapter);
-  if (readable == null || !context.mounted) return;
+  if (readable == null || !context.mounted) return false;
   await Navigator.of(context).push<bool>(gameRoute(StoryScreen(chapter: readable)));
+  return true;
 }
 
 /// Every chapter of the season: the ones that have opened, and a hint of when

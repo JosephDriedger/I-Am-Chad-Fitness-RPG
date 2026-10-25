@@ -9,7 +9,9 @@ Season One is part of the app. Seasons Two, Three and Four (and any later season
 3. A progress bar, with **Stop**. When it finishes, the chapter opens straight away.
 4. If something goes wrong (no connection, a damaged file, a pack for a newer game, a season not on the shelf yet), a kind message says so, nothing is lost, and **Try Again** is offered where it could help. **Not Now** always leaves the chapter unread, exactly as before.
 
-Nothing downloads at launch, in the background, or without a tap. A season that has been downloaded is never fetched again.
+Nothing downloads at launch, in the background, or without a tap. A season that has been downloaded is never fetched again. The hall's offer is only an offer: being offered, or saying **Later**, fetches nothing, and the one look at the manifest (to say how big the download is) happens only after **Read Now**. If the player says **Not Now** to a download, the hall leaves that whole season alone for the rest of the session instead of offering its next chapter. A returning player with a chapter waiting is offered it when the hall appears, including right after the title screen, which moves on by itself after a few seconds.
+
+Tested on an Android emulator against the live GitHub Pages address: the offer at launch, the size card, a real download whose file matches the published checksum, the same after a restart (nothing fetched), the offline message with airplane mode on, **Try Again** after reconnecting, and **Not Now** leaving nothing stored.
 
 ## What is in the app and what is downloaded
 

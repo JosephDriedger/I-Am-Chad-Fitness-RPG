@@ -12,6 +12,7 @@ import '../../domain/cosmetics.dart';
 import '../../domain/expedition.dart';
 import '../../domain/player_state.dart';
 import '../../domain/quests.dart';
+import '../../domain/story.dart';
 import '../../domain/workout.dart';
 import '../../game/hub_scene.dart';
 import '../../game/look.dart';
@@ -21,6 +22,7 @@ import '../guild/quests_screen.dart';
 import '../history/history_screen.dart';
 import '../settings/settings_screen.dart';
 import '../story/chronicle_screen.dart';
+import '../story/pack_download.dart';
 import '../workout/workout_screen.dart';
 
 /// The home screen: a living guild hall you tap around in, with a HUD that
@@ -52,6 +54,9 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       onSelect: _open,
       onChadTap: () => setState(() => _chadNudge++),
     );
+    // A returning player can already have a chapter waiting when the hall appears
+    // (the title screen comes first, so the story status has long since loaded).
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOfferStory());
   }
 
   HubState _stateFor(PlayerStatus p) {
@@ -137,12 +142,16 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     if (chapter == null) return;
     _offered.add(chapter.number);
     _navigating = true;
+    // Say whether this season still has to be downloaded, which needs the phone's saved packs read.
+    await untilPacksLoaded(ProviderScope.containerOf(context));
+    if (!mounted) return;
+    final needsDownload = !ref.read(installedPacksProvider).hasSeason(chapter.season);
     final readNow = await showGameDialog<bool>(
       context: context,
       title: 'A New Chapter!',
       content: Text(
         '${chapter.label}: ${chapter.title}\n\n${chapter.summary}'
-        '${ref.read(installedPacksProvider).loaded && !ref.read(installedPacksProvider).hasSeason(chapter.season) ? '\n\nThis season downloads once, the first time you read it.' : ''}',
+        '${needsDownload ? '\n\nThis season downloads once, the first time you read it.' : ''}',
       ),
       actions: [
         Builder(
@@ -163,14 +172,17 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       ],
     );
     if (!mounted) return;
+    var opened = false;
     if (readNow == true) {
-      await openChapter(context, chapter);
+      opened = await openChapter(context, chapter);
+      // Not ready to download this season: leave the rest of it alone for this session too.
+      if (!opened) _offered.addAll([for (final c in Story.inSeason(chapter.season)) c.number]);
     }
     if (!mounted) return;
     _navigating = false;
     await _scene.resume();
     // A read chapter can lead straight on to the next that has opened.
-    if (readNow == true) await _maybeOfferStory();
+    if (opened) await _maybeOfferStory();
   }
 
   /// Plays the "you earned something" moments after returning to the hall.
