@@ -15,11 +15,24 @@ import 'mark_progress.dart';
 import 'month_panel.dart';
 
 /// The journal: a chronicle of everything you have done.
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final workoutsAsync = ref.watch(workoutsProvider);
     final grantList = ref.watch(grantsProvider).value ?? const <DayGrant>[];
     final grants = {for (final g in grantList) g.day: g};
@@ -61,8 +74,10 @@ class HistoryScreen extends ConsumerWidget {
           );
         }
 
+        final query = _search.text.trim();
+        final shown = [for (final w in workouts) if (w.matches(query)) w];
         final byDay = <String, List<WorkoutEntry>>{};
-        for (final w in workouts) {
+        for (final w in shown) {
           byDay.putIfAbsent(dayKey(w.performedAt), () => []).add(w);
         }
         final days = byDay.keys.toList(); // already newest first
@@ -71,6 +86,36 @@ class HistoryScreen extends ConsumerWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
           children: [
+            TextField(
+              key: const Key('journal_search'),
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'Search Exercises and Notes',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _search.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear Search',
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => setState(_search.clear),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            if (query.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  shown.isEmpty
+                      ? 'Nothing matches "$query". Try another word.'
+                      : '${shown.length} ${shown.length == 1 ? 'workout matches' : 'workouts match'} "$query".',
+                  key: const Key('journal_search_result'),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ] else ...[
             GamePanel(
               title: 'Chronicle',
               child: Wrap(
@@ -94,6 +139,7 @@ class HistoryScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             _ExercisesPanel(summaries: ExerciseHistory.summaries(workouts), now: now),
             const SizedBox(height: 14),
+            ],
             for (final day in days) ...[
               _DayHeader(day: day, grant: grants[day]),
               for (final w in byDay[day]!) _WorkoutTile(entry: w, metric: metric),
@@ -323,11 +369,27 @@ class _WorkoutTile extends ConsumerWidget {
       child: Card(
         child: ListTile(
           title: Text(a?.name ?? 'Unknown activity', style: gameTitle(18)),
-          subtitle: Text(
-            '${DateFormat('h:mm a').format(entry.performedAt)} · ${entry.summary(metric: metric)}'
-            '${entry.cameraCounted ? ' · Camera Counted' : ''}'
-            '${entry.countsForRewards ? '' : ' · Journal Only'}',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${DateFormat('h:mm a').format(entry.performedAt)} · ${entry.summary(metric: metric)}'
+                '${entry.cameraCounted ? ' · Camera Counted' : ''}'
+                '${entry.countsForRewards ? '' : ' · Journal Only'}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (entry.feel != null || entry.notes != null)
+                Text(
+                  [
+                    if (entry.feel != null) 'Felt ${entry.feel}',
+                    if (entry.notes != null) entry.notes!,
+                  ].join(' · '),
+                  key: Key('note_${entry.id}'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+            ],
           ),
           trailing: IconButton(
             tooltip: 'Delete workout',

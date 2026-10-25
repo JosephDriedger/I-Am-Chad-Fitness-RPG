@@ -64,7 +64,16 @@ class ExercisePage extends ConsumerWidget {
                       key: Key('exercise_recent_${e.id}'),
                       contentPadding: EdgeInsets.zero,
                       title: Text(DateFormat('EEE, MMM d').format(e.performedAt), style: gameTitle(17)),
-                      subtitle: Text(e.summary(metric: metric), style: const TextStyle(fontWeight: FontWeight.w600)),
+                      subtitle: Text(
+                        [
+                          e.summary(metric: metric),
+                          if (e.feel != null) 'Felt ${e.feel}',
+                          if (e.notes != null) e.notes!,
+                        ].join(' · '),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
                       trailing: const Icon(Icons.chevron_right_rounded, color: GameColors.inkSoft),
                       onTap: activity == null
                           ? null

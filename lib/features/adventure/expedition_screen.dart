@@ -10,6 +10,7 @@ import '../../domain/chad.dart';
 import '../../domain/combat.dart';
 import '../../domain/difficulty.dart';
 import '../../domain/expedition.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/items.dart';
 import '../../domain/rng.dart';
 import '../../game/battle_scene.dart';
@@ -412,6 +413,16 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
               ),
             ),
           ),
+        // Until the first expedition is won, the first fight of a run says what the buttons do.
+        if (_firstFight)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              FirstSteps.battleHint,
+              key: Key('battle_hint'),
+              style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
+            ),
+          ),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -436,6 +447,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       ],
     );
   }
+
+  bool get _firstFight =>
+      !_busy && _run.battlesWon == 0 && (ref.read(playerProvider)?.hero.victories ?? 1) == 0;
 
   String _intentLine(BattleState b, bool heavy) => switch (b.intent) {
         EnemyMove.windUp => '${b.enemy.name} is winding up a heavy blow. Guarding will soften it.',

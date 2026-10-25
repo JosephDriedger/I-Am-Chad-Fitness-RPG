@@ -24,6 +24,10 @@ class FirstSteps {
   static const warmUpOfferText =
       'Want me to walk you through a one-minute warm-up? Four gentle moves, no rewards, and you can stop any time.';
 
+  /// Under the battle buttons in the first fight, until an expedition has been won.
+  static const battleHint =
+      'First fight? Attack and Guard each build focus, Power Strike spends 2 of it, and Potion heals. Guarding softens a big blow.';
+
   static const logTitle = 'Your First Log';
 
   static const logIntro = 'Rough numbers are fine, and you can edit or delete it later.';
@@ -39,6 +43,7 @@ class FirstSteps {
         trainLine,
         warmUpOfferTitle,
         warmUpOfferText,
+        battleHint,
         logTitle,
         logIntro,
         for (final s in logSteps) ...[s.title, s.text],
