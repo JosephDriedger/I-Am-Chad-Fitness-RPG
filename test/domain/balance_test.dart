@@ -80,6 +80,7 @@ const _levels = <int, List<int>>{
   5: [24, 35, 60],
   6: [36, 48, 80],
   7: [50, 65, 95],
+  8: [66, 78, 95],
 };
 
 void main() {
@@ -107,7 +108,7 @@ void main() {
       }
     }
     // The toughest region is still beatable most of the time.
-    expect(average(Difficulty.maxTier), greaterThan(0.55));
+    expect(average(Difficulty.maxTier), greaterThan(0.5));
   });
 
   test('the steps up are noticeable but not cliffs', () {

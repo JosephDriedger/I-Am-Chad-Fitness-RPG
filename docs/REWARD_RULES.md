@@ -153,6 +153,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 | Thunder Heights gear (4 pieces) | 1,900 to 2,100 | Found in region 5, or bought |
 | Sunstone Dunes gear (4 pieces) | 2,600 to 3,000 | Found in region 6, or bought |
 | Starlit Isles gear (4 pieces) | 3,500 to 4,000 | Found in region 7, or bought |
+| Ember Deeps gear (4 pieces) | 4,600 to 5,200 | Found in region 8, or bought |
 | Healing Potion | 25 each | Up to 5 in the pouch |
 
 - **Gear** is also found as expedition loot, so buying is never the only way, and a duplicate drop pays 10 coins back. The bonuses are deliberately small and unchanged.

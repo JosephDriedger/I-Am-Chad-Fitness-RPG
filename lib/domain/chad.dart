@@ -226,6 +226,11 @@ class ChadDialogue {
       'Nova is too bright to look at, so look at the intent line instead. It '
           'always says what is coming.',
     ],
+    8: [
+      'Cinder sprites strike twice and fizzle fast. Guard when you are hurt and they run out of spark.',
+      'Anvil golems brace and ring like bells. Build focus while they do, then hit them when they stop.',
+      'Magma slugs mend slowly, so hit them hard while they are hurt. The forgemaster only wants to talk about swords.',
+    ],
   };
 
   /// Picks a line deterministically from [seed] so it doesn't flicker on

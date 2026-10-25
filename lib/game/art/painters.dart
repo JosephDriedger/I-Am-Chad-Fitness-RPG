@@ -537,6 +537,12 @@ ActorPainter enemyPainter(String name) => switch (name) {
       'Star Turtle' => paintStarTurtle,
       'The Comet King' => paintCometKing,
       'Nova, the Very Bright' => paintNova,
+      // The Ember Deeps.
+      'Cinder Sprite' => paintCinderSprite,
+      'Anvil Golem' => paintAnvilGolem,
+      'Magma Slug' => paintMagmaSlug,
+      'Forgemaster Brun' => paintForgemaster,
+      'Magmara, the Slow Simmer' => paintMagmara,
       _ => paintSlime,
     };
 
