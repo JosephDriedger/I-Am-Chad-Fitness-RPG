@@ -98,7 +98,7 @@ void main() {
     // The workouts sit below the overview panels, so scroll down to them.
     await tester.drag(find.byType(Scrollable).first, const Offset(0, -1500));
     await settle(tester, frames: 10);
-    expect(find.text('Walking'), findsOneWidget);
+    expect(find.text('Walking'), findsWidgets);
     expect(find.textContaining('+40 XP'), findsOneWidget);
 
     semantics.dispose();

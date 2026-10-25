@@ -5,10 +5,12 @@ import 'package:intl/intl.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/activity.dart';
+import '../../domain/exercise_history.dart';
 import '../../domain/player_state.dart';
 import '../../domain/records.dart';
 import '../../domain/workout.dart';
 import '../workout/log_workout_screen.dart';
+import 'exercise_page.dart';
 import 'mark_progress.dart';
 import 'month_panel.dart';
 
@@ -89,6 +91,8 @@ class HistoryScreen extends ConsumerWidget {
             MonthPanel(entries: workouts, now: now),
             const SizedBox(height: 14),
             _BestsPanel(bests: PersonalBests.of(workouts), entries: workouts, metric: metric),
+            const SizedBox(height: 14),
+            _ExercisesPanel(summaries: ExerciseHistory.summaries(workouts), now: now),
             const SizedBox(height: 14),
             for (final day in days) ...[
               _DayHeader(day: day, grant: grants[day]),
@@ -176,6 +180,93 @@ class _BestsPanelState extends State<_BestsPanel> {
               child: TextButton(
                 onPressed: () => setState(() => _all = !_all),
                 child: Text(_all ? 'Show Fewer' : 'Show All ${bests.length}'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Every exercise in the journal, most recent first. Tap one for its own page.
+/// Collapsed to a few until asked.
+class _ExercisesPanel extends StatefulWidget {
+  const _ExercisesPanel({required this.summaries, required this.now});
+
+  final List<ExerciseSummary> summaries;
+  final DateTime now;
+
+  @override
+  State<_ExercisesPanel> createState() => _ExercisesPanelState();
+}
+
+class _ExercisesPanelState extends State<_ExercisesPanel> {
+  static const _shown = 4;
+  bool _all = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final list = widget.summaries;
+    if (list.isEmpty) return const SizedBox.shrink();
+    final visible = _all ? list : list.take(_shown).toList();
+    final date = DateFormat('MMM d');
+    return GamePanel(
+      title: 'Your Exercises',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final s in visible)
+            Semantics(
+              button: true,
+              label: '${ActivityCatalog.byId(s.activityId)?.name ?? 'Unknown'}, ${s.days} ${s.days == 1 ? 'day' : 'days'}, '
+                  'last ${date.format(s.last)}. Show its story.',
+              child: ExcludeSemantics(
+                child: InkWell(
+                  key: Key('exercise_${s.activityId}'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => Navigator.of(context).push(gameRoute(ExercisePage(activityId: s.activityId))),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.fitness_center_rounded, color: GameColors.teal, size: 22),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            ActivityCatalog.byId(s.activityId)?.name ?? 'Unknown',
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '${s.days} ${s.days == 1 ? 'day' : 'days'} · ${date.format(s.last)}',
+                            textAlign: TextAlign.end,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(Icons.chevron_right_rounded, color: GameColors.inkSoft),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Tap one to see how often you have done it and your own marks. Only for looking back on.',
+            style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
+          ),
+          if (list.length > _shown)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const Key('exercises_toggle'),
+                onPressed: () => setState(() => _all = !_all),
+                child: Text(_all ? 'Show Fewer' : 'Show All ${list.length}'),
               ),
             ),
         ],
