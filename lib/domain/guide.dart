@@ -152,7 +152,7 @@ class Guide {
           ),
           const GuideEntry(
             'Pennants and Trophies',
-            'Milestones hang as pennants across the top of the guild hall, and the bigger ones stand as trophies on the top shelf of the Journal bookshelf. They appear as you earn them, and they never go away.',
+            'Milestones hang as pennants across the top of the guild hall, and the bigger ones stand as trophies on the top shelf of the Journal bookshelf. Small keepsakes for each finished story season stand on the hall floor. They appear as you earn them, and they never go away.',
           ),
           const GuideEntry(
             'Mantles and Hair Dyes',

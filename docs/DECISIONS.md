@@ -311,3 +311,10 @@ Short records of choices that shaped the codebase, so the reasoning is not lost.
 **Why:** People who lift or run want their numbers in a spreadsheet, or to send a coach the log, and the JSON summary is not something a spreadsheet opens. It keeps the game's promise that the data is the player's: nothing leaves the phone except where the player sends it.
 **Trade-off:** It is a second export beside the full backup, so the wording keeps them apart: the backup restores, the spreadsheet does not. It is metric only, because a spreadsheet should not have to guess. The player's own notes could contain a formula, so any cell that starts like one gets a leading apostrophe.
 **Consequence:** `WorkoutCsv` (`lib/data/workout_csv.dart`), `GameRepository.allWorkouts` and an optional `mimeType` on `BackupFiles.send`. Tests: `test/data/workout_csv_test.dart` and `test/workouts_csv_flow_test.dart`.
+
+## 52. The hall floor gets a keepsake for each later season
+
+**Decision:** Finishing Season Two, Three, Four and Five each sets a small keepsake on the hall floor by the left wall: a harbour lamp, a little chime, a laid table and a banked hearth. They are earned only by finishing the story, never sold, and never taken away.
+**Why:** The pennants and trophies reward milestones and levels, but the finished stories had no mark of their own in the hall except a mantle and a trophy on a shelf you have to open. A keepsake is something you see every time you come back.
+**Trade-off:** The floor has four places, one for each later season, so a sixth season would need a new place (the trophy shelf grew the same way). Chad's speech bubble covers them while he is talking.
+**Consequence:** `Cosmetics.keepsakes` and `KeepsakeShape` (`lib/domain/cosmetics.dart`), drawn by `HallBackdrop` (`lib/game/hub_scene.dart`). Tests are in `test/domain/patronage_test.dart`.

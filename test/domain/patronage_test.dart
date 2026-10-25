@@ -246,6 +246,28 @@ void main() {
       expect(Cosmetics.capes.take(4).map((c) => c.id), [Cosmetics.classicCapeId, 'dawn', 'lantern', 'chime']);
     });
 
+    test('keepsakes stand on the hall floor for the later seasons, earned and never sold', () {
+      expect(Cosmetics.keepsakes.map((k) => k.id).toSet(), hasLength(Cosmetics.keepsakes.length));
+      expect(Cosmetics.keepsakes.every((k) => k.unlock.isEarned), isTrue);
+      expect(Cosmetics.keepsakes.length, lessThanOrEqualTo(4), reason: 'the floor has four places');
+      expect({for (final k in Cosmetics.keepsakes) k.shape}, hasLength(Cosmetics.keepsakes.length), reason: 'each looks different');
+      for (var i = 0; i < Cosmetics.keepsakes.length; i++) {
+        expect(Cosmetics.keepsakes[i].unlock.n, Story.inSeason(i + 2).last.number, reason: Cosmetics.keepsakes[i].name);
+      }
+    });
+
+    test('a keepsake appears only when its season is finished, and stays', () {
+      expect(Cosmetics.earnedKeepsakes(const CosmeticContext()), isEmpty);
+      expect(Cosmetics.earnedKeepsakes(const CosmeticContext(level: 120, victories: 99, claimedStreakDays: {365})), isEmpty,
+          reason: 'only the story earns them');
+      final lamp = Story.inSeason(2).last.number;
+      final hearth = Story.inSeason(5).last.number;
+      expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {lamp})).map((k) => k.id), ['lamp']);
+      // Reading a later season's finale does not set out the earlier seasons' pieces for it.
+      expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {hearth})).map((k) => k.id), ['hearth']);
+      expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {lamp, hearth})).map((k) => k.id), ['lamp', 'hearth']);
+    });
+
     test('hints for a finished season name the season', () {
       expect(Unlock.chapter(Story.inSeason(1).last.number).hint, 'Earned by finishing the Season One story');
       expect(Unlock.chapter(Story.inSeason(2).last.number).hint, 'Earned by finishing the Season Two story');

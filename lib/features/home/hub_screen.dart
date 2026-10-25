@@ -110,6 +110,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       highlight: workouts.isEmpty ? HubTarget.train : null,
       pennants: cosmetics == null ? const [] : [for (final x in Cosmetics.earnedPennants(cosmetics)) x.color],
       trophies: cosmetics == null ? const [] : [for (final t in Cosmetics.earnedTrophies(cosmetics)) t.shape],
+      keepsakes: cosmetics == null ? const [] : [for (final k in Cosmetics.earnedKeepsakes(cosmetics)) k.shape],
       patronDecor: cosmetics == null ? const {} : Cosmetics.patronDecor(cosmetics),
       chadLine: quiet ? 'Tap me if you want a word.' : ChadDialogue.line(ctx, seed: seed),
       questPending: quests.any((q) => !q.isDoneBy(today)),

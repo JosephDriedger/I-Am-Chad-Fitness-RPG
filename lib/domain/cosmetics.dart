@@ -121,6 +121,20 @@ class Pennant {
   final int color;
 }
 
+/// What a keepsake on the hall floor looks like.
+enum KeepsakeShape { lamp, chime, table, hearth }
+
+/// A small thing that stands on the hall floor for a story season finished.
+/// Earned by playing, never sold, and never taken away.
+class Keepsake {
+  const Keepsake(this.id, this.name, this.unlock, this.shape);
+
+  final String id;
+  final String name;
+  final Unlock unlock;
+  final KeepsakeShape shape;
+}
+
 /// What a trophy on the Journal shelf looks like.
 enum TrophyShape { lantern, chime, cup, star, shield, sun, table, crown, flame }
 
@@ -205,6 +219,15 @@ class Cosmetics {
     Trophy('story_five', 'The Banked Fire', Unlock.chapter(39), TrophyShape.flame),
   ];
 
+  /// The hall floor's keepsakes, in the order they are set out: one for each of the later
+  /// seasons. The floor has room for four. All earned; none sold.
+  static const keepsakes = <Keepsake>[
+    Keepsake('lamp', 'The Harbour Lamp', Unlock.chapter(15), KeepsakeShape.lamp),
+    Keepsake('chime', 'The Little Chime', Unlock.chapter(23), KeepsakeShape.chime),
+    Keepsake('table', 'The Laid Table', Unlock.chapter(31), KeepsakeShape.table),
+    Keepsake('hearth', 'The Banked Hearth', Unlock.chapter(39), KeepsakeShape.hearth),
+  ];
+
   static Cape capeById(String id) => capes.firstWhere((c) => c.id == id, orElse: () => capes.first);
 
   static HairDye? dyeById(String id) {
@@ -231,6 +254,11 @@ class Cosmetics {
   static List<Pennant> earnedPennants(CosmeticContext c) => [
         for (final p in pennants)
           if (p.unlock.isMet(c)) p,
+      ];
+
+  static List<Keepsake> earnedKeepsakes(CosmeticContext c) => [
+        for (final k in keepsakes)
+          if (k.unlock.isMet(c)) k,
       ];
 
   static List<Trophy> earnedTrophies(CosmeticContext c) => [
