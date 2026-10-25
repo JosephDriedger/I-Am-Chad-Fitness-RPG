@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/domain/hero.dart' show Progression;
 import 'package:i_am_chad/domain/story.dart';
 import '../../tool/story_content/content.dart';
 
@@ -30,12 +31,13 @@ void main() {
   final chapters = StoryContent.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
-    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4]);
-    expect(chapters.length, 32);
-    expect([for (final c in chapters) c.number], [for (var i = 0; i < 32; i++) i]);
+    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4, 5]);
+    expect(chapters.length, 40);
+    expect([for (final c in chapters) c.number], [for (var i = 0; i < 40; i++) i]);
     expect([for (final c in StoryContent.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
     expect([for (final c in StoryContent.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
-    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four']);
+    expect([for (final c in StoryContent.inSeason(5)) c.number], [32, 33, 34, 35, 36, 37, 38, 39]);
+    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four', 'Season Five']);
     expect([for (final c in StoryContent.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
     expect([for (final c in StoryContent.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
@@ -70,13 +72,17 @@ void main() {
     // Season Four starts after Season Three and ends by the level cap.
     expect(StoryContent.inSeason(4).first.unlockLevel, greaterThan(StoryContent.inSeason(3).last.unlockLevel));
     expect(StoryContent.inSeason(4).last.unlockLevel, inInclusiveRange(80, 99));
+    // Season Five starts after Season Four and finishes at the level cap.
+    expect(StoryContent.inSeason(5).first.unlockLevel, greaterThan(StoryContent.inSeason(4).last.unlockLevel));
+    expect(StoryContent.inSeason(5).last.unlockLevel, inInclusiveRange(100, Progression.maxLevel));
   });
 
   test('what is open depends only on level, and never shrinks as the hero levels up', () {
     expect(StoryRules.unlocked(1).map((c) => c.number), [0]);
     expect(StoryRules.unlocked(2).map((c) => c.number), [0, 1]);
     expect(StoryRules.unlocked(6).map((c) => c.number), [0, 1, 2, 3]);
-    expect(StoryRules.unlocked(99).length, chapters.length);
+    expect(StoryRules.unlocked(Progression.maxLevel).length, chapters.length);
+    expect(StoryRules.unlocked(99).length, 32, reason: 'Season Five opens after the old cap');
     var last = 0;
     for (var level = 1; level <= 40; level++) {
       final n = StoryRules.unlocked(level).length;
@@ -88,6 +94,7 @@ void main() {
     expect(StoryRules.next(16)!.number, 8, reason: 'Season Two opens once Season One is done');
     expect(StoryRules.next(42)!.number, 16, reason: 'Season Three opens once Season Two is done');
     expect(StoryRules.next(StoryContent.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
+    expect(StoryRules.next(StoryContent.inSeason(4).last.unlockLevel)!.number, 32, reason: 'Season Five opens once Season Four is done');
     expect(StoryRules.next(StoryContent.chapters.last.unlockLevel), isNull);
   });
 
@@ -458,6 +465,90 @@ void main() {
     test('it ends at the level cap or just short of it, so the story finishes before the game does', () {
       expect(four.last.unlockLevel, lessThanOrEqualTo(99));
       expect(four.first.unlockLevel, greaterThan(StoryContent.inSeason(3).last.unlockLevel));
+    });
+  });
+
+  group('Season Five, The Banked Fire', () {
+    final five = StoryContent.inSeason(5);
+
+    test('it takes the story below the hall to a forge and a mountain, and back up with a coal', () {
+      final all = [for (final c in five) for (final l in _lines(c)) l.text].join(' ');
+      expect(all, contains('hearth'));
+      expect(all, contains('forge'));
+      expect(all, contains('Magmara'));
+      expect(all, contains('coal'));
+      expect(all, contains('thumb'));
+    });
+
+    test('it brings in two new characters and both of them speak', () {
+      final speakers = {for (final c in five) for (final l in _lines(c)) l.speaker};
+      expect(speakers, containsAll([StorySpeaker.brun, StorySpeaker.magmara]));
+    });
+
+    test('it brings back the people who came before it', () {
+      final speakers = {for (final c in five) for (final l in _lines(c)) l.speaker};
+      expect(
+        speakers,
+        containsAll([
+          StorySpeaker.chad, StorySpeaker.maple, StorySpeaker.pip, StorySpeaker.bertram, StorySpeaker.biscuit,
+          StorySpeaker.fennel, StorySpeaker.hush, StorySpeaker.wren, StorySpeaker.tamsin,
+        ]),
+      );
+    });
+
+    test('it remembers choices from the seasons before', () {
+      final keysUsed = {
+        for (final c in five) for (final s in c.scenes) for (final n in s.nodes) if (n.only != null) n.only!.key,
+      };
+      expect(keysUsed, containsAll(['gift', 'motivation']));
+    });
+
+    test('it asks its own questions, with fresh keys', () {
+      final earlier = {
+        for (final c in [...StoryContent.inSeason(1), ...StoryContent.inSeason(2), ...StoryContent.inSeason(3), ...StoryContent.inSeason(4)])
+          for (final ch in _choices(c)) ch.key,
+      };
+      final keys = [for (final c in five) for (final ch in _choices(c)) ch.key];
+      expect(keys.length, greaterThanOrEqualTo(7));
+      expect(keys.toSet().intersection(earlier), isEmpty);
+    });
+
+    test('it says the same kind things as the others: rest, its own pace, no deadline', () {
+      final all = [for (final c in five) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('rest is training'), isTrue);
+      expect(all.contains('at your own pace'), isTrue);
+      expect(all.contains('nothing here has a deadline'), isTrue);
+    });
+
+    test('it has its own places, and ends at the hearth', () {
+      final used = {for (final c in five) for (final s in c.scenes) s.backdrop};
+      expect(used, containsAll([StoryBackdrop.cellar, StoryBackdrop.forge, StoryBackdrop.embers, StoryBackdrop.hearth]));
+      expect(five.last.scenes.last.backdrop, StoryBackdrop.hearth);
+    });
+
+    test('its theme is keeping rather than feeding: low, steady, shared, and handed on', () {
+      final all = [for (final c in five) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all, contains('keep it'));
+      expect(all, contains('banked'));
+      expect(all, contains('a turn'));
+      expect(all, contains('hand'));
+      // Nobody is blamed for the poking: Chad is the one who laughs at himself.
+      for (final w in ['your fault', 'you ruined', 'should have known', 'careless']) {
+        expect(all.contains(w), isFalse, reason: w);
+      }
+    });
+
+    test('it reaches past the old level cap of 99, and finishes at the new one', () {
+      expect(five.first.unlockLevel, greaterThan(StoryContent.inSeason(4).last.unlockLevel));
+      expect(five.first.unlockLevel, greaterThan(97));
+      expect(five.last.unlockLevel, Progression.maxLevel);
+      expect(five.every((c) => c.unlockLevel <= Progression.maxLevel), isTrue);
+    });
+
+    test('somebody new arrives at the end, and the newcomer is welcomed the way Bertram was', () {
+      final last = [for (final l in _lines(five.last)) l.text].join(' ');
+      expect(last, contains('Is this the place one begins?'));
+      expect(last, contains('Duck Mat'));
     });
   });
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:i_am_chad/domain/hero.dart' show Progression;
 import 'package:i_am_chad/domain/story.dart';
 import 'package:i_am_chad/domain/story_pack.dart';
 
@@ -48,7 +49,7 @@ void main() {
     });
 
     test('opening a chapter never depends on a download: levels and numbers come from the app', () {
-      expect(StoryRules.unlocked(99).length, StoryContent.chapters.length);
+      expect(StoryRules.unlocked(Progression.maxLevel).length, StoryContent.chapters.length);
       expect(StoryRules.next(16)!.number, 8);
       expect(Story.byNumber(24)!.title, StoryContent.byNumber(24).title);
     });

@@ -432,9 +432,17 @@ class _Hud extends StatelessWidget {
                                 color: _cream, fontWeight: FontWeight.w800, fontSize: 15)),
                       ),
                       const SizedBox(width: 8),
-                      Text('Lv ${player.level}',
-                          style: const TextStyle(
-                              color: Color(0xFFF2C94C), fontWeight: FontWeight.w800, fontSize: 14)),
+                      // Three digits past level 99, so at the largest text it shrinks to fit
+                      // instead of pushing the name out.
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 110),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('Lv ${player.level}',
+                              style: const TextStyle(
+                                  color: Color(0xFFF2C94C), fontWeight: FontWeight.w800, fontSize: 14)),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

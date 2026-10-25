@@ -1,6 +1,6 @@
 # Story
 
-Four seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three) and **The Long Table** (Season Four). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Five seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four) and **The Banked Fire** (Season Five). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -107,7 +107,7 @@ Chad, Maple, Biscuit, Pip, Brad and Grit come back (Biscuit arrives at the summi
 
 The guild hall has outgrown its own table: Maple built one that seats sixty, and the hall seats forty. Chad's answer is a feast for everyone who ever came through the door, and the hero helps carry the invitations out along every road. Fennel and Bertram deliver them to the coast, the hut on the pass, the old wood and the dunes; Chairs are grown, soup is made for sixty, and Tamsin comes down her four hundred and twelve steps by stages, as she promised in Season Three. The season ends at a long table under strings of lights, with every chair full and one kept for whoever comes next.
 
-The season is about **making room**: hosting, belonging, and the idea that a place gets better when there is a seat for the next person. It finishes before the level cap, so it doubles as a gentle thank-you for everything that came before.
+The season is about **making room**: hosting, belonging, and the idea that a place gets better when there is a seat for the next person. It finished just before the old level cap of 99, so it doubles as a gentle thank-you for everything that came before.
 
 ### New cast
 
@@ -132,6 +132,36 @@ Everyone who is still around comes back: Chad, Maple, Biscuit, Pip, Brad, Grit, 
 | 6 | The Night Before the Table | Level 93 | Lanterns go up, the guests arrive from every road, and someone counts the chairs again. |
 | 7 | The Long Table | Level 97 | The table is laid, the chairs are full, and there is room for one more. |
 
+## Season Five: The Banked Fire
+
+### The premise
+
+The great hearth in the Guild Hall has burned for longer than anyone can remember, and this morning it is the colour of a very tired peach. Chad's answer is to feed it, all night, until he is swaying. An old note in the founder's hand says something else: *Do not feed the fire. Keep it.* Under the stairs there is a door that everyone has always assumed was a cupboard. Behind it a stair goes down, warm and long, to a forge where a smith named Brun has been waiting eleven years for someone to knock. The hearth was lit from his forge, and nobody ever learned how to keep it. Below the forge, a mountain called Magmara has been very politely not annoyed by eleven years of poking. The guild learns to bank a fire (rake the coals, cover them, leave a thumb of air, and walk away), carries one coal up four hundred and twelve steps hand to hand, and lights the hearth. That evening somebody new knocks at the door.
+
+The season is about **keeping something going**: effort that lasts is low, steady and shared, a fire is banked rather than blazed, and everyone takes a turn. It is also where the story carries on past the old level cap of 99, and it finishes at the new one, 120.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Brun | The Forgemaster. Enormous, soot-smudged, goggles pushed up, a red beard. Has opinions about every sword he ever made, especially the third on the left, which he did on a Tuesday. Waits for the next word before he says anything. |
+| Magmara | A small, calm mountain with a sleepy face, whose front step is the end of the hearth. Takes eleven years to get annoyed, and speaks slowly. "Rest is training. Ask any mountain." |
+
+Chad, Maple, Biscuit, Pip and Bertram carry the season. Fennel, Hush, Wren and Tamsin come to help carry the coal. The newcomer at the end is never named, so that anyone can be them.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | The Hearth Goes Quiet | Level 100 | The fire is low, Chad has fed it all night, and the founder's note says to keep it. |
+| 1 | The Door Under the Stairs | Level 103 | A cupboard that was never a cupboard, a warm stair, and a letter for whoever finally asked. |
+| 2 | A Smith With Opinions | Level 106 | A forge that has waited eleven years, and a smith with a lot to say about fires. |
+| 3 | Magmara Is Not Annoyed | Level 109 | A mountain who takes eleven years to get annoyed, and a small conversation about poking. |
+| 4 | How to Bank a Fire | Level 112 | Rake, cover, leave a little air, and walk away. Everyone has a turn, and Chad has two. |
+| 5 | The Bucket Chain | Level 115 | One pot of coals, one very long stair, and friends to hand it along. |
+| 6 | The Night Before the Hearth | Level 118 | A cold hall, a warm pot and some true confessions. Maple tells the real story of the first fire. |
+| 7 | The Banked Fire | Level 120 | The hearth is lit and kept, and somebody new knocks at the door. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
@@ -140,6 +170,7 @@ A few moments ask you something. The answer is saved, the character replies to i
 - **Season Two** asks how you welcome Pip, how you walk the road, how you spend the ferry crossing, what you say to Wren, to Murmur and to Pip, what you write back to Oakhelm, and how you light the lamp. It also remembers your Season One answers: Brad, Grit, Murmur and Oakhelm each greet you differently depending on what you said to them, and the final farewell again follows your very first answer.
 
 - **Season Four** asks what you say to Bertram, what the invitation says, what you bring to the table, which chair Chad gets, the Sphinx's riddle, what weather Skarn should send, what you would give the guild, and where you sit. It remembers what you told Pip, how you lit the lamp, what you said to Tamsin at her stair and how the Chime was started, and the farewell follows your very first answer once more.
+- **Season Five** asks what you do first when the hearth goes quiet, how you go down the stair, what you would make on Brun's anvil, how you speak to Magmara, how much air a banked fire needs, which stretch of the stair you carry the coal, what you do with Brun's little poker and what you hand the newcomer. It remembers what you said you would give the guild in Season Four (a story, a song or an afternoon), and the farewell follows your very first answer once more.
 - **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
@@ -151,7 +182,7 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 31 across all four seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 39 across all five seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -161,7 +192,8 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | Season Two's script, downloaded as a pack ([Content packs](CONTENT_PACKS.md)) | `tool/story_content/season_two.dart` |
 | Season Three's script | `tool/story_content/season_three.dart` |
 | Season Four's script | `tool/story_content/season_four.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers) | `lib/game/art/story_art.dart` |
+| Season Five's script | `tool/story_content/season_five.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |

@@ -120,7 +120,7 @@ class HeroProfile {
 class Progression {
   const Progression._();
 
-  static const int maxLevel = 99;
+  static const int maxLevel = 120;
 
   static int xpForLevel(int level) {
     if (level <= 1) return 0;

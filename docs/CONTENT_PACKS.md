@@ -1,6 +1,6 @@
 # Content packs: downloading the later story seasons
 
-Season One is part of the app. Seasons Two, Three and Four (and any later season) are **downloaded the first time the player reads them**, and kept on the phone after that. This keeps a first install small and follows the pattern of games like Shadow Fight 2: when you reach new story content, the game offers a download with its size, shows progress, and then carries on. The reasoning is in [decision 39](DECISIONS.md#39-later-story-seasons-are-downloaded-once-from-static-files).
+Season One is part of the app. Seasons Two to Five (and any later season) are **downloaded the first time the player reads them**, and kept on the phone after that. This keeps a first install small and follows the pattern of games like Shadow Fight 2: when you reach new story content, the game offers a download with its size, shows progress, and then carries on. The reasoning is in [decision 39](DECISIONS.md#39-later-story-seasons-are-downloaded-once-from-static-files).
 
 ## What the player sees
 

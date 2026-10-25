@@ -410,6 +410,10 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintSphinx(c, s);
     case StorySpeaker.worm:
       paintDuneWorm(c, s);
+    case StorySpeaker.brun:
+      paintForgemaster(c, s);
+    case StorySpeaker.magmara:
+      paintMagmara(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -436,6 +440,8 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.bertram => 0.95,
       StorySpeaker.sphinx => 0.7,
       StorySpeaker.worm => 0.6,
+      StorySpeaker.brun => 1.0,
+      StorySpeaker.magmara => 0.8,
       _ => 1.0,
     };
 
@@ -1243,5 +1249,98 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
           oval(c, x, ground - h * 0.18, 2.6 * f, 4.2 * f, const Color(0xFFFFB300));
         }
       }
+    case StoryBackdrop.cellar:
+      // A stair going down under the hall, brick walls, two lanterns and a warm glow from below.
+      _gradient(c, full, const [Color(0xFF1E1713), Color(0xFF3B2A1E)]);
+      for (var y = 0.0; y < h; y += 22) {
+        line(c, 0, y, w, y, 1, const Color(0x22000000));
+      }
+      for (var i = 0; i < 9; i++) {
+        final t = i / 8;
+        final inset = w * (0.04 + 0.2 * (1 - t));
+        final y = h * (0.26 + 0.07 * i);
+        rrect(c, inset, y, w - inset * 2, h * 0.05, 3, Color.lerp(const Color(0xFF5B4636), const Color(0xFF8A6A4E), t)!);
+        rrect(c, inset, y + h * 0.05, w - inset * 2, 3, 1, const Color(0x55000000));
+      }
+      final glow = 0.75 + 0.2 * math.sin(time * 2.2);
+      circle(c, w * 0.5, h * 0.2, w * 0.3, Color.fromRGBO(255, 138, 61, 0.22 * glow));
+      circle(c, w * 0.5, h * 0.2, w * 0.14, Color.fromRGBO(255, 183, 77, 0.45 * glow));
+      for (final x in [w * 0.12, w * 0.88]) {
+        line(c, x, h * 0.08, x, h * 0.2, 1.6, const Color(0xFF3E2F26));
+        rrect(c, x - 6, h * 0.2, 12, 17, 3, const Color(0xFFFFE9A8));
+        circle(c, x, h * 0.22, 14 * glow, const Color(0x33FFC46B));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF4A3A2E));
+    case StoryBackdrop.forge:
+      // The forge below the hall: a big furnace, an anvil, tools on the wall and soot in the air.
+      _gradient(c, full, const [Color(0xFF241714), Color(0xFF4A2A22)]);
+      for (var y = 0.0; y < ground; y += 24) {
+        line(c, 0, y, w, y, 1, const Color(0x22000000));
+      }
+      // The furnace mouth, glowing and breathing.
+      final breath = 0.8 + 0.2 * math.sin(time * 1.7);
+      rrect(c, w * 0.34, h * 0.2, w * 0.32, h * 0.5, 14, const Color(0xFF3A2A25));
+      rrect(c, w * 0.39, h * 0.3, w * 0.22, h * 0.4, 10, Color.fromRGBO(255, 112, 67, breath));
+      rrect(c, w * 0.43, h * 0.4, w * 0.14, h * 0.3, 8, Color.fromRGBO(255, 213, 79, breath));
+      circle(c, w * 0.5, h * 0.45, w * 0.3, Color.fromRGBO(255, 138, 61, 0.14 * breath));
+      // Tools hanging in a row: tongs, a hammer and a ladle.
+      for (var i = 0; i < 3; i++) {
+        final x = w * (0.08 + i * 0.07);
+        line(c, x, h * 0.14, x, h * 0.34 + i * 6, 3, const Color(0xFF607D8B));
+        rrect(c, x - 7, h * 0.34 + i * 6, 14, 10, 2, const Color(0xFF78909C));
+      }
+      // The anvil, and a bellows leaning on the wall.
+      fillPath(c, poly([w * 0.7, ground - h * 0.1, w * 0.92, ground - h * 0.1, w * 0.97, ground - h * 0.14, w * 0.7, ground - h * 0.14]), const Color(0xFF546E7A));
+      rrect(c, w * 0.76, ground - h * 0.1, w * 0.1, h * 0.1, 3, const Color(0xFF37474F));
+      oval(c, w * 0.15, ground - h * 0.08, w * 0.08, h * 0.07, const Color(0xFF8D5E3C));
+      for (var i = 0; i < 12; i++) {
+        final p = ((time * 0.3 + i * 0.11) % 1);
+        circle(c, w * (0.42 + (i % 6) * 0.03) + math.sin(time + i) * 6, h * 0.34 - p * h * 0.3, 1.4 * (1 - p), Color.fromRGBO(255, 183, 77, 1 - p));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3A2B26));
+    case StoryBackdrop.embers:
+      // A cavern with a slow river of lava, rock arches either side, sparks and steam.
+      _gradient(c, full, const [Color(0xFF1B0E10), Color(0xFF7A2A16)]);
+      for (final side in [0.0, 1.0]) {
+        final x = side == 0 ? 0.0 : w;
+        final dir = side == 0 ? 1.0 : -1.0;
+        fillPath(c, poly([x, 0, x + dir * w * 0.22, 0, x + dir * w * 0.12, h * 0.4, x + dir * w * 0.2, ground, x, ground]), const Color(0xFF2A1512));
+      }
+      final river = 0.7 + 0.25 * math.sin(time * 1.4);
+      _fill(c, Rect.fromLTWH(0, h * 0.62, w, h * 0.12), Color.fromRGBO(255, 112, 67, river));
+      for (var i = 0; i < 10; i++) {
+        final x = ((time * 14 + i * 90) % (w + 80)) - 40;
+        rrect(c, x, h * 0.64 + (i % 3) * 8, 30, 3, 2, Color.fromRGBO(255, 213, 79, 0.6 * river));
+      }
+      _hill(c, s, h * 0.62, h * 0.04, 1.2, const Color(0xFF3A1D1A));
+      for (var i = 0; i < 24; i++) {
+        final p = ((time * 0.2 + i * 0.087) % 1);
+        circle(c, w * ((i * 37 % 100) / 100) + math.sin(time * 1.2 + i) * 10, h * 0.68 - p * h * 0.6, 1.3 + (i % 3) * 0.4, Color.fromRGBO(255, 183, 77, 0.9 * (1 - p)));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF4A2A22));
+    case StoryBackdrop.hearth:
+      // The great hearth in the hall, lit and banked, with a night sky in the windows.
+      _fill(c, full, const Color(0xFFB59A78));
+      for (var y = 0.0; y < ground; y += 26) {
+        line(c, 0, y, w, y, 1, const Color(0x1A000000));
+      }
+      _window(c, w * 0.08, h * 0.12, w * 0.13, h * 0.3, const Color(0xFF22305E));
+      _window(c, w * 0.79, h * 0.12, w * 0.13, h * 0.3, const Color(0xFF22305E));
+      circle(c, w * 0.145, h * 0.2, 2, const Color(0xFFFFF3D6));
+      circle(c, w * 0.855, h * 0.3, 2, const Color(0xFFFFF3D6));
+      // The chimney breast and the fire.
+      // Set high on the wall, so the fire stays in view above the people in front of it.
+      rrect(c, w * 0.28, h * 0.04, w * 0.44, h * 0.5, 6, const Color(0xFF8A7A66));
+      rrect(c, w * 0.34, h * 0.2, w * 0.32, h * 0.34, 16, const Color(0xFF2A1D17));
+      final f = 1 + math.sin(time * 6) * 0.06;
+      circle(c, w * 0.5, h * 0.44, w * 0.2, Color.fromRGBO(255, 138, 61, 0.2));
+      fillPath(c, poly([w * 0.4, h * 0.54, w * 0.43, h * 0.4 * f, w * 0.47, h * 0.47, w * 0.5, h * 0.33 * f, w * 0.54, h * 0.47, w * 0.58, h * 0.4 * f, w * 0.6, h * 0.54]), const Color(0xFFFF7043));
+      fillPath(c, poly([w * 0.45, h * 0.54, w * 0.48, h * 0.45, w * 0.5, h * 0.5, w * 0.53, h * 0.42 * f, w * 0.56, h * 0.54]), const Color(0xFFFFCA28));
+      rrect(c, w * 0.31, h * 0.52, w * 0.38, 7, 3, const Color(0xFF5D4037));
+      // A mantel with a lantern.
+      rrect(c, w * 0.26, h * 0.13, w * 0.48, 8, 3, const Color(0xFF6D4C41));
+      rrect(c, w * 0.31, h * 0.06, 8, 14, 2, const Color(0xFFFFE9A8));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF6B4528));
+      oval(c, w * 0.5, ground + 4, w * 0.28, h * 0.03, const Color(0xFF8E2B3B));
   }
 }

@@ -1,5 +1,6 @@
 /// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast",
-/// Season Three, "The Weather Chime", and Season Four, "The Long Table".
+/// Season Three, "The Weather Chime", Season Four, "The Long Table", and Season
+/// Five, "The Banked Fire".
 /// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
@@ -35,6 +36,10 @@ enum StorySpeaker {
   bertram('Bertram'),
   sphinx('The Sphinx'),
   worm('The Dune Worm'),
+
+  // Season Five, "The Banked Fire".
+  brun('Brun'),
+  magmara('Magmara'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -75,6 +80,12 @@ enum StoryBackdrop {
   courtyard,
   dunes,
   feast,
+
+  // Season Five, "The Banked Fire".
+  cellar,
+  forge,
+  embers,
+  hearth,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -203,7 +214,8 @@ class StorySeason {
         1 => 'Season One',
         2 => 'Season Two',
         3 => 'Season Three',
-        _ => 'Season Four',
+        4 => 'Season Four',
+        _ => 'Season Five',
       };
 }
 
@@ -298,6 +310,12 @@ class Story {
       blurb: 'A hall too full for its own table, a feast for everyone who ever came, and room for one more.',
       firstChapter: 24,
     ),
+    StorySeason(
+      number: 5,
+      title: 'The Banked Fire',
+      blurb: 'A hearth burning low, a door under the stairs, and the quiet art of keeping a flame going.',
+      firstChapter: 32,
+    ),
   ];
 
   static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
@@ -316,9 +334,9 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour, ...seasonFive];
 
-  // Seasons Two to Four are downloaded the first time they are read (see
+  // Seasons Two to Five are downloaded the first time they are read (see
   // docs/CONTENT_PACKS.md). The app keeps only what the Chronicle and the unlock
   // rules need: each chapter's place, title, level and summary, with no scenes.
   // The scripts live in tool/story_content, and tool/build_packs.dart turns them
@@ -455,6 +473,65 @@ class Story {
       unlockLevel: 70,
       summary:
           'The seven bells are rung, the storm settles, and three lights and three sounds answer each other.',
+    ),
+  ];
+
+  static const seasonFive = <StoryChapter>[
+    StoryChapter(
+      season: 5,
+      number: 32,
+      title: 'The Hearth Goes Quiet',
+      unlockLevel: 100,
+      summary: 'The great hearth is burning low, Chad has been feeding it all night, and an old note says something else.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 33,
+      title: 'The Door Under the Stairs',
+      unlockLevel: 103,
+      summary: 'A cupboard that was never a cupboard, a great many warm steps down, and a letter for whoever finally asked.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 34,
+      title: 'A Smith With Opinions',
+      unlockLevel: 106,
+      summary: 'Below the hall a forge has been waiting eleven years, and its smith has a lot to say about fires.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 35,
+      title: 'Magmara Is Not Annoyed',
+      unlockLevel: 109,
+      summary: 'A mountain who takes eleven years to get annoyed, and a very small conversation about poking.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 36,
+      title: 'How to Bank a Fire',
+      unlockLevel: 112,
+      summary: 'Rake, cover, leave a little air, and walk away. Everyone has a turn, and Chad has two.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 37,
+      title: 'The Bucket Chain',
+      unlockLevel: 115,
+      summary: 'One pot of glowing coals, one very long stair, and a great many friends to hand it along.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 38,
+      title: 'The Night Before the Hearth',
+      unlockLevel: 118,
+      summary: 'A cold hall, a warm pot and some true confessions. Maple tells the real story of the first fire.',
+    ),
+    StoryChapter(
+      season: 5,
+      number: 39,
+      title: 'The Banked Fire',
+      unlockLevel: 120,
+      summary: 'The hearth is lit and kept, and somebody new knocks at the door.',
     ),
   ];
 
