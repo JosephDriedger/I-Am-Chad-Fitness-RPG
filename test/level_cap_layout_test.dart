@@ -7,19 +7,19 @@ import 'package:i_am_chad/domain/hero.dart';
 
 import 'helpers.dart';
 
-/// The level cap is 120, so a level can be three digits. The numbers that show it
+/// The level cap is 144, so a level can be three digits. The numbers that show it
 /// have to fit at the smallest phone and the largest text.
 void main() {
   test('the cap is where the last season ends, and the XP curve reaches it', () {
-    expect(Progression.maxLevel, 120);
-    expect(Progression.levelForXp(Progression.xpForLevel(120)), 120);
-    expect(Progression.levelForXp(Progression.xpForLevel(120) * 3), 120, reason: 'XP past the cap changes nothing');
-    expect(Progression.levelProgress(Progression.xpForLevel(120)), 1);
+    expect(Progression.maxLevel, 144);
+    expect(Progression.levelForXp(Progression.xpForLevel(144)), 144);
+    expect(Progression.levelForXp(Progression.xpForLevel(144) * 3), 144, reason: 'XP past the cap changes nothing');
+    expect(Progression.levelProgress(Progression.xpForLevel(144)), 1);
   });
 
   test('stats still grow only a little past level 99', () {
-    expect(Progression.attack(120) - Progression.attack(99), lessThanOrEqualTo(2));
-    expect(Progression.maxHp(120) - Progression.maxHp(99), lessThanOrEqualTo(7));
+    expect(Progression.attack(144) - Progression.attack(99), lessThanOrEqualTo(3));
+    expect(Progression.maxHp(144) - Progression.maxHp(99), lessThanOrEqualTo(12));
   });
 
   testWidgets('three-digit levels fit on the hall, the hero page and the journal', (tester) async {
@@ -39,11 +39,11 @@ void main() {
         preferredCategories: {},
         hasDumbbells: false,
       ));
-      await repo.recordExpedition(seed: 1, victory: true, battlesWon: 3, xp: Progression.xpForLevel(120), coins: 0, lootItemId: '');
+      await repo.recordExpedition(seed: 1, victory: true, battlesWon: 3, xp: Progression.xpForLevel(144), coins: 0, lootItemId: '');
     });
     await bootApp(tester, db);
     expect(tester.takeException(), isNull);
-    expect(find.text('Lv 120'), findsOneWidget);
+    expect(find.text('Lv 144'), findsOneWidget);
 
     for (final page in ['Hero', 'Journal', 'Quests']) {
       await tester.tap(find.text(page));

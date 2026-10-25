@@ -1,6 +1,6 @@
 /// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast",
 /// Season Three, "The Weather Chime", Season Four, "The Long Table", and Season
-/// Five, "The Banked Fire".
+/// Five, "The Banked Fire", and Season Six, "The Comet Road".
 /// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
@@ -40,6 +40,10 @@ enum StorySpeaker {
   // Season Five, "The Banked Fire".
   brun('Brun'),
   magmara('Magmara'),
+
+  // Season Six, "The Comet Road".
+  juno('Juno'),
+  comet('The Comet King'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -86,6 +90,10 @@ enum StoryBackdrop {
   forge,
   embers,
   hearth,
+
+  // Season Six, "The Comet Road".
+  isles,
+  cometSky,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -215,7 +223,8 @@ class StorySeason {
         2 => 'Season Two',
         3 => 'Season Three',
         4 => 'Season Four',
-        _ => 'Season Five',
+        5 => 'Season Five',
+        _ => 'Season Six',
       };
 }
 
@@ -316,6 +325,12 @@ class Story {
       blurb: 'A hearth burning low, a door under the stairs, and the quiet art of keeping a flame going.',
       firstChapter: 32,
     ),
+    StorySeason(
+      number: 6,
+      title: 'The Comet Road',
+      blurb: 'An old item on an old list, a long road back through everywhere, and a sky that arrives when it arrives.',
+      firstChapter: 40,
+    ),
   ];
 
   static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
@@ -334,9 +349,9 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour, ...seasonFive];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour, ...seasonFive, ...seasonSix];
 
-  // Seasons Two to Five are downloaded the first time they are read (see
+  // Seasons Two to Six are downloaded the first time they are read (see
   // docs/CONTENT_PACKS.md). The app keeps only what the Chronicle and the unlock
   // rules need: each chapter's place, title, level and summary, with no scenes.
   // The scripts live in tool/story_content, and tool/build_packs.dart turns them
@@ -473,6 +488,65 @@ class Story {
       unlockLevel: 70,
       summary:
           'The seven bells are rung, the storm settles, and three lights and three sounds answer each other.',
+    ),
+  ];
+
+  static const seasonSix = <StoryChapter>[
+    StoryChapter(
+      season: 6,
+      number: 40,
+      title: 'A Date in the Notebook',
+      unlockLevel: 123,
+      summary: 'Bertram has an item on his list from seventy-six years ago, and the sky has finally caught up with it.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 41,
+      title: 'Packing for the Sky',
+      unlockLevel: 126,
+      summary: 'Maple has a list, Chad has a cape, and Biscuit has already packed himself.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 42,
+      title: 'The Road Back Through Everywhere',
+      unlockLevel: 129,
+      summary: 'The way to the Isles runs through every place the guild has been, and everyone has something to hand over.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 43,
+      title: 'The Last Ferry',
+      unlockLevel: 132,
+      summary: 'A very slow tortoise, a very wide sky, and a crossing that takes exactly as long as it takes.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 44,
+      title: 'Moths, Cats and One Large Turtle',
+      unlockLevel: 135,
+      summary: 'The Isles are full of polite creatures, and every one of them has been waiting for the comet too.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 45,
+      title: 'The Comet King Is Early',
+      unlockLevel: 138,
+      summary: 'The most important guest in the sky has arrived three days ahead of himself and is very worried about it.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 46,
+      title: 'The Night Before the Sky',
+      unlockLevel: 141,
+      summary: 'Everyone lies on their backs on a floating island and says what they would tell the person they were at the start.',
+    ),
+    StoryChapter(
+      season: 6,
+      number: 47,
+      title: 'The Comet Road',
+      unlockLevel: 144,
+      summary: 'The comet passes, an old notebook gets a tick, and the road home is the road on.',
     ),
   ];
 

@@ -545,6 +545,15 @@ class HubScene extends GameScene {
           Paint()..color = const Color(0xFFFF7043),
         );
         oval(c, x, b - 12, 2.2, 4, const Color(0xFFFFCA28));
+      case TrophyShape.comet:
+        // A small comet with a long tail, on a stand.
+        rrect(c, x - 1.5, b - 8, 3, 8, 0, goldDark);
+        for (var i = 0; i < 6; i++) {
+          final t = i / 5;
+          circle(c, x - 2 - t * 7, b - 21 - t * 4, 4.2 * (1 - t * 0.7), Color.fromRGBO(129, 212, 250, 0.7 * (1 - t)));
+        }
+        circle(c, x + 3, b - 18, 5.2, const Color(0x55B3E5FC));
+        circle(c, x + 3, b - 18, 3.4, const Color(0xFFE1F5FE));
     }
   }
 
@@ -970,7 +979,7 @@ class HallBackdrop extends Component {
 
   /// Where each keepsake stands on the floor by the left wall, so earlier ones never
   /// shift as more are earned.
-  static const _keepsakeSlots = <double>[54, 76, 98, 120];
+  static const _keepsakeSlots = <double>[54, 76, 98, 120, 142];
 
   /// Small things that stand on the hall floor for each story season finished.
   /// Earned, never sold, and never taken away.
@@ -1023,6 +1032,16 @@ class HallBackdrop extends Component {
             Paint()..color = const Color(0xFFFF7043),
           );
           oval(canvas, x, base - 12, 2.2, 4, const Color(0xFFFFCA28));
+        case KeepsakeShape.comet:
+          // A little comet glass: a small round lamp with a trailing tail, glowing blue.
+          final glow = 0.7 + 0.3 * math.sin(_t * 2 + 2);
+          rrect(canvas, x - 1.2, base - 12, 2.4, 12, 1, const Color(0xFF5D4037));
+          for (var k = 0; k < 5; k++) {
+            final t = k / 4;
+            circle(canvas, x - 2 - t * 7, base - 26 - t * 3, 4.2 * (1 - t * 0.7), Color.fromRGBO(129, 212, 250, 0.55 * (1 - t) * glow));
+          }
+          circle(canvas, x + 2, base - 24, 6, Color.fromRGBO(179, 229, 252, 0.4 * glow));
+          circle(canvas, x + 2, base - 24, 3.6, const Color(0xFFE1F5FE));
       }
     }
   }

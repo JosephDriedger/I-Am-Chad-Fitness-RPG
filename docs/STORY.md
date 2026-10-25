@@ -1,6 +1,6 @@
 # Story
 
-Five seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four) and **The Banked Fire** (Season Five). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Six seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four), **The Banked Fire** (Season Five) and **The Comet Road** (Season Six). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -162,6 +162,36 @@ Chad, Maple, Biscuit, Pip and Bertram carry the season. Fennel, Hush, Wren and T
 | 6 | The Night Before the Hearth | Level 118 | A cold hall, a warm pot and some true confessions. Maple tells the real story of the first fire. |
 | 7 | The Banked Fire | Level 120 | The hearth is lit and kept, and somebody new knocks at the door. |
 
+## Season Six: The Comet Road
+
+### The premise
+
+Bertram's notebook has an item that has waited seventy-six years: item twelve, written in pencil when he was eight and put to bed too early to see it. 'See the comet.' The comet passes over the Starlit Isles once every seventy-six years, and it is due this winter. The whole guild sets out to take him, along with Juno, the newcomer who knocked at the door at the end of Season Five. The road runs back through everywhere: the lighthouse, the hut at the snow line, the river and its slowest ferry, and out to the floating islands, where every moth, cat and turtle has been waiting too. The Comet King turns out to be three days early and mortified about it, and the guild tells him that early is only another way to arrive. On the last night everyone lies back on a floating island and says what they would tell the person they were at the start. The comet passes, item twelve gets a tick, and the road home is the road on.
+
+The season is about **arriving**: the long road is the point, something that takes seventy-six years can still be reached one night at a time, and it is the sort of person who goes that matters, not the getting there. It carries the story to the new level cap, 144.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Juno | The newcomer from the end of Season Five, now a few months in. Thoughtful, quietly funny, a green jacket and a yellow scarf, and a backpack that has gained patches. Has not been anywhere yet, and wants to. Remembers what you handed them at the door. |
+| The Comet King | A bright, round, slightly pale light in a crooked crown, who arrives every seventy-six years and is, this time, three days early and worried about it. He is told that a king may be as slow as his guests like. |
+
+Chad, Maple, Biscuit, Pip and Bertram carry the season. Wren, Hush, Tamsin and Sedge appear on the road. The creatures of the Isles (a lantern moth, a comet cat and a very large star turtle) are described rather than given lines.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Date in the Notebook | Level 123 | Item twelve, a comet, and a very big appointment that will not be rushed. |
+| 1 | Packing for the Sky | Level 126 | Maple has a list, Chad has a drum, and Biscuit has packed himself. |
+| 2 | The Road Back Through Everywhere | Level 129 | Wren, Hush and Tamsin each hand over something for the dark parts of the road. |
+| 3 | The Last Ferry | Level 132 | A slow tortoise, a wide sky, and a crossing that takes exactly as long as it takes. |
+| 4 | Moths, Cats and One Large Turtle | Level 135 | The Isles are full of polite creatures, all waiting for the same patch of sky. |
+| 5 | The Comet King Is Early | Level 138 | The most important guest in the sky is three days ahead of himself and is told he is welcome. |
+| 6 | The Night Before the Sky | Level 141 | Everyone lies back and says what they would tell the person they were at the start. |
+| 7 | The Comet Road | Level 144 | The comet passes, an old notebook gets a tick, and the hearth is still banked at home. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
@@ -171,6 +201,7 @@ A few moments ask you something. The answer is saved, the character replies to i
 
 - **Season Four** asks what you say to Bertram, what the invitation says, what you bring to the table, which chair Chad gets, the Sphinx's riddle, what weather Skarn should send, what you would give the guild, and where you sit. It remembers what you told Pip, how you lit the lamp, what you said to Tamsin at her stair and how the Chime was started, and the farewell follows your very first answer once more.
 - **Season Five** asks what you do first when the hearth goes quiet, how you go down the stair, what you would make on Brun's anvil, how you speak to Magmara, how much air a banked fire needs, which stretch of the stair you carry the coal, what you do with Brun's little poker and what you hand the newcomer. It remembers what you said you would give the guild in Season Four (a story, a song or an afternoon), and the farewell follows your very first answer once more.
+- **Season Six** asks what you say to Bertram, what goes in your bag, what you take from the road, how you spend the ferry crossing, how you greet the creatures of the Isles, what you say to the Comet King, what you would tell the person you were at the start, and what you do as the comet passes. It remembers what you handed the newcomer at the end of Season Five (a warm cup, the little poker or a chair), and the farewell follows your very first answer once more.
 - **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
@@ -182,7 +213,7 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 39 across all five seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 47 across all six seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -193,7 +224,8 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | Season Three's script | `tool/story_content/season_three.dart` |
 | Season Four's script | `tool/story_content/season_four.dart` |
 | Season Five's script | `tool/story_content/season_five.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops) | `lib/game/art/story_art.dart` |
+| Season Six's script | `tool/story_content/season_six.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops; Season Six adds Juno and reuses the Comet King from the enemy art, with the Isles and the comet sky as backdrops) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |

@@ -24,7 +24,8 @@ Defense =  4 + 0.9 × softLevel(L)
 | 20 | 6,670 | 112 | 27 | 15 |
 | 50 | 30,371 | 153 | 38 | 21 |
 | 99 | 92,069 | 178 | 45 | 25 |
-| 120 (cap) | 125,611 | 184 | 46 | 26 |
+| 120 | 125,611 | 184 | 46 | 26 |
+| 144 (cap) | 168,535 | 189 | 48 | 26 |
 
 Level XP is `60 × (level − 1)^1.6`. XP comes from workouts (derived) and from expeditions.
 

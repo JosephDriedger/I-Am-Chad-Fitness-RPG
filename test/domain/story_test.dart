@@ -31,13 +31,14 @@ void main() {
   final chapters = StoryContent.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
-    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4, 5]);
-    expect(chapters.length, 40);
-    expect([for (final c in chapters) c.number], [for (var i = 0; i < 40; i++) i]);
+    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4, 5, 6]);
+    expect(chapters.length, 48);
+    expect([for (final c in chapters) c.number], [for (var i = 0; i < 48; i++) i]);
     expect([for (final c in StoryContent.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
     expect([for (final c in StoryContent.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
     expect([for (final c in StoryContent.inSeason(5)) c.number], [32, 33, 34, 35, 36, 37, 38, 39]);
-    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four', 'Season Five']);
+    expect([for (final c in StoryContent.inSeason(6)) c.number], [40, 41, 42, 43, 44, 45, 46, 47]);
+    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four', 'Season Five', 'Season Six']);
     expect([for (final c in StoryContent.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
     expect([for (final c in StoryContent.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
@@ -74,7 +75,10 @@ void main() {
     expect(StoryContent.inSeason(4).last.unlockLevel, inInclusiveRange(80, 99));
     // Season Five starts after Season Four and finishes at the level cap.
     expect(StoryContent.inSeason(5).first.unlockLevel, greaterThan(StoryContent.inSeason(4).last.unlockLevel));
-    expect(StoryContent.inSeason(5).last.unlockLevel, inInclusiveRange(100, Progression.maxLevel));
+    expect(StoryContent.inSeason(5).last.unlockLevel, inInclusiveRange(100, 120));
+    // Season Six starts after Season Five and finishes at the cap.
+    expect(StoryContent.inSeason(6).first.unlockLevel, greaterThan(StoryContent.inSeason(5).last.unlockLevel));
+    expect(StoryContent.inSeason(6).last.unlockLevel, inInclusiveRange(121, Progression.maxLevel));
   });
 
   test('what is open depends only on level, and never shrinks as the hero levels up', () {
@@ -83,6 +87,7 @@ void main() {
     expect(StoryRules.unlocked(6).map((c) => c.number), [0, 1, 2, 3]);
     expect(StoryRules.unlocked(Progression.maxLevel).length, chapters.length);
     expect(StoryRules.unlocked(99).length, 32, reason: 'Season Five opens after the old cap');
+    expect(StoryRules.unlocked(120).length, 40, reason: 'Season Six opens after the second cap');
     var last = 0;
     for (var level = 1; level <= 40; level++) {
       final n = StoryRules.unlocked(level).length;
@@ -95,6 +100,7 @@ void main() {
     expect(StoryRules.next(42)!.number, 16, reason: 'Season Three opens once Season Two is done');
     expect(StoryRules.next(StoryContent.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
     expect(StoryRules.next(StoryContent.inSeason(4).last.unlockLevel)!.number, 32, reason: 'Season Five opens once Season Four is done');
+    expect(StoryRules.next(StoryContent.inSeason(5).last.unlockLevel)!.number, 40, reason: 'Season Six opens once Season Five is done');
     expect(StoryRules.next(StoryContent.chapters.last.unlockLevel), isNull);
   });
 
@@ -538,17 +544,97 @@ void main() {
       }
     });
 
-    test('it reaches past the old level cap of 99, and finishes at the new one', () {
+    test('it reaches past the old level cap of 99, and finishes at the second one', () {
       expect(five.first.unlockLevel, greaterThan(StoryContent.inSeason(4).last.unlockLevel));
       expect(five.first.unlockLevel, greaterThan(97));
-      expect(five.last.unlockLevel, Progression.maxLevel);
-      expect(five.every((c) => c.unlockLevel <= Progression.maxLevel), isTrue);
+      expect(five.last.unlockLevel, 120);
+      expect(five.every((c) => c.unlockLevel <= 120), isTrue);
     });
 
     test('somebody new arrives at the end, and the newcomer is welcomed the way Bertram was', () {
       final last = [for (final l in _lines(five.last)) l.text].join(' ');
       expect(last, contains('Is this the place one begins?'));
       expect(last, contains('Duck Mat'));
+    });
+  });
+
+  group('Season Six, The Comet Road', () {
+    final six = StoryContent.inSeason(6);
+
+    test('it takes the guild back through the old places and out to the Starlit Isles', () {
+      final all = [for (final c in six) for (final l in _lines(c)) l.text].join(' ');
+      expect(all, contains('comet'));
+      expect(all, contains('Starlit Isles'));
+      expect(all, contains('notebook'));
+      expect(all, contains('seventy-six'));
+      final used = {for (final c in six) for (final s in c.scenes) s.backdrop};
+      expect(used, containsAll([StoryBackdrop.isles, StoryBackdrop.cometSky, StoryBackdrop.coastRoad, StoryBackdrop.passHut]));
+    });
+
+    test('it brings in two new characters and both of them speak', () {
+      final speakers = {for (final c in six) for (final l in _lines(c)) l.speaker};
+      expect(speakers, containsAll([StorySpeaker.juno, StorySpeaker.comet]));
+    });
+
+    test('it brings back people from the seasons before', () {
+      final speakers = {for (final c in six) for (final l in _lines(c)) l.speaker};
+      expect(
+        speakers,
+        containsAll([
+          StorySpeaker.chad, StorySpeaker.maple, StorySpeaker.pip, StorySpeaker.bertram, StorySpeaker.biscuit,
+          StorySpeaker.wren, StorySpeaker.hush, StorySpeaker.tamsin, StorySpeaker.sedge,
+        ]),
+      );
+    });
+
+    test('it remembers what you handed the newcomer at the end of Season Five', () {
+      final keysUsed = {
+        for (final c in six) for (final s in c.scenes) for (final n in s.nodes) if (n.only != null) n.only!.key,
+      };
+      expect(keysUsed, containsAll(['pass', 'motivation']));
+      // Every answer to that choice is picked up, so nobody gets a gap.
+      final answers = {
+        for (final c in six) for (final s in c.scenes) for (final n in s.nodes) if (n.only?.key == 'pass') n.only!.option,
+      };
+      expect(answers, {0, 1, 2});
+    });
+
+    test('it asks its own questions, with fresh keys', () {
+      final earlier = {
+        for (final c in [for (var s = 1; s <= 5; s++) ...StoryContent.inSeason(s)]) for (final ch in _choices(c)) ch.key,
+      };
+      final keys = [for (final c in six) for (final ch in _choices(c)) ch.key];
+      expect(keys.length, greaterThanOrEqualTo(7));
+      expect(keys.toSet().intersection(earlier), isEmpty);
+    });
+
+    test('it says the same kind things as the others: rest, its own pace, no deadline', () {
+      final all = [for (final c in six) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('rest is training'), isTrue);
+      expect(all.contains('at your own pace'), isTrue);
+      expect(all.contains('nothing here has a deadline'), isTrue);
+    });
+
+    test('its one real date is gentle: a comet that takes its time, and nobody is hurried for it', () {
+      final all = [for (final c in six) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all, contains('never once been in a hurry'));
+      expect(all, contains('three days early'));
+      for (final w in ['hurry up', 'run out of time', 'miss it', 'too late for you']) {
+        expect(all.contains(w), isFalse, reason: w);
+      }
+    });
+
+    test('it picks up where Season Five left off and ends at the hearth', () {
+      expect(six.last.scenes.last.backdrop, StoryBackdrop.hearth);
+      expect(six.first.scenes.first.backdrop, StoryBackdrop.hearth);
+      final first = [for (final l in _lines(six.first)) l.text].join(' ');
+      expect(first, contains('hearth'));
+    });
+
+    test('it reaches past the level cap of Season Five, and finishes at the cap', () {
+      expect(six.first.unlockLevel, greaterThan(StoryContent.inSeason(5).last.unlockLevel));
+      expect(six.last.unlockLevel, Progression.maxLevel);
+      expect(six.every((c) => c.unlockLevel <= Progression.maxLevel), isTrue);
     });
   });
 }

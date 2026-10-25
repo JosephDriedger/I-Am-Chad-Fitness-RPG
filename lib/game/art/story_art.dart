@@ -368,6 +368,50 @@ void paintBertram(Canvas c, ActorState s) {
   c.restore();
 }
 
+/// Juno, who knocked at the hall's door at the end of Season Five: a small, thoughtful
+/// traveller in a green jacket and a yellow scarf, with a backpack that has gained a
+/// few patches since.
+void paintJuno(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 1.9) * 0.7;
+  const skin = Color(0xFFC98F63);
+  const jacket = Color(0xFF3F7F5A);
+  shadow(c, 14);
+  c.save();
+  c.translate(0, bob);
+  // Legs and trainers.
+  rrect(c, -6.5, -22, 6, 22, 2, const Color(0xFF3D4A66));
+  rrect(c, 1, -22, 6, 22, 2, const Color(0xFF3D4A66));
+  rrect(c, -8.5, -4, 9, 4, 2, const Color(0xFFF5F0E6));
+  rrect(c, 0, -4, 9, 4, 2, const Color(0xFFF5F0E6));
+  // The backpack, behind, with two patches.
+  rrect(c, -22, -60, 14, 34, 5, const Color(0xFF8D5E3C));
+  circle(c, -15, -50, 3.2, const Color(0xFFF2C94C));
+  circle(c, -15, -40, 2.6, const Color(0xFFE2663A));
+  // Jacket, scarf and arms.
+  rrect(c, -13, -62, 26, 42, 8, jacket);
+  rrect(c, -13, -64, 26, 7, 3, const Color(0xFFF2C94C));
+  rrect(c, 8, -60, 5, 14, 2, const Color(0xFFF2C94C));
+  rrect(c, 11, -58, 6, 22, 3, jacket);
+  circle(c, 14, -35, 3.6, skin);
+  // Head: dark hair in a short tail, a thoughtful look, and a small smile.
+  circle(c, 0, -74, 11.5, skin);
+  c.drawPath(
+    Path()
+      ..moveTo(-11.5, -75)
+      ..quadraticBezierTo(-12, -90, 1, -88)
+      ..quadraticBezierTo(13, -87, 11.5, -75)
+      ..quadraticBezierTo(5, -81, -2, -80)
+      ..quadraticBezierTo(-8, -79, -11.5, -75)
+      ..close(),
+    Paint()..color = const Color(0xFF3B2A22),
+  );
+  circle(c, -17, -78, 4, const Color(0xFF3B2A22));
+  circle(c, -4, -73, 1.4, const Color(0xFF2B1D14));
+  circle(c, 4, -73, 1.4, const Color(0xFF2B1D14));
+  strokePath(c, Path()..moveTo(-3.5, -67)..quadraticBezierTo(0, -64.5, 3.5, -67), 1.3, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -414,6 +458,10 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintForgemaster(c, s);
     case StorySpeaker.magmara:
       paintMagmara(c, s);
+    case StorySpeaker.juno:
+      paintJuno(c, s);
+    case StorySpeaker.comet:
+      paintCometKing(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -442,6 +490,8 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.worm => 0.6,
       StorySpeaker.brun => 1.0,
       StorySpeaker.magmara => 0.8,
+      StorySpeaker.juno => 0.9,
+      StorySpeaker.comet => 0.85,
       _ => 1.0,
     };
 
@@ -1342,5 +1392,36 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
       rrect(c, w * 0.31, h * 0.06, 8, 14, 2, const Color(0xFFFFE9A8));
       _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF6B4528));
       oval(c, w * 0.5, ground + 4, w * 0.28, h * 0.03, const Color(0xFF8E2B3B));
+    case StoryBackdrop.isles:
+      // Floating islands under a deep night sky, a pale moon and a little drifting mist.
+      _gradient(c, full, const [Color(0xFF0E1236), Color(0xFF4C3F95)]);
+      _stars(c, s, time, count: 60);
+      circle(c, w * 0.8, h * 0.16, w * 0.06, const Color(0x33F1F4C9));
+      circle(c, w * 0.8, h * 0.16, w * 0.04, const Color(0xFFF1F4C9));
+      for (var i = 0; i < 4; i++) {
+        final x = w * (0.1 + i * 0.27) + math.sin(time * 0.3 + i * 2) * 8;
+        final y = h * (0.42 + (i % 2) * 0.1) + math.sin(time * 0.6 + i) * 4;
+        fillPath(c, poly([x - w * 0.12, y, x + w * 0.12, y, x + w * 0.03, y + h * 0.14, x - w * 0.02, y + h * 0.09]), const Color(0xFF3A3470));
+        oval(c, x, y, w * 0.12, h * 0.022, const Color(0xFF5FA86A));
+        oval(c, x, y - 2, w * 0.1, h * 0.012, const Color(0xFF7BC47A));
+      }
+      for (var i = 0; i < 3; i++) {
+        oval(c, w * (0.2 + i * 0.3) + math.sin(time * 0.25 + i) * 14, h * 0.78, w * 0.2, h * 0.03, const Color(0x22FFFFFF));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3E3F88));
+    case StoryBackdrop.cometSky:
+      // A wide night with a comet crossing it, its long tail glowing.
+      _gradient(c, full, const [Color(0xFF070A24), Color(0xFF2B3A7A)]);
+      _stars(c, s, time, count: 70);
+      final p = (time * 0.05 + 0.15) % 1;
+      final head = Offset(w * (0.1 + p * 0.8), h * (0.08 + p * 0.22));
+      for (var i = 0; i < 12; i++) {
+        final t = i / 11;
+        circle(c, head.dx - t * w * 0.34, head.dy - t * h * 0.2, w * 0.03 * (1 - t * 0.8), Color.fromRGBO(150, 215, 255, 0.5 * (1 - t)));
+      }
+      circle(c, head.dx, head.dy, w * 0.05, const Color(0x44B3E5FC));
+      circle(c, head.dx, head.dy, w * 0.026, const Color(0xFFE1F5FE));
+      _hill(c, s, h * 0.7, h * 0.04, 0.8, const Color(0xFF1F2A5C));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF26331F));
   }
 }
