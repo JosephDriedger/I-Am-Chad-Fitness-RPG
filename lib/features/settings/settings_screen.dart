@@ -166,7 +166,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 10),
                 GameButton(
-                  label: 'Copy My Data (JSON)',
+                  label: 'Copy a Workout Summary',
                   icon: Icons.copy_all_rounded,
                   kind: GameButtonKind.secondary,
                   onPressed: () async {
@@ -174,7 +174,7 @@ class SettingsScreen extends ConsumerWidget {
                     await Clipboard.setData(ClipboardData(text: json));
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('Copied. This is a readable summary of your workouts. To keep a backup you can restore, use Copy a Full Backup.'),
+                        content: Text('Copied. This is a plain summary of your workouts, to look at. To keep a backup you can restore, use Copy a Full Backup.'),
                       ));
                     }
                   },

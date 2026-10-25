@@ -27,6 +27,7 @@ Follow the usual game convention:
 - Comparison with other people or with an ideal.
 - Medical claims or promises of health outcomes.
 - Urgency tricks, countdown timers, or fear of missing out.
+- Technical words the player has no reason to know: JSON, database, API, checksum and the like. Say what it does ("Copy a Full Backup", "Restore From a Backup") and keep the technical names in code and docs. `test/plain_words_test.dart` scans the text on every screen, the guide, Chad's lines, reminders and ideas for them.
 
 Reminder notifications follow the same rules, and more: they are off until the player turns them on, never mention streaks, missed days or anything not yet done, never count, compare or sell, and are only ever an invitation ("come by if you feel like it"). Their lines live in `ReminderCopy` and `test/domain/reminders_test.dart` lints them.
 
