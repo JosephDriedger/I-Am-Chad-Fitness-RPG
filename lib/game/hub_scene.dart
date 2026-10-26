@@ -554,6 +554,12 @@ class HubScene extends GameScene {
         }
         circle(c, x + 3, b - 18, 5.2, const Color(0x55B3E5FC));
         circle(c, x + 3, b - 18, 3.4, const Color(0xFFE1F5FE));
+      case TrophyShape.hammock:
+        // A tiny hammock slung between two posts, with a sleeper-shaped dip.
+        rrect(c, x - 7, b - 22, 2, 22, 0, const Color(0xFF8D5E3C));
+        rrect(c, x + 5, b - 22, 2, 22, 0, const Color(0xFF8D5E3C));
+        strokePath(c, Path()..moveTo(x - 6, b - 19)..quadraticBezierTo(x, b - 8, x + 6, b - 19), 3.4, const Color(0xFFE2663A));
+        strokePath(c, Path()..moveTo(x - 6, b - 19)..quadraticBezierTo(x, b - 8, x + 6, b - 19), 1, const Color(0xFFFFE0B2));
     }
   }
 
@@ -979,7 +985,7 @@ class HallBackdrop extends Component {
 
   /// Where each keepsake stands on the floor by the left wall, so earlier ones never
   /// shift as more are earned.
-  static const _keepsakeSlots = <double>[54, 76, 98, 120, 142];
+  static const _keepsakeSlots = <double>[54, 76, 98, 120, 142, 164];
 
   /// Small things that stand on the hall floor for each story season finished.
   /// Earned, never sold, and never taken away.
@@ -1042,6 +1048,16 @@ class HallBackdrop extends Component {
           }
           circle(canvas, x + 2, base - 24, 6, Color.fromRGBO(179, 229, 252, 0.4 * glow));
           circle(canvas, x + 2, base - 24, 3.6, const Color(0xFFE1F5FE));
+        case KeepsakeShape.hammock:
+          // A small hammock between two posts, rocking very slightly.
+          final rock = math.sin(_t * 0.9) * 1.2;
+          rrect(canvas, x - 11, base - 26, 2.4, 26, 1, const Color(0xFF7A5230));
+          rrect(canvas, x + 9, base - 26, 2.4, 26, 1, const Color(0xFF7A5230));
+          final path = Path()
+            ..moveTo(x - 10, base - 22)
+            ..quadraticBezierTo(x + rock, base - 9, x + 10, base - 22);
+          strokePath(canvas, path, 4, const Color(0xFFE2663A));
+          strokePath(canvas, path, 1.2, const Color(0xFFFFE0B2));
       }
     }
   }

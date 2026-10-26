@@ -170,7 +170,7 @@ class Guide {
         GuideSection('Story', [
           const GuideEntry(
             'The Chronicle',
-            'Each chapter opens at a hero level and waits for you, so nothing can be missed and nothing is timed. You can skip a chapter, leave it, or read it again whenever you like. The first season is in the game. Later seasons download once, the first time you read them, and stay on your phone.',
+            'Each chapter opens at a hero level (the last season opens after days of moving instead, once the levels run out) and waits for you, so nothing can be missed and nothing is timed. You can skip a chapter, leave it, or read it again whenever you like. The first season is in the game. Later seasons download once, the first time you read them, and stay on your phone.',
           ),
           const GuideEntry(
             'Choices',

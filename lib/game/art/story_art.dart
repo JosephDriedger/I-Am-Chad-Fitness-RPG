@@ -412,6 +412,40 @@ void paintJuno(Canvas c, ActorState s) {
   c.restore();
 }
 
+/// The goat who knocks at doors, chews on plans and has no interest in being busy: a
+/// cream goat in profile, with small horns, a beard and a very calm eye.
+void paintGoat(Canvas c, ActorState s) {
+  final chew = math.sin(s.time * 5) * 1.2;
+  final sway = math.sin(s.time * 1.3) * 0.8;
+  const coat = Color(0xFFF1E8D6);
+  const shade = Color(0xFFD8C9AE);
+  shadow(c, 24);
+  // Legs: two near, two far.
+  for (final x in [-14.0, -8.0, 10.0, 16.0]) {
+    rrect(c, x, -22, 4.5, 22, 2, x < 0 ? shade : coat);
+    rrect(c, x - 0.3, -3, 5.2, 3, 1, const Color(0xFF5D4037));
+  }
+  // Body and a short tail.
+  oval(c, 0, -30 + sway, 24, 13, coat);
+  oval(c, 3, -26 + sway, 20, 8, shade);
+  fillPath(c, poly([-23, -34 + sway, -30, -42 + sway, -26, -30 + sway]), shade);
+  // Neck and head, held high and calm.
+  fillPath(c, poly([14, -36 + sway, 22, -62, 30, -58, 24, -30 + sway]), coat);
+  circle(c, 29, -60, 7.4, coat);
+  oval(c, 36, -57 + chew * 0.2, 6, 4.2, coat);
+  circle(c, 41, -57 + chew * 0.2, 1.5, const Color(0xFF8D6E63));
+  // A pale beard, swaying as it chews.
+  fillPath(c, poly([34, -53 + chew * 0.3, 38, -53 + chew * 0.3, 36, -44 + chew * 0.6]), const Color(0xFFFFFFFF));
+  // Horns and an ear, an eye with a long horizontal pupil.
+  strokePath(c, Path()..moveTo(26, -66)..quadraticBezierTo(22, -76, 17, -72), 2.4, const Color(0xFFBCAAA4));
+  oval(c, 22, -62, 5, 2.4, shade);
+  circle(c, 31, -62, 2.4, const Color(0xFFFFF59D));
+  rrect(c, 29.4, -62.6, 3.4, 1.3, 0.6, const Color(0xFF2B1D14));
+  // A paper, half eaten, in its mouth: somebody's plan.
+  rrect(c, 38, -55 + chew * 0.2, 7, 5, 1, const Color(0xFFFFF3D6));
+  line(c, 39.5, -53.5 + chew * 0.2, 43.5, -53.5 + chew * 0.2, 0.7, const Color(0xFF8D6E63));
+}
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -462,6 +496,8 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintJuno(c, s);
     case StorySpeaker.comet:
       paintCometKing(c, s);
+    case StorySpeaker.goat:
+      paintGoat(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -492,6 +528,7 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.magmara => 0.8,
       StorySpeaker.juno => 0.9,
       StorySpeaker.comet => 0.85,
+      StorySpeaker.goat => 0.95,
       _ => 1.0,
     };
 
@@ -1423,5 +1460,34 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
       circle(c, head.dx, head.dy, w * 0.026, const Color(0xFFE1F5FE));
       _hill(c, s, h * 0.7, h * 0.04, 0.8, const Color(0xFF1F2A5C));
       _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF26331F));
+    case StoryBackdrop.garden:
+      // The hall's back garden on a warm afternoon: hedges, flowers, and two trees with a hammock.
+      _gradient(c, full, const [Color(0xFF9CD3F2), Color(0xFFEAF6FB)]);
+      _cloud(c, w * 0.22, h * 0.12, w * 0.1, const Color(0xE6FFFFFF));
+      _cloud(c, w * 0.7, h * 0.18, w * 0.08, const Color(0xCCFFFFFF));
+      _hill(c, s, h * 0.5, h * 0.03, 0.6, const Color(0xFF8CC47A));
+      // A hedge along the back, with a few flowers in it.
+      rrect(c, 0, h * 0.5, w, h * 0.12, 8, const Color(0xFF3F7F4A));
+      for (var i = 0; i < 16; i++) {
+        circle(c, w * (i + 0.5) / 16, h * 0.5 + (i % 3) * 4, 6, const Color(0xFF4F9A58));
+        if (i % 3 == 1) circle(c, w * (i + 0.5) / 16 + 4, h * 0.53, 2.2, [const Color(0xFFF2C94C), const Color(0xFFE26A9B), const Color(0xFFFFFFFF)][(i ~/ 3) % 3]);
+      }
+      // Two trees, and a hammock slung between them, swaying a very little.
+      for (final x in [w * 0.18, w * 0.82]) {
+        rrect(c, x - 5, h * 0.3, 10, h * 0.5, 3, const Color(0xFF7A5230));
+        circle(c, x, h * 0.26, w * 0.12, const Color(0xFF3F9E5A));
+        circle(c, x - w * 0.06, h * 0.32, w * 0.08, const Color(0xFF4FB06A));
+      }
+      final sag = h * 0.07 + math.sin(time * 0.9) * 2;
+      final hammock = Path()
+        ..moveTo(w * 0.2, h * 0.52)
+        ..quadraticBezierTo(w * 0.5, h * 0.52 + sag * 2, w * 0.8, h * 0.52);
+      strokePath(c, hammock, 7, const Color(0xFFE2663A));
+      strokePath(c, hammock, 2, const Color(0xFFFFE0B2));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF7DB66A));
+      for (var i = 0; i < 14; i++) {
+        final x = w * ((i * 37 % 100) / 100);
+        line(c, x, ground + 6 + (i % 4) * 8, x + 2, ground + 1 + (i % 4) * 8, 1.2, const Color(0xFF5E9A4E));
+      }
   }
 }

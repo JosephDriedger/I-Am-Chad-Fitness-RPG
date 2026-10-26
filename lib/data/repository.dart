@@ -343,6 +343,10 @@ class GameRepository {
   Stream<Set<int>> watchStoryRead() =>
       _db.select(_db.storyProgress).watch().map((rows) => {for (final r in rows) r.chapter});
 
+  /// When each chapter was first read, by chapter number.
+  Stream<Map<int, DateTime>> watchStoryReadAt() =>
+      _db.select(_db.storyProgress).watch().map((rows) => {for (final r in rows) r.chapter: r.readAt});
+
   /// The player's remembered story choices, by key.
   Stream<Map<String, int>> watchStoryChoices() =>
       _db.select(_db.storyChoices).watch().map((rows) => {for (final r in rows) r.key: r.option});

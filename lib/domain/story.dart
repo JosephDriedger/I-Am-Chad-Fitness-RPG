@@ -1,6 +1,6 @@
 /// The story: Season One, "The Dawn Bell", Season Two, "The Lantern Coast",
 /// Season Three, "The Weather Chime", Season Four, "The Long Table", and Season
-/// Five, "The Banked Fire", and Season Six, "The Comet Road".
+/// Five, "The Banked Fire", Season Six, "The Comet Road", and Season Seven, "The Day Off".
 /// See docs/STORY.md for the cast,
 /// themes and the rules every line has to follow.
 ///
@@ -9,6 +9,8 @@
 /// never pressures anyone: it simply waits. Every chapter can be skipped and
 /// read again. A few choices are remembered and echoed later.
 library;
+
+import 'workout.dart';
 
 /// Who is talking. [hero] is the player, who speaks only through choices.
 enum StorySpeaker {
@@ -44,6 +46,9 @@ enum StorySpeaker {
   // Season Six, "The Comet Road".
   juno('Juno'),
   comet('The Comet King'),
+
+  // Season Seven, "The Day Off".
+  goat('The Goat'),
   hero('');
 
   const StorySpeaker(this.label);
@@ -94,6 +99,9 @@ enum StoryBackdrop {
   // Season Six, "The Comet Road".
   isles,
   cometSky,
+
+  // Season Seven, "The Day Off".
+  garden,
 }
 
 /// A line that only appears if an earlier choice went a particular way.
@@ -157,6 +165,8 @@ class StoryChapter {
     required this.summary,
     this.scenes = const [],
     this.season = 1,
+    this.afterChapter,
+    this.afterDays = 0,
   });
 
   /// Which season this chapter belongs to.
@@ -169,6 +179,16 @@ class StoryChapter {
 
   /// The hero level at which this chapter opens.
   final int unlockLevel;
+
+  /// For a chapter that opens by how much the player moves rather than how high their
+  /// level is (the levels have run out): the chapter whose reading starts the count.
+  /// Null for every chapter that opens by level alone.
+  final int? afterChapter;
+
+  /// How many days of movement, after [afterChapter] was read, this chapter waits for.
+  /// Only ever counts up, and nothing about it is timed: a quiet week adds nothing and
+  /// takes nothing away.
+  final int afterDays;
 
   /// A line for the Chronicle once it has been read, with no spoilers for later.
   final String summary;
@@ -188,6 +208,8 @@ class StoryChapter {
         unlockLevel: unlockLevel,
         summary: summary,
         scenes: scenes,
+        afterChapter: afterChapter,
+        afterDays: afterDays,
       );
 
   /// Where this chapter sits in its own season: 0 is the prologue.
@@ -224,7 +246,8 @@ class StorySeason {
         3 => 'Season Three',
         4 => 'Season Four',
         5 => 'Season Five',
-        _ => 'Season Six',
+        6 => 'Season Six',
+        _ => 'Season Seven',
       };
 }
 
@@ -247,14 +270,22 @@ class StoryText {
 
 /// Where the player stands in the story: what has opened and what is unread.
 class StoryStatus {
-  const StoryStatus({required this.level, required this.read});
+  const StoryStatus({required this.level, required this.read, this.daysSince = const {}});
 
   final int level;
 
   /// Numbers of the chapters already read.
   final Set<int> read;
 
-  List<StoryChapter> get unlocked => StoryRules.unlocked(level);
+  /// For each chapter that starts a count (see [StoryChapter.afterChapter]), the days
+  /// the player has moved since reading it.
+  final Map<int, int> daysSince;
+
+  /// Everything that has opened, in order. A chapter that has been read stays open.
+  List<StoryChapter> get unlocked => [
+        for (final c in Story.chapters)
+          if (isUnlocked(c)) c,
+      ];
 
   /// Open chapters not yet read, in order.
   List<StoryChapter> get unread => [
@@ -263,9 +294,28 @@ class StoryStatus {
       ];
 
   /// The next chapter still closed, or null at the end of the season.
-  StoryChapter? get next => StoryRules.next(level);
+  StoryChapter? get next {
+    for (final c in Story.chapters) {
+      if (!isUnlocked(c)) return c;
+    }
+    return null;
+  }
 
-  bool isUnlocked(StoryChapter c) => c.unlockLevel <= level;
+  bool isUnlocked(StoryChapter c) =>
+      read.contains(c.number) || StoryRules.opens(c, level, read: read, daysSince: daysSince);
+
+  /// When a closed chapter opens, in plain words that read after "Opens" ("at Level 20",
+  /// "after 4 more days of moving"). Never a countdown against the clock.
+  String whenOpens(StoryChapter c) {
+    if (level < c.unlockLevel) return 'at Level ${c.unlockLevel}';
+    final after = c.afterChapter;
+    if (after != null) {
+      if (!read.contains(after)) return 'once ${Story.seasonOf(Story.byNumber(after)!.season).title} is read';
+      final left = c.afterDays - (daysSince[after] ?? 0);
+      if (left > 0) return 'after $left more ${left == 1 ? 'day' : 'days'} of moving';
+    }
+    return 'now';
+  }
   bool isRead(StoryChapter c) => read.contains(c.number);
 
   /// The most recently opened chapter.
@@ -277,17 +327,38 @@ class StoryRules {
 
   /// Chapters open at these hero levels. They are spaced so the first few come
   /// quickly and the rest arrive over a few months of regular movement.
-  static List<StoryChapter> unlocked(int level) => [
-    for (final c in Story.chapters)
-      if (c.unlockLevel <= level) c,
-  ];
+  static List<StoryChapter> unlocked(int level, {Set<int> read = const {}, Map<int, int> daysSince = const {}}) => [
+        for (final c in Story.chapters)
+          if (opens(c, level, read: read, daysSince: daysSince)) c,
+      ];
 
-  /// The next chapter still closed at [level], or null at the end of the season.
-  static StoryChapter? next(int level) {
+  /// The next chapter still closed at [level], or null at the end of the story.
+  static StoryChapter? next(int level, {Set<int> read = const {}, Map<int, int> daysSince = const {}}) {
     for (final c in Story.chapters) {
-      if (c.unlockLevel > level) return c;
+      if (!opens(c, level, read: read, daysSince: daysSince)) return c;
     }
     return null;
+  }
+
+  /// Whether [c] has opened: the level has been reached and, for a chapter that waits
+  /// on movement, the chapter before it has been read and enough days have passed
+  /// since. A chapter that waits on movement never opens from the level alone.
+  static bool opens(StoryChapter c, int level, {Set<int> read = const {}, Map<int, int> daysSince = const {}}) {
+    if (c.unlockLevel > level) return false;
+    final after = c.afterChapter;
+    if (after == null) return true;
+    return read.contains(after) && (daysSince[after] ?? 0) >= c.afterDays;
+  }
+
+  /// The days of movement after the day [readAt] (a chapter was read): different days on
+  /// which a workout that counts for rewards was done. The day of reading itself is not
+  /// counted, so finishing a season does not start the next one on the spot.
+  static int daysMovedAfter(DateTime readAt, Iterable<WorkoutEntry> entries) {
+    final readDay = dayKey(readAt);
+    return {
+      for (final e in entries)
+        if (e.countsForRewards && dayKey(e.performedAt).compareTo(readDay) > 0) dayKey(e.performedAt),
+    }.length;
   }
 }
 
@@ -331,6 +402,12 @@ class Story {
       blurb: 'An old item on an old list, a long road back through everywhere, and a sky that arrives when it arrives.',
       firstChapter: 40,
     ),
+    StorySeason(
+      number: 7,
+      title: 'The Day Off',
+      blurb: 'The guild gives Chad a day off, and he has no idea what to do with it. It opens as you move, not as you level.',
+      firstChapter: 48,
+    ),
   ];
 
   static StorySeason seasonOf(int season) => seasons.firstWhere((s) => s.number == season);
@@ -349,9 +426,9 @@ class Story {
   }
 
   /// Every chapter of every season, in the order they open.
-  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour, ...seasonFive, ...seasonSix];
+  static const chapters = <StoryChapter>[...seasonOne, ...seasonTwo, ...seasonThree, ...seasonFour, ...seasonFive, ...seasonSix, ...seasonSeven];
 
-  // Seasons Two to Six are downloaded the first time they are read (see
+  // Seasons Two to Seven are downloaded the first time they are read (see
   // docs/CONTENT_PACKS.md). The app keeps only what the Chronicle and the unlock
   // rules need: each chapter's place, title, level and summary, with no scenes.
   // The scripts live in tool/story_content, and tool/build_packs.dart turns them
@@ -488,6 +565,83 @@ class Story {
       unlockLevel: 70,
       summary:
           'The seven bells are rung, the storm settles, and three lights and three sounds answer each other.',
+    ),
+  ];
+
+  // Season Seven opens by movement, not level, because the levels have run out (see
+  // decision 55): each chapter waits for more days of moving after the Season Six finale.
+  static const seasonSeven = <StoryChapter>[
+    StoryChapter(
+      season: 7,
+      number: 48,
+      title: 'A Hall Without Chad',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 0,
+      summary: 'The guild votes, with great kindness and no dissent, to give Chad a day off. He takes it badly.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 49,
+      title: 'Strategic Pauses',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 10,
+      summary: 'Chad schedules his rest in fifteen-minute blocks, and Maple takes the schedule away.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 50,
+      title: 'The Hammock Problem',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 20,
+      summary: 'A hammock, a garden, a very upright man, and a goat with an appetite for plans.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 51,
+      title: 'Other People\'s Ways of Resting',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 30,
+      summary: 'Soup, landings and early nights: friends from all over come to show Chad how they do it.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 52,
+      title: 'A Hall That Runs Itself',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 40,
+      summary: 'A small emergency in the hall, handled calmly without Chad, to his enormous relief and slight dismay.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 53,
+      title: 'Why Chad Does Not Stop',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 50,
+      summary: 'In the garden, after the others have gone in, Chad says the true thing.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 54,
+      title: 'The Night Before the Nothing',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 60,
+      summary: 'The garden fills up with people with nothing planned, which takes a surprising amount of preparation.',
+    ),
+    StoryChapter(
+      season: 7,
+      number: 55,
+      title: 'The Great Do Nothing',
+      unlockLevel: 144,
+      afterChapter: 47,
+      afterDays: 70,
+      summary: 'The whole guild does nothing together, beautifully, and the hall is still standing at the end of it.',
     ),
   ];
 

@@ -11,6 +11,7 @@ import 'package:i_am_chad/domain/story.dart';
 import 'package:i_am_chad/domain/story_pack.dart';
 
 import 'season_five.dart';
+import 'season_seven.dart';
 import 'season_six.dart';
 import 'season_four.dart';
 import 'season_three.dart';
@@ -20,7 +21,7 @@ class StoryContent {
   const StoryContent._();
 
   /// Every chapter of every season, with its scenes.
-  static const chapters = <StoryChapter>[...Story.seasonOne, ...seasonTwoChapters, ...seasonThreeChapters, ...seasonFourChapters, ...seasonFiveChapters, ...seasonSixChapters];
+  static const chapters = <StoryChapter>[...Story.seasonOne, ...seasonTwoChapters, ...seasonThreeChapters, ...seasonFourChapters, ...seasonFiveChapters, ...seasonSixChapters, ...seasonSevenChapters];
 
   static StoryChapter byNumber(int n) => chapters.firstWhere((c) => c.number == n);
 
@@ -32,7 +33,7 @@ class StoryContent {
   /// Raised when the wording of a published pack is corrected, so phones that
   /// already have it can be offered the fix. Bump a season's number whenever
   /// its script changes after it has been published.
-  static const versions = <int, int>{2: 1, 3: 1, 4: 1, 5: 1, 6: 1};
+  static const versions = <int, int>{2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 1};
 
   /// The files to publish, by name: one pack per downloaded season, and the
   /// manifest that lists them.

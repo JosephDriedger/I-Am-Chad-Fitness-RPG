@@ -82,7 +82,7 @@ class _ChapterCard extends ConsumerWidget {
     final read = status.isRead(chapter);
     final String stateText;
     if (!open) {
-      stateText = 'Opens at Level ${chapter.unlockLevel}';
+      stateText = 'Opens ${status.whenOpens(chapter)}';
     } else if (read) {
       stateText = 'Read';
     } else {
@@ -186,7 +186,7 @@ class ChroniclePanel extends ConsumerWidget {
                 ? 'A new chapter is waiting: ${unread.first.title}.'
                 : next == null
                 ? 'You have read everything there is, and every chapter can be read again whenever you like.'
-                : 'You are all caught up. The next chapter opens at Level ${next.unlockLevel}.',
+                : 'You are all caught up. The next chapter opens ${status.whenOpens(next)}.',
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 12),

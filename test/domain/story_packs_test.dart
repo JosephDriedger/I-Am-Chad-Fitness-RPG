@@ -49,7 +49,7 @@ void main() {
     });
 
     test('opening a chapter never depends on a download: levels and numbers come from the app', () {
-      expect(StoryRules.unlocked(Progression.maxLevel).length, StoryContent.chapters.length);
+      expect(StoryRules.unlocked(Progression.maxLevel, read: {47}, daysSince: {47: 70}).length, StoryContent.chapters.length);
       expect(StoryRules.next(16)!.number, 8);
       expect(Story.byNumber(24)!.title, StoryContent.byNumber(24).title);
     });

@@ -122,7 +122,7 @@ class Pennant {
 }
 
 /// What a keepsake on the hall floor looks like.
-enum KeepsakeShape { lamp, chime, table, hearth, comet }
+enum KeepsakeShape { lamp, chime, table, hearth, comet, hammock }
 
 /// A small thing that stands on the hall floor for a story season finished.
 /// Earned by playing, never sold, and never taken away.
@@ -136,7 +136,7 @@ class Keepsake {
 }
 
 /// What a trophy on the Journal shelf looks like.
-enum TrophyShape { lantern, chime, cup, star, shield, sun, table, crown, flame, comet }
+enum TrophyShape { lantern, chime, cup, star, shield, sun, table, crown, flame, comet, hammock }
 
 /// A trophy on the Journal shelf, for the bigger milestones. Earned by playing,
 /// never sold, and never taken away.
@@ -173,6 +173,7 @@ class Cosmetics {
     Cape('table', 'Table Mantle', Unlock.chapter(31), color: 0xFF8E3B46, trim: 0xFFFFF3D6),
     Cape('hearth', 'Hearth Mantle', Unlock.chapter(39), color: 0xFF9A3412, trim: 0xFFFFB74D),
     Cape('road', 'Comet Mantle', Unlock.chapter(47), color: 0xFF1E2A5E, trim: 0xFF9FD8FF),
+    Cape('dayoff', 'Day Off Mantle', Unlock.chapter(55), color: 0xFFE2663A, trim: 0xFFFFF3D6),
     Cape('crimson', 'Crimson Mantle', Unlock.patron, color: 0xFFB3202F, trim: 0xFFF2C94C),
     Cape('starlit', 'Starlit Mantle', Unlock.patron, color: 0xFF1F2F66, trim: 0xFFB9C7FF, stars: true),
     Cape('aurora', 'Aurora Mantle', Unlock.patron, color: 0xFF1F8F86, trim: 0xFFC9A6FF),
@@ -219,16 +220,18 @@ class Cosmetics {
     Trophy('level_100', 'Level 100', Unlock.level(100), TrophyShape.crown),
     Trophy('story_five', 'The Banked Fire', Unlock.chapter(39), TrophyShape.flame),
     Trophy('story_six', 'The Comet Road', Unlock.chapter(47), TrophyShape.comet),
+    Trophy('story_seven', 'The Day Off', Unlock.chapter(55), TrophyShape.hammock),
   ];
 
   /// The hall floor's keepsakes, in the order they are set out: one for each of the later
-  /// seasons. The floor has room for five. All earned; none sold.
+  /// seasons. The floor has room for six. All earned; none sold.
   static const keepsakes = <Keepsake>[
     Keepsake('lamp', 'The Harbour Lamp', Unlock.chapter(15), KeepsakeShape.lamp),
     Keepsake('chime', 'The Little Chime', Unlock.chapter(23), KeepsakeShape.chime),
     Keepsake('table', 'The Laid Table', Unlock.chapter(31), KeepsakeShape.table),
     Keepsake('hearth', 'The Banked Hearth', Unlock.chapter(39), KeepsakeShape.hearth),
     Keepsake('comet', 'The Comet Glass', Unlock.chapter(47), KeepsakeShape.comet),
+    Keepsake('hammock', 'The Little Hammock', Unlock.chapter(55), KeepsakeShape.hammock),
   ];
 
   static Cape capeById(String id) => capes.firstWhere((c) => c.id == id, orElse: () => capes.first);

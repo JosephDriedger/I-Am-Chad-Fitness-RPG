@@ -1,6 +1,6 @@
 # Story
 
-Six seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four), **The Banked Fire** (Season Five) and **The Comet Road** (Season Six). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Seven seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four), **The Banked Fire** (Season Five), **The Comet Road** (Season Six) and **The Day Off** (Season Seven). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -192,6 +192,39 @@ Chad, Maple, Biscuit, Pip and Bertram carry the season. Wren, Hush, Tamsin and S
 | 6 | The Night Before the Sky | Level 141 | Everyone lies back and says what they would tell the person they were at the start. |
 | 7 | The Comet Road | Level 144 | The comet passes, an old notebook gets a tick, and the hearth is still banked at home. |
 
+## Season Seven: The Day Off
+
+### The premise
+
+The guild votes, unanimously and with great kindness, to give Chad a day off. He has not sat down since the comet. He takes it extremely seriously, which is the problem: he draws up a Schedule of Rest in fifteen-minute blocks (Maple: "Rest that has a timetable is just work in slippers"), climbs into a hammock sitting perfectly upright, and is eventually helped to lie back by a goat who has no plan at all and has eaten his. Friends from every place the story has been come to show him how they rest: Hush with a bowl of soup held in both hands, Tamsin stopping at landings that are not there, Wren going to bed at sundown, Sedge who does not rest but goes slowly, which is the same thing from the inside. On the fourth day forty-one crates of Brun's hammers arrive at once and the hall deals with them calmly without him, to his enormous relief and slight dismay. In the garden, after the others have gone in, he says the true thing: that he thought if he stopped, everyone would see that under the cape it was just him. Maple, who lit the first fire, tells him that is the part everybody came for. The season ends with a Great Do Nothing, at which the whole guild lies on blankets in the garden and the hall is still standing at the end of it.
+
+The season is about **rest as the main event**: stopping is a skill, other people rest in other ways, a thing worth building keeps standing when you step back, and you are enough when you are still.
+
+### How it opens
+
+Season Seven is the first season that opens by **days of movement rather than by level**, because the levels have run out (the cap is 144 and Season Six finishes there; see [decision 55](DECISIONS.md#55-season-seven-opens-by-days-of-movement-not-level)). Every chapter needs level 144 and the Season Six finale to have been read. The prologue opens at once, and each later chapter waits for ten more days on which the player did something that counts (days after the day the finale was read, so finishing a season does not start the next on the spot): 10, 20, 30, 40, 50, 60 and 70 days. The Chronicle says it plainly ("Opens after 4 more days of moving"), a quiet week adds nothing and takes nothing away, and a chapter that has been read stays open.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| The Goat | The cream-coloured goat who knocked at Brun's door when nobody else had in eleven years, and has walked up the stair since. Has no plan, no list and no interest in being busy, eats paper, and lies down in exactly the right place without checking. "The sun is warm. That is the whole plan." |
+
+Everyone else comes back: Chad, Maple, Pip, Juno, Bertram and Biscuit run the season, and Hush, Tamsin, Wren and Sedge visit.
+
+### Chapters
+
+| Chapter | Title | Opens after | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Hall Without Chad | The Season Six finale | The guild votes Chad a day off. He takes it badly. |
+| 1 | Strategic Pauses | 10 days | A Schedule of Rest in fifteen-minute blocks, and Biscuit, who has simply stopped. |
+| 2 | The Hammock Problem | 20 days | A very upright man in a hammock, and a goat with an appetite for plans. |
+| 3 | Other People's Ways of Resting | 30 days | Soup, landings, early nights and a very slow tortoise. |
+| 4 | A Hall That Runs Itself | 40 days | Forty-one crates and a goose, handled calmly without him. |
+| 5 | Why Chad Does Not Stop | 50 days | In the garden, the true thing, and what Maple has watched for years. |
+| 6 | The Night Before the Nothing | 60 days | Preparing nothing in great detail. Forty blankets that do not match. |
+| 7 | The Great Do Nothing | 70 days | The whole guild does nothing, beautifully, and the hall is still standing. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
@@ -202,18 +235,19 @@ A few moments ask you something. The answer is saved, the character replies to i
 - **Season Four** asks what you say to Bertram, what the invitation says, what you bring to the table, which chair Chad gets, the Sphinx's riddle, what weather Skarn should send, what you would give the guild, and where you sit. It remembers what you told Pip, how you lit the lamp, what you said to Tamsin at her stair and how the Chime was started, and the farewell follows your very first answer once more.
 - **Season Five** asks what you do first when the hearth goes quiet, how you go down the stair, what you would make on Brun's anvil, how you speak to Magmara, how much air a banked fire needs, which stretch of the stair you carry the coal, what you do with Brun's little poker and what you hand the newcomer. It remembers what you said you would give the guild in Season Four (a story, a song or an afternoon), and the farewell follows your very first answer once more.
 - **Season Six** asks what you say to Bertram, what goes in your bag, what you take from the road, how you spend the ferry crossing, how you greet the creatures of the Isles, what you say to the Comet King, what you would tell the person you were at the start, and what you do as the comet passes. It remembers what you handed the newcomer at the end of Season Five (a warm cup, the little poker or a chair), and the farewell follows your very first answer once more.
+- **Season Seven** asks how you vote on Chad's day off, what you do with his Schedule of Rest, how you help him into the hammock, whose way of resting you try first, what you say to him at the window, what you tell him in the garden, what you bring to the Nothing and what you do with your nothing. It remembers what you told the person you were at the start (Season Six), and the farewell follows your very first answer once more.
 - **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
 
 ## How it works
 
-- **Unlocking:** a chapter is open when the hero's level reaches its unlock level. Nothing is timed, nothing can be missed, and nothing is lost if you stop exercising for a while.
+- **Unlocking:** a chapter is open when the hero's level reaches its unlock level. The exception is Season Seven, which also waits for days of moving after the Season Six finale (see above). Nothing is timed, nothing can be missed, and nothing is lost if you stop exercising for a while.
 - **The ad:** before a chapter's first line, the first time you read it, there is one full-screen ad unless you have Premium. The story shows "One moment..." while it waits and will not begin underneath it. If there is no ad or no connection, the story just begins. Re-reading a chapter never shows one. See [Monetization](MONETIZATION.md).
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 47 across all six seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 55 across all seven seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -225,7 +259,8 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | Season Four's script | `tool/story_content/season_four.dart` |
 | Season Five's script | `tool/story_content/season_five.dart` |
 | Season Six's script | `tool/story_content/season_six.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops; Season Six adds Juno and reuses the Comet King from the enemy art, with the Isles and the comet sky as backdrops) | `lib/game/art/story_art.dart` |
+| Season Seven's script | `tool/story_content/season_seven.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops; Season Six adds Juno and reuses the Comet King from the enemy art, with the Isles and the comet sky as backdrops; Season Seven adds the goat and the garden) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |

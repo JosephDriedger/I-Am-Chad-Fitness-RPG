@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:i_am_chad/domain/hero.dart' show Progression;
 import 'package:i_am_chad/domain/story.dart';
+import 'package:i_am_chad/domain/workout.dart';
 import '../../tool/story_content/content.dart';
 
 /// Every line in a chapter, including the replies to choices.
@@ -31,14 +32,15 @@ void main() {
   final chapters = StoryContent.chapters;
 
   test('each season is a prologue and seven chapters, numbered in order across the whole story', () {
-    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4, 5, 6]);
-    expect(chapters.length, 48);
-    expect([for (final c in chapters) c.number], [for (var i = 0; i < 48; i++) i]);
+    expect(Story.seasons.map((s) => s.number), [1, 2, 3, 4, 5, 6, 7]);
+    expect(chapters.length, 56);
+    expect([for (final c in chapters) c.number], [for (var i = 0; i < 56; i++) i]);
     expect([for (final c in StoryContent.inSeason(3)) c.number], [16, 17, 18, 19, 20, 21, 22, 23]);
     expect([for (final c in StoryContent.inSeason(4)) c.number], [24, 25, 26, 27, 28, 29, 30, 31]);
     expect([for (final c in StoryContent.inSeason(5)) c.number], [32, 33, 34, 35, 36, 37, 38, 39]);
     expect([for (final c in StoryContent.inSeason(6)) c.number], [40, 41, 42, 43, 44, 45, 46, 47]);
-    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four', 'Season Five', 'Season Six']);
+    expect([for (final c in StoryContent.inSeason(7)) c.number], [48, 49, 50, 51, 52, 53, 54, 55]);
+    expect([for (final s in Story.seasons) s.name], ['Season One', 'Season Two', 'Season Three', 'Season Four', 'Season Five', 'Season Six', 'Season Seven']);
     expect([for (final c in StoryContent.inSeason(1)) c.number], [0, 1, 2, 3, 4, 5, 6, 7]);
     expect([for (final c in StoryContent.inSeason(2)) c.number], [8, 9, 10, 11, 12, 13, 14, 15]);
     for (final season in Story.seasons) {
@@ -59,7 +61,13 @@ void main() {
   test('chapters open at rising levels, starting with the prologue at level 1', () {
     expect(chapters.first.unlockLevel, 1);
     for (var i = 1; i < chapters.length; i++) {
-      expect(chapters[i].unlockLevel, greaterThan(chapters[i - 1].unlockLevel), reason: chapters[i].title);
+      // Season Seven opens by movement at the top level, so its chapters share a level and rise by days.
+      if (chapters[i].afterChapter != null) {
+        expect(chapters[i].unlockLevel, chapters[i - 1].unlockLevel, reason: chapters[i].title);
+        expect(chapters[i].afterDays, greaterThanOrEqualTo(chapters[i - 1].afterChapter == null ? 0 : chapters[i - 1].afterDays), reason: chapters[i].title);
+      } else {
+        expect(chapters[i].unlockLevel, greaterThan(chapters[i - 1].unlockLevel), reason: chapters[i].title);
+      }
     }
     // Early chapters come quickly; the last is a few months of regular use away.
     expect(chapters[1].unlockLevel, lessThanOrEqualTo(3));
@@ -85,7 +93,7 @@ void main() {
     expect(StoryRules.unlocked(1).map((c) => c.number), [0]);
     expect(StoryRules.unlocked(2).map((c) => c.number), [0, 1]);
     expect(StoryRules.unlocked(6).map((c) => c.number), [0, 1, 2, 3]);
-    expect(StoryRules.unlocked(Progression.maxLevel).length, chapters.length);
+    expect(StoryRules.unlocked(Progression.maxLevel).length, 48, reason: 'Season Seven waits on movement, not level');
     expect(StoryRules.unlocked(99).length, 32, reason: 'Season Five opens after the old cap');
     expect(StoryRules.unlocked(120).length, 40, reason: 'Season Six opens after the second cap');
     var last = 0;
@@ -101,7 +109,8 @@ void main() {
     expect(StoryRules.next(StoryContent.inSeason(3).last.unlockLevel)!.number, 24, reason: 'Season Four opens once Season Three is done');
     expect(StoryRules.next(StoryContent.inSeason(4).last.unlockLevel)!.number, 32, reason: 'Season Five opens once Season Four is done');
     expect(StoryRules.next(StoryContent.inSeason(5).last.unlockLevel)!.number, 40, reason: 'Season Six opens once Season Five is done');
-    expect(StoryRules.next(StoryContent.chapters.last.unlockLevel), isNull);
+    expect(StoryRules.next(Progression.maxLevel)!.number, 48, reason: 'only Season Seven is left, and it waits on movement');
+    expect(StoryRules.next(Progression.maxLevel, read: {47}, daysSince: {47: 70}), isNull);
   });
 
   test('every chapter has a title, a summary and scenes with something in them', () {
@@ -284,7 +293,7 @@ void main() {
 
   test('the story is a decent length: rich, but each chapter is a few minutes', () {
     final total = chapters.fold(0, (a, c) => a + _lines(c).length);
-    expect(total, inInclusiveRange(120, 1100));
+    expect(total, inInclusiveRange(120, 1250));
     for (final c in chapters) {
       expect(_lines(c).length, inInclusiveRange(10, 60), reason: c.title);
     }
@@ -635,6 +644,135 @@ void main() {
       expect(six.first.unlockLevel, greaterThan(StoryContent.inSeason(5).last.unlockLevel));
       expect(six.last.unlockLevel, Progression.maxLevel);
       expect(six.every((c) => c.unlockLevel <= Progression.maxLevel), isTrue);
+    });
+  });
+
+  group('Season Seven, The Day Off', () {
+    final seven = StoryContent.inSeason(7);
+
+    test('it opens by days of movement after the Season Six finale, never by level alone', () {
+      final finale = StoryContent.inSeason(6).last.number;
+      for (final c in seven) {
+        expect(c.afterChapter, finale, reason: c.title);
+        expect(c.unlockLevel, Progression.maxLevel, reason: c.title);
+      }
+      expect([for (final c in seven) c.afterDays], [0, 10, 20, 30, 40, 50, 60, 70]);
+      // No chapter before it waits on movement: every other season opens by level.
+      for (final c in StoryContent.chapters.where((c) => c.season < 7)) {
+        expect(c.afterChapter, isNull, reason: c.title);
+      }
+    });
+
+    test('it is about rest, handed over in plain words, and the day off is taken on purpose', () {
+      final all = [for (final c in seven) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all, contains('day off'));
+      expect(all, contains('hammock'));
+      expect(all, contains('goat'));
+      expect(all, contains('do nothing'));
+      expect(all, contains('rest is training'));
+      for (final w in ['wasting time', 'lazy', 'earn your rest', 'you deserve a rest', 'you have earned']) {
+        expect(all.contains(w), isFalse, reason: w);
+      }
+    });
+
+    test('it brings in one new character and she speaks', () {
+      final speakers = {for (final c in seven) for (final l in _lines(c)) l.speaker};
+      expect(speakers, contains(StorySpeaker.goat));
+    });
+
+    test('it brings back friends from every place the story has been', () {
+      final speakers = {for (final c in seven) for (final l in _lines(c)) l.speaker};
+      expect(
+        speakers,
+        containsAll([
+          StorySpeaker.chad, StorySpeaker.maple, StorySpeaker.pip, StorySpeaker.bertram, StorySpeaker.juno,
+          StorySpeaker.hush, StorySpeaker.tamsin, StorySpeaker.wren, StorySpeaker.sedge, StorySpeaker.biscuit,
+        ]),
+      );
+    });
+
+    test('it remembers what you told the person you were at the start, whichever you said', () {
+      final answers = {
+        for (final c in seven) for (final s in c.scenes) for (final n in s.nodes) if (n.only?.key == 'stars') n.only!.option,
+      };
+      expect(answers, {0, 1, 2});
+    });
+
+    test('it asks its own questions, with fresh keys', () {
+      final earlier = {
+        for (final c in [for (var s = 1; s <= 6; s++) ...StoryContent.inSeason(s)]) for (final ch in _choices(c)) ch.key,
+      };
+      final keys = [for (final c in seven) for (final ch in _choices(c)) ch.key];
+      expect(keys.length, greaterThanOrEqualTo(7));
+      expect(keys.toSet().intersection(earlier), isEmpty);
+    });
+
+    test('it says the same kind things as the others: rest, its own pace, no deadline', () {
+      final all = [for (final c in seven) for (final l in _lines(c)) l.text.toLowerCase()].join(' ');
+      expect(all.contains('rest is training'), isTrue);
+      expect(all.contains('at your own pace'), isTrue);
+      expect(all.contains('nothing here has a deadline'), isTrue);
+    });
+
+    test('it has the garden for itself, begins in the hall and ends at the hearth', () {
+      final used = {for (final c in seven) for (final s in c.scenes) s.backdrop};
+      expect(used, containsAll([StoryBackdrop.garden, StoryBackdrop.hall, StoryBackdrop.hearth]));
+      expect(seven.first.scenes.first.backdrop, StoryBackdrop.hall);
+      expect(seven.last.scenes.last.backdrop, StoryBackdrop.hearth);
+    });
+  });
+
+  group('chapters that open by movement', () {
+    final finale = StoryContent.inSeason(6).last;
+    final first = StoryContent.inSeason(7).first;
+    final third = StoryContent.inSeason(7)[2];
+    final readAt = DateTime(2026, 11, 1, 20);
+
+    WorkoutEntry on(int day) => WorkoutEntry(activityId: 'walking', performedAt: DateTime(2026, 11, day, 9), durationSeconds: 600);
+
+    test('the days are the different days moved after the day the finale was read', () {
+      expect(StoryRules.daysMovedAfter(readAt, const []), 0);
+      expect(StoryRules.daysMovedAfter(readAt, [on(1)]), 0, reason: 'the day of reading does not count');
+      expect(StoryRules.daysMovedAfter(readAt, [on(2), on(2), on(5)]), 2, reason: 'two walks on one day are one day');
+      expect(StoryRules.daysMovedAfter(readAt, [on(2).copyWith(loggedAt: DateTime(2026, 12, 20))]), 0, reason: 'back-dated entries do not count');
+    });
+
+    test('the level alone never opens one', () {
+      expect(StoryRules.opens(first, Progression.maxLevel), isFalse);
+      expect(StoryRules.opens(first, Progression.maxLevel, read: {finale.number}), isTrue, reason: 'the prologue opens as soon as the finale is read');
+      expect(StoryRules.opens(third, Progression.maxLevel, read: {finale.number}, daysSince: {finale.number: 19}), isFalse);
+      expect(StoryRules.opens(third, Progression.maxLevel, read: {finale.number}, daysSince: {finale.number: 20}), isTrue);
+      expect(StoryRules.opens(third, 143, read: {finale.number}, daysSince: {finale.number: 99}), isFalse, reason: 'and the level still has to be reached');
+    });
+
+    test('it says when one opens in plain words, with no clock in them', () {
+      StoryStatus status({Set<int> read = const {}, int days = 0, int level = 144}) =>
+          StoryStatus(level: level, read: read, daysSince: {finale.number: days});
+      expect(status().whenOpens(first), 'once The Comet Road is read');
+      expect(status(read: {finale.number}, days: 17).whenOpens(third), 'after 3 more days of moving');
+      expect(status(read: {finale.number}, days: 19).whenOpens(third), 'after 1 more day of moving');
+      expect(status(read: {finale.number}, days: 20).whenOpens(third), 'now');
+      expect(status(level: 100).whenOpens(Story.byNumber(32)!), 'now');
+      expect(StoryStatus(level: 10, read: const {}).whenOpens(Story.byNumber(30)!), 'at Level ${Story.byNumber(30)!.unlockLevel}');
+    });
+
+    test('a quiet week takes nothing away, and a chapter that was read stays open', () {
+      final read = {finale.number, third.number};
+      final status = StoryStatus(level: 144, read: read, daysSince: {finale.number: 0});
+      expect(status.isUnlocked(third), isTrue, reason: 'read once, open for good');
+      expect(status.isUnlocked(StoryContent.inSeason(7)[3]), isFalse);
+      expect(status.next!.number, 49, reason: 'the next one closed, in order');
+    });
+
+    test('everything opens in order as the days add up', () {
+      var opened = 0;
+      for (var days = 0; days <= 70; days++) {
+        final s = StoryStatus(level: 144, read: {finale.number}, daysSince: {finale.number: days});
+        final n = s.unlocked.where((c) => c.season == 7).length;
+        expect(n, greaterThanOrEqualTo(opened), reason: 'day $days');
+        opened = n;
+      }
+      expect(opened, 8);
     });
   });
 }

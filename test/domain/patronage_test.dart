@@ -230,6 +230,8 @@ void main() {
       expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_five').unlock.n, hearth);
       expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_six').unlock.n, Story.inSeason(6).last.number);
       expect(Cosmetics.capeById('road').unlock.n, Story.inSeason(6).last.number);
+      expect(Cosmetics.capeById('dayoff').unlock.n, Story.inSeason(7).last.number);
+      expect(Cosmetics.trophies.firstWhere((t) => t.id == 'story_seven').unlock.n, Story.inSeason(7).last.number);
       expect(Cosmetics.dyeById('comet')!.unlock.n, 50);
       expect(Cosmetics.dyeById('cinder')!.unlock.n, 66);
       // Level 100 is a level the game could not reach before the cap moved to 120.
@@ -251,7 +253,7 @@ void main() {
     test('keepsakes stand on the hall floor for the later seasons, earned and never sold', () {
       expect(Cosmetics.keepsakes.map((k) => k.id).toSet(), hasLength(Cosmetics.keepsakes.length));
       expect(Cosmetics.keepsakes.every((k) => k.unlock.isEarned), isTrue);
-      expect(Cosmetics.keepsakes.length, lessThanOrEqualTo(5), reason: 'the floor has five places');
+      expect(Cosmetics.keepsakes.length, lessThanOrEqualTo(6), reason: 'the floor has six places');
       expect({for (final k in Cosmetics.keepsakes) k.shape}, hasLength(Cosmetics.keepsakes.length), reason: 'each looks different');
       for (var i = 0; i < Cosmetics.keepsakes.length; i++) {
         expect(Cosmetics.keepsakes[i].unlock.n, Story.inSeason(i + 2).last.number, reason: Cosmetics.keepsakes[i].name);
@@ -266,6 +268,7 @@ void main() {
       final hearth = Story.inSeason(5).last.number;
       expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {lamp})).map((k) => k.id), ['lamp']);
       expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {Story.inSeason(6).last.number})).map((k) => k.id), ['comet']);
+      expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {Story.inSeason(7).last.number})).map((k) => k.id), ['hammock']);
       // Reading a later season's finale does not set out the earlier seasons' pieces for it.
       expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {hearth})).map((k) => k.id), ['hearth']);
       expect(Cosmetics.earnedKeepsakes(CosmeticContext(chaptersRead: {lamp, hearth})).map((k) => k.id), ['lamp', 'hearth']);
