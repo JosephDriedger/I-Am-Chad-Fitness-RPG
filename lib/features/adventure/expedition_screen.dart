@@ -10,6 +10,7 @@ import '../../domain/chad.dart';
 import '../../domain/combat.dart';
 import '../../domain/difficulty.dart';
 import '../../domain/expedition.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/items.dart';
 import '../../domain/rng.dart';
 import '../../game/battle_scene.dart';
@@ -81,7 +82,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
     );
     final saved = widget.progress;
     if (!widget.practice && saved != null) {
-      _run = ExpeditionRun.restore(progress: saved, hero: freshHero);
+      _run = ExpeditionRun.restore(progress: saved, hero: freshHero)..style = player.hero.style;
     } else {
       final expedition = widget.practice
           ? Expedition.practice(seed: widget.seed, heroLevel: player.level)
@@ -90,7 +91,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
         expedition: expedition,
         hero: freshHero,
         rng: GameRng(widget.seed ^ 0x5bd1e995),
-      );
+      )..style = player.hero.style;
     }
     final resumed = saved != null && saved.stepIndex > 0;
     _chadStart = resumed
@@ -135,6 +136,7 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       Terrain.storm => Biome.storm,
       Terrain.dunes => Biome.dunes,
       Terrain.isles => Biome.isles,
+      Terrain.embers => Biome.embers,
     };
   }
 
@@ -412,6 +414,16 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
               ),
             ),
           ),
+        // Until the first expedition is won, the first fight of a run says what the buttons do.
+        if (_firstFight)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 8),
+            child: Text(
+              FirstSteps.battleHint,
+              key: Key('battle_hint'),
+              style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
+            ),
+          ),
         GridView.count(
           crossAxisCount: 4,
           shrinkWrap: true,
@@ -423,10 +435,11 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
             for (final a in BattleAction.values)
               _ActionButton(
                 action: a,
+                style: b.style,
                 enabled: !_busy && b.canAct(a),
                 badge: switch (a) {
                   BattleAction.item => '${b.potions}',
-                  BattleAction.skill => '${b.focus}/${BattleState.skillCost}',
+                  BattleAction.skill => '${b.focus}/${b.style.skillCost}',
                   _ => null,
                 },
                 onTap: () => _act(a),
@@ -436,6 +449,9 @@ class _ExpeditionScreenState extends ConsumerState<ExpeditionScreen> with WantsM
       ],
     );
   }
+
+  bool get _firstFight =>
+      !_busy && _run.battlesWon == 0 && (ref.read(playerProvider)?.hero.victories ?? 1) == 0;
 
   String _intentLine(BattleState b, bool heavy) => switch (b.intent) {
         EnemyMove.windUp => '${b.enemy.name} is winding up a heavy blow. Guarding will soften it.',
@@ -638,9 +654,11 @@ class _ActionButton extends StatelessWidget {
     required this.action,
     required this.enabled,
     required this.onTap,
+    required this.style,
     this.badge,
   });
 
+  final FightingStyle style;
   final BattleAction action;
   final bool enabled;
   final VoidCallback onTap;
@@ -666,7 +684,7 @@ class _ActionButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: enabled,
-      label: '${action.label}. ${action.help}${badge != null ? ' ($badge)' : ''}',
+      label: '${action.label}. ${action.helpFor(style)}${badge != null ? ' ($badge)' : ''}',
       child: ExcludeSemantics(
         child: FilledButton(
           onPressed: enabled ? onTap : null,

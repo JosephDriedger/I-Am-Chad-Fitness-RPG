@@ -6,15 +6,59 @@ library;
 
 import 'rng.dart';
 
+/// How the hero fights: a free choice, changed any time, that shifts how focus is
+/// built and spent. It never adds power, so every style wins about as often as the
+/// others (see test/domain/styles_test.dart); it only changes what the good move is.
+enum FightingStyle {
+  steady('steady', 'Steady', 'The balanced way: attacking and guarding each build 1 focus, and Power Strike costs 2.', attackFocus: 1, guardFocus: 1, skillCost: 2, skillMult: 2.0),
+  guardian('guardian', 'Guardian', 'Guarding builds 2 focus, and Power Strike costs 3 but hits harder. Good for waiting out a heavy blow and answering it.', attackFocus: 1, guardFocus: 2, skillCost: 3, skillMult: 2.3),
+  striker('striker', 'Striker', 'Attacking builds 2 focus, but guarding builds none and Power Strike hits a little lighter. Good for keeping up the pressure.', attackFocus: 2, guardFocus: 0, skillCost: 2, skillMult: 1.9);
+
+  const FightingStyle(
+    this.id,
+    this.label,
+    this.blurb, {
+    required this.attackFocus,
+    required this.guardFocus,
+    required this.skillCost,
+    required this.skillMult,
+  });
+
+  /// Stored in the save. Never rename.
+  final String id;
+  final String label;
+  final String blurb;
+
+  /// Focus gained by attacking and by guarding.
+  final int attackFocus;
+  final int guardFocus;
+
+  /// Focus a Power Strike costs, and how many times a normal blow it hits for.
+  final int skillCost;
+  final double skillMult;
+
+  static FightingStyle fromId(String id) => values.firstWhere((s) => s.id == id, orElse: () => steady);
+}
+
 enum BattleAction {
-  attack('Attack', 'A reliable strike. Builds 1 focus.'),
-  guard('Guard', 'Halve incoming damage this turn. Builds 1 focus.'),
-  skill('Power Strike', 'Hit hard for 2 focus.'),
+  attack('Attack', 'A reliable strike.'),
+  guard('Guard', 'Halve incoming damage this turn.'),
+  skill('Power Strike', 'Hit hard for focus.'),
   item('Potion', 'Restore about a third of your health.');
 
   const BattleAction(this.label, this.help);
   final String label;
   final String help;
+
+  /// What the button says for a hero who fights in [style].
+  String helpFor(FightingStyle style) => switch (this) {
+        attack => 'A reliable strike. Builds ${style.attackFocus} focus.',
+        guard => style.guardFocus == 0
+            ? 'Halve incoming damage this turn. Builds no focus.'
+            : 'Halve incoming damage this turn. Builds ${style.guardFocus} focus.',
+        skill => 'Hit hard for ${style.skillCost} focus.',
+        item => help,
+      };
 }
 
 /// What an enemy will do after the player's next action. It is always shown
@@ -186,12 +230,17 @@ class BattleState {
     this.log = const [],
     this.events = const [],
     this.enraged = false,
+    this.style = FightingStyle.steady,
   });
 
   static const int maxFocus = 5;
 
+  /// How the hero fights in this battle.
+  final FightingStyle style;
+
   /// A boss that has crossed its "fired up" line stays fired up.
   final bool enraged;
+  /// What a Power Strike costs in the default style; see [FightingStyle.skillCost].
   static const int skillCost = 2;
 
   final Combatant player;
@@ -212,7 +261,7 @@ class BattleState {
   final List<BattleEvent> events;
 
   bool get isOver => phase != BattlePhase.playerTurn;
-  bool get canUseSkill => focus >= skillCost;
+  bool get canUseSkill => focus >= style.skillCost;
   bool get canUseItem => potions > 0 && player.hp < player.maxHp;
 
   bool canAct(BattleAction a) => switch (a) {
@@ -234,6 +283,7 @@ class BattleState {
     bool? enraged,
   }) =>
       BattleState(
+        style: style,
         player: player ?? this.player,
         enemy: enemy ?? this.enemy,
         intent: intent ?? this.intent,
@@ -267,8 +317,10 @@ class BattleEngine {
     required GameRng rng,
     int focus = 0,
     int potions = 2,
+    FightingStyle style = FightingStyle.steady,
   }) =>
       BattleState(
+        style: style,
         player: player,
         enemy: enemy,
         intent: _rollIntent(rng, enemy),
@@ -324,18 +376,18 @@ class BattleEngine {
       case BattleAction.attack:
         final d = soften(_damage(player.attack, enemy.defense, rng));
         enemy = enemy.withHp(enemy.hp - d);
-        focus = (focus + 1).clamp(0, BattleState.maxFocus);
+        focus = (focus + s.style.attackFocus).clamp(0, BattleState.maxFocus);
         log.add('${player.name} attacks for $d damage${softened()}.');
         events.add(PlayerAttacked(d));
       case BattleAction.guard:
         guarding = true;
-        focus = (focus + 1).clamp(0, BattleState.maxFocus);
+        focus = (focus + s.style.guardFocus).clamp(0, BattleState.maxFocus);
         log.add('${player.name} braces for impact.');
         events.add(const PlayerGuarded());
       case BattleAction.skill:
-        final d = soften(_damage(player.attack, enemy.defense, rng, mult: 2) + 1);
+        final d = soften(_damage(player.attack, enemy.defense, rng, mult: s.style.skillMult) + 1);
         enemy = enemy.withHp(enemy.hp - d);
-        focus -= BattleState.skillCost;
+        focus -= s.style.skillCost;
         log.add('${player.name} unleashes a Power Strike for $d damage${softened()}!');
         events.add(PlayerUsedSkill(d));
       case BattleAction.item:

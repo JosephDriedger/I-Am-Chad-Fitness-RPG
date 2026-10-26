@@ -13,8 +13,9 @@ import 'package:share_plus/share_plus.dart';
 abstract class BackupFiles {
   bool get isSupported;
 
-  /// Opens the share sheet with [text] as a file called [fileName].
-  Future<void> send(String fileName, String text);
+  /// Opens the share sheet with [text] as a file called [fileName]. [mimeType] says what
+  /// kind of file it is (a spreadsheet, say), and is plain text unless told.
+  Future<void> send(String fileName, String text, {String mimeType = 'text/plain'});
 
   /// Lets the player choose a backup file, and returns what is in it, or null if
   /// they changed their mind.
@@ -29,7 +30,7 @@ class NoBackupFiles implements BackupFiles {
   bool get isSupported => false;
 
   @override
-  Future<void> send(String fileName, String text) async {}
+  Future<void> send(String fileName, String text, {String mimeType = 'text/plain'}) async {}
 
   @override
   Future<String?> choose() async => null;
@@ -44,14 +45,15 @@ class TestBackupFiles implements BackupFiles {
   /// What the pretend file chooser returns (null is "changed my mind").
   String? toChoose;
 
-  final sent = <({String fileName, String text})>[];
+  final sent = <({String fileName, String text, String mimeType})>[];
   int chooseCalls = 0;
 
   @override
   bool get isSupported => supported;
 
   @override
-  Future<void> send(String fileName, String text) async => sent.add((fileName: fileName, text: text));
+  Future<void> send(String fileName, String text, {String mimeType = 'text/plain'}) async =>
+      sent.add((fileName: fileName, text: text, mimeType: mimeType));
 
   @override
   Future<String?> choose() async {
@@ -75,11 +77,11 @@ class DeviceBackupFiles implements BackupFiles {
   bool get isSupported => platformCanShare;
 
   @override
-  Future<void> send(String fileName, String text) async {
+  Future<void> send(String fileName, String text, {String mimeType = 'text/plain'}) async {
     await SharePlus.instance.share(ShareParams(
-      files: [XFile.fromData(utf8.encode(text), mimeType: 'text/plain')],
+      files: [XFile.fromData(utf8.encode(text), mimeType: mimeType)],
       fileNameOverrides: [fileName],
-      subject: 'My I Am Chad backup',
+      subject: mimeType == 'text/csv' ? 'My I Am Chad workouts' : 'My I Am Chad backup',
     ));
   }
 

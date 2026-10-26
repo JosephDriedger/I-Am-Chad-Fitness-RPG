@@ -51,6 +51,12 @@ bool _gold(WidgetTester tester, String key) {
   return tester.widgetList<Container>(c).any((w) => w.decoration is BoxDecoration && (w.decoration! as BoxDecoration).color == GameColors.gold);
 }
 
+Future<void> _tapKey(WidgetTester tester, String key) async {
+  await tester.ensureVisible(find.byKey(Key(key)));
+  await settle(tester, frames: 3);
+  await tester.tap(find.byKey(Key(key)));
+}
+
 void main() {
   testWidgets('the month starts as one line, so the workouts stay near the top, and opens when asked', (tester) async {
     final db = await _boot(tester, [_on(10, 5), _on(10, 19)], open: false);
@@ -88,21 +94,21 @@ void main() {
     expect(arrow('month_later').onPressed, isNull, reason: 'nothing after this month');
     expect(arrow('month_earlier').onPressed, isNotNull);
 
-    await tester.tap(find.byKey(const Key('month_earlier')));
+    await _tapKey(tester, 'month_earlier');
     await settle(tester, frames: 5);
     expect(find.text('September 2026'), findsOneWidget);
     expect(find.text('A quiet month. Rest counts too.'), findsOneWidget, reason: 'nothing logged in September, and that is fine');
 
-    await tester.tap(find.byKey(const Key('month_earlier')));
+    await _tapKey(tester, 'month_earlier');
     await settle(tester, frames: 5);
     expect(find.text('August 2026'), findsOneWidget);
     expect(find.text('2 days you moved in August. Rest days are part of the plan.'), findsOneWidget);
     expect(_gold(tester, 'day_2026-08-03'), isTrue);
     expect(arrow('month_earlier').onPressed, isNull, reason: 'August is where the journal begins');
 
-    await tester.tap(find.byKey(const Key('month_later')));
+    await _tapKey(tester, 'month_later');
     await settle(tester, frames: 5);
-    await tester.tap(find.byKey(const Key('month_later')));
+    await _tapKey(tester, 'month_later');
     await settle(tester, frames: 5);
     expect(find.text('October 2026'), findsOneWidget);
     expect(arrow('month_later').onPressed, isNull);

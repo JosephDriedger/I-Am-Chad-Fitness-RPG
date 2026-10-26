@@ -62,6 +62,11 @@ class Shop {
     'night_watch_cloak': 3700,
     'comet_blade': 4000,
     'starlight_jar': 4000,
+    // The Ember Deeps.
+    'forgehand_helm': 4600,
+    'cinderweave_coat': 4900,
+    'emberbrand': 5200,
+    'pocket_forge': 5200,
   };
 
   /// The coin price of an item, or null if it is not sold.

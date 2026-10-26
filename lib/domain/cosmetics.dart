@@ -121,8 +121,22 @@ class Pennant {
   final int color;
 }
 
+/// What a keepsake on the hall floor looks like.
+enum KeepsakeShape { lamp, chime, table, hearth, comet, hammock }
+
+/// A small thing that stands on the hall floor for a story season finished.
+/// Earned by playing, never sold, and never taken away.
+class Keepsake {
+  const Keepsake(this.id, this.name, this.unlock, this.shape);
+
+  final String id;
+  final String name;
+  final Unlock unlock;
+  final KeepsakeShape shape;
+}
+
 /// What a trophy on the Journal shelf looks like.
-enum TrophyShape { lantern, chime, cup, star, shield, sun }
+enum TrophyShape { lantern, chime, cup, star, shield, sun, table, crown, flame, comet, hammock }
 
 /// A trophy on the Journal shelf, for the bigger milestones. Earned by playing,
 /// never sold, and never taken away.
@@ -156,6 +170,10 @@ class Cosmetics {
     Cape('dawn', 'Dawn Mantle', Unlock.chapter(7), color: 0xFFF2A65A, trim: 0xFFFFE9B0),
     Cape('lantern', 'Lantern Mantle', Unlock.chapter(15), color: 0xFF1F7A8C, trim: 0xFFFFC857),
     Cape('chime', 'Chime Mantle', Unlock.chapter(23), color: 0xFF6A7FBF, trim: 0xFFE6EEF8),
+    Cape('table', 'Table Mantle', Unlock.chapter(31), color: 0xFF8E3B46, trim: 0xFFFFF3D6),
+    Cape('hearth', 'Hearth Mantle', Unlock.chapter(39), color: 0xFF9A3412, trim: 0xFFFFB74D),
+    Cape('road', 'Comet Mantle', Unlock.chapter(47), color: 0xFF1E2A5E, trim: 0xFF9FD8FF),
+    Cape('dayoff', 'Day Off Mantle', Unlock.chapter(55), color: 0xFFE2663A, trim: 0xFFFFF3D6),
     Cape('crimson', 'Crimson Mantle', Unlock.patron, color: 0xFFB3202F, trim: 0xFFF2C94C),
     Cape('starlit', 'Starlit Mantle', Unlock.patron, color: 0xFF1F2F66, trim: 0xFFB9C7FF, stars: true),
     Cape('aurora', 'Aurora Mantle', Unlock.patron, color: 0xFF1F8F86, trim: 0xFFC9A6FF),
@@ -167,6 +185,8 @@ class Cosmetics {
     HairDye('ember', 'Ember', Unlock.level(20), 0xFFD84B2A),
     HairDye('glacier', 'Glacier', Unlock.level(30), 0xFF8FD3F4),
     HairDye('sunstone', 'Sunstone', Unlock.level(40), 0xFFFFB627),
+    HairDye('comet', 'Comet', Unlock.level(50), 0xFF9FB4FF),
+    HairDye('cinder', 'Cinder', Unlock.level(66), 0xFFFF7043),
     HairDye('mint', 'Mint', Unlock.patron, 0xFF5FD3A5),
     HairDye('sky', 'Sky', Unlock.patron, 0xFF4FA8E8),
     HairDye('rose', 'Rose', Unlock.patron, 0xFFE26A9B),
@@ -188,7 +208,7 @@ class Cosmetics {
   ];
 
   /// The Journal shelf's trophies, in the order they are set out. The shelf has
-  /// room for six. All earned; none sold.
+  /// room for twelve, in two rows of six. All earned; none sold.
   static const trophies = <Trophy>[
     Trophy('story_two', 'The Lantern Coast', Unlock.chapter(15), TrophyShape.lantern),
     Trophy('level_40', 'Level 40', Unlock.level(40), TrophyShape.cup),
@@ -196,6 +216,22 @@ class Cosmetics {
     Trophy('streak_90', 'Season of Strength', Unlock.streak(90), TrophyShape.sun),
     Trophy('story_three', 'The Weather Chime', Unlock.chapter(23), TrophyShape.chime),
     Trophy('level_50', 'Level 50', Unlock.level(50), TrophyShape.star),
+    Trophy('story_four', 'The Long Table', Unlock.chapter(31), TrophyShape.table),
+    Trophy('level_100', 'Level 100', Unlock.level(100), TrophyShape.crown),
+    Trophy('story_five', 'The Banked Fire', Unlock.chapter(39), TrophyShape.flame),
+    Trophy('story_six', 'The Comet Road', Unlock.chapter(47), TrophyShape.comet),
+    Trophy('story_seven', 'The Day Off', Unlock.chapter(55), TrophyShape.hammock),
+  ];
+
+  /// The hall floor's keepsakes, in the order they are set out: one for each of the later
+  /// seasons. The floor has room for six. All earned; none sold.
+  static const keepsakes = <Keepsake>[
+    Keepsake('lamp', 'The Harbour Lamp', Unlock.chapter(15), KeepsakeShape.lamp),
+    Keepsake('chime', 'The Little Chime', Unlock.chapter(23), KeepsakeShape.chime),
+    Keepsake('table', 'The Laid Table', Unlock.chapter(31), KeepsakeShape.table),
+    Keepsake('hearth', 'The Banked Hearth', Unlock.chapter(39), KeepsakeShape.hearth),
+    Keepsake('comet', 'The Comet Glass', Unlock.chapter(47), KeepsakeShape.comet),
+    Keepsake('hammock', 'The Little Hammock', Unlock.chapter(55), KeepsakeShape.hammock),
   ];
 
   static Cape capeById(String id) => capes.firstWhere((c) => c.id == id, orElse: () => capes.first);
@@ -224,6 +260,11 @@ class Cosmetics {
   static List<Pennant> earnedPennants(CosmeticContext c) => [
         for (final p in pennants)
           if (p.unlock.isMet(c)) p,
+      ];
+
+  static List<Keepsake> earnedKeepsakes(CosmeticContext c) => [
+        for (final k in keepsakes)
+          if (k.unlock.isMet(c)) k,
       ];
 
   static List<Trophy> earnedTrophies(CosmeticContext c) => [

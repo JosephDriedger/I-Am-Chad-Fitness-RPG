@@ -57,7 +57,7 @@ The hall is the app's home. The HUD and menu are Flutter widgets (so they work w
 | Quest board | Quests (with a look back at last week) | An alert marker bounces while a suggestion is still undone |
 | Bookshelf | Journal (history) | Nothing yet. Its top shelf holds the earned trophies, if any |
 | Gate | Adventure | Glows teal when you have the 2 energy an expedition costs; shows a padlock otherwise |
-| Training dummy | Train (log a workout, or take Chad's one-minute warm-up) | Wobbles when the hero hits it |
+| Training dummy | Train (log a workout, or take Chad's one-minute warm-up or calm minute) | Wobbles when the hero hits it |
 | Armour stand | Hero | Shows your outfit and equipped gear; sparkles once you own loot |
 | Chad | Tap for another line | His speech bubble follows your day: first visit, after a workout, a rest day, idle |
 
@@ -123,7 +123,7 @@ Logging a workout opens with an animated "How to Do It" card (`lib/game/demo/exe
 - **Props.** Wall, bench, chair, mat, dumbbells and barbell where they belong.
 - **Cues that follow the motion.** Each demo has three or so cues ("Hands under your shoulders", "Lower slowly", "Press back up, breathe out as you push") that change as the figure moves, plus a note pointing to easier versions.
 - **Pause, or step through.** A play/pause button; with Reduce Motion on, the demo shows still key poses with a "Next Pose" button instead of looping.
-- **Covers everything.** All 79 exercises and every variant listed in the catalog. A test fails if an exercise or variant is added without a demo.
+- **Covers everything.** All 86 exercises and every variant listed in the catalog. A test fails if an exercise or variant is added without a demo.
 - **A keyframe rig for the big catalog.** The first eleven are hand-built poses. The rest use `_rig` (`demo_rig.dart`): each keyframe gives a torso position and lean plus where the hands and feet should be, the targets are blended, and the same IK solves the limbs. Poses live in `demo_standing.dart`, `demo_floor.dart`, `demo_weights.dart` and `demo_gear.dart`, props in `demo_props.dart`, and the entry for each id (title, three cues, props) in `demo_catalog.dart`. Seen from the side, a few moves (jumping jacks, side lunges, lateral raises, side bends, butterfly stretch) are drawn face-on and say so in their note.
 - **Look at them.** `test/tool/demo_sheet_test.dart` draws every demo at four moments of its loop into a contact sheet PNG, which is how the whole catalog was checked by eye. See [Exercise catalog](EXERCISE_CATALOG.md#adding-an-exercise).
 

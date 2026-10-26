@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../app/ads.dart';
 import '../../app/backup_files.dart';
+import '../../data/workout_csv.dart';
 import '../../app/feedback.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
@@ -131,6 +132,7 @@ class SettingsScreen extends ConsumerWidget {
                 const Text(
                   'Your workouts, progress and story choices are stored only on this device, and there is no account. '
                   'To keep them safe or move to a new phone, copy a full backup and restore it there. '
+                  'To look at your workouts in a spreadsheet, save them as one: that file is only for looking at. '
                   'The only things that use the internet are the store, the one ad at the start of a story chapter '
                   '(which Premium removes), and downloading a later story season once, when you choose to. '
                   'That download sends nothing about you.',
@@ -178,6 +180,28 @@ class SettingsScreen extends ConsumerWidget {
                     if (name != null && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restored. Welcome back, $name.')));
                       Navigator.of(context).popUntil((r) => r.isFirst);
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                GameButton(
+                  key: const Key('workouts_csv'),
+                  label: 'Save Workouts as a Spreadsheet',
+                  icon: Icons.table_chart_rounded,
+                  kind: GameButtonKind.secondary,
+                  onPressed: () async {
+                    final csv = WorkoutCsv.encode(await repo.allWorkouts());
+                    final day = DateFormat('yyyy-MM-dd').format(ref.read(clockProvider)());
+                    final files = ref.read(backupFilesProvider);
+                    if (files.isSupported) {
+                      await files.send('I-Am-Chad-workouts-$day.csv', csv, mimeType: 'text/csv');
+                    } else {
+                      await Clipboard.setData(ClipboardData(text: csv));
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Copied. Paste it into a spreadsheet. This is only a look at your workouts, not a backup you can restore.'),
+                        ));
+                      }
                     }
                   },
                 ),

@@ -60,11 +60,17 @@ const _enemyArt = <String, _EnemyArt>{
   'Static Imp': _EnemyArt(1.8, 74),
   'The Thunderhead': _EnemyArt(2.1, 70),
   'Stormcaller Skarn': _EnemyArt(2.0, 74),
+  // The Ember Deeps.
+  'Cinder Sprite': _EnemyArt(1.9, 56),
+  'Anvil Golem': _EnemyArt(1.65, 66),
+  'Magma Slug': _EnemyArt(1.75, 60),
+  'Forgemaster Brun': _EnemyArt(1.5, 92),
+  'Magmara, the Slow Simmer': _EnemyArt(1.5, 94),
 };
 
 /// The stages: meadow, forest dusk, boss arena, night camp (events), and the
 /// scenery of the later regions.
-enum Biome { meadow, forest, arena, night, coast, cave, peak, storm, dunes, isles }
+enum Biome { meadow, forest, arena, night, coast, cave, peak, storm, dunes, isles, embers }
 
 class BattleScene extends GameScene {
   BattleScene({
@@ -733,6 +739,7 @@ class Backdrop extends Component {
         Biome.storm => (const Color(0xFF2B2F45), const Color(0xFF6B6F8F), const Color(0xFF3F4660), const Color(0xFF343A52), const Color(0xFF55607A)),
         Biome.dunes => (const Color(0xFFF0A860), const Color(0xFFFBE3B0), const Color(0xFFE2B572), const Color(0xFFD7A25A), const Color(0xFFEBCB8E)),
         Biome.isles => (const Color(0xFF0E1236), const Color(0xFF5B4FA8), const Color(0xFF3E3F88), const Color(0xFF4C4C9E), const Color(0xFF6A66B8)),
+        Biome.embers => (const Color(0xFF1E0F10), const Color(0xFF8A2E16), const Color(0xFF3A1D1A), const Color(0xFF2C1614), const Color(0xFF4A2A22)),
       };
 
   @override
@@ -934,6 +941,36 @@ class Backdrop extends Component {
         canvas.drawOval(Rect.fromCenter(center: Offset(x, y), width: 80, height: 14), _paint);
         _paint.color = const Color(0xFF7BC47A);
         canvas.drawOval(Rect.fromCenter(center: Offset(x, y - 2), width: 66, height: 8), _paint);
+      }
+    }
+    if (biome == Biome.embers) {
+      // A glowing river of lava behind jagged rock, and embers rising from it.
+      _paint.color = const Color(0xFF2A1512);
+      for (var i = 0; i < 8; i++) {
+        final x = -300 + i * 115 + _trees[i % _trees.length] * 30;
+        final h = 60 + _trees[(i + 3) % _trees.length] * 70;
+        canvas.drawPath(
+          Path()
+            ..moveTo(x - 34, groundY - 10)
+            ..lineTo(x - 8, groundY - 10 - h)
+            ..lineTo(x + 6, groundY - 10 - h * 0.7)
+            ..lineTo(x + 34, groundY - 10)
+            ..close(),
+          _paint,
+        );
+      }
+      final river = 0.7 + 0.25 * math.sin(_t * 1.6);
+      _paint.color = Color.fromRGBO(255, 112, 67, river);
+      canvas.drawRect(Rect.fromLTWH(left, groundY - 22, width, 12), _paint);
+      _paint.color = Color.fromRGBO(255, 213, 79, 0.55 * river);
+      for (var i = 0; i < 9; i++) {
+        final x = ((_t * 12 + i * 130) % 1100) - 400;
+        canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTWH(x, groundY - 19 + (i % 3) * 3, 34, 3), const Radius.circular(2)), _paint);
+      }
+      for (var i = 0; i < 34; i++) {
+        final p = ((_t * 0.2 + i * 0.097) % 1);
+        _paint.color = Color.fromRGBO(255, 183, 77, 0.9 * (1 - p));
+        canvas.drawCircle(Offset(-100 + (i * 47) % 560 + math.sin(_t * 1.3 + i) * 12, groundY - 14 - p * (groundY + 80)), 1.2 + (i % 3) * 0.5, _paint);
       }
     }
     if (biome == Biome.dunes) {

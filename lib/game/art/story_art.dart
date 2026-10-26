@@ -368,6 +368,84 @@ void paintBertram(Canvas c, ActorState s) {
   c.restore();
 }
 
+/// Juno, who knocked at the hall's door at the end of Season Five: a small, thoughtful
+/// traveller in a green jacket and a yellow scarf, with a backpack that has gained a
+/// few patches since.
+void paintJuno(Canvas c, ActorState s) {
+  final bob = math.sin(s.time * 1.9) * 0.7;
+  const skin = Color(0xFFC98F63);
+  const jacket = Color(0xFF3F7F5A);
+  shadow(c, 14);
+  c.save();
+  c.translate(0, bob);
+  // Legs and trainers.
+  rrect(c, -6.5, -22, 6, 22, 2, const Color(0xFF3D4A66));
+  rrect(c, 1, -22, 6, 22, 2, const Color(0xFF3D4A66));
+  rrect(c, -8.5, -4, 9, 4, 2, const Color(0xFFF5F0E6));
+  rrect(c, 0, -4, 9, 4, 2, const Color(0xFFF5F0E6));
+  // The backpack, behind, with two patches.
+  rrect(c, -22, -60, 14, 34, 5, const Color(0xFF8D5E3C));
+  circle(c, -15, -50, 3.2, const Color(0xFFF2C94C));
+  circle(c, -15, -40, 2.6, const Color(0xFFE2663A));
+  // Jacket, scarf and arms.
+  rrect(c, -13, -62, 26, 42, 8, jacket);
+  rrect(c, -13, -64, 26, 7, 3, const Color(0xFFF2C94C));
+  rrect(c, 8, -60, 5, 14, 2, const Color(0xFFF2C94C));
+  rrect(c, 11, -58, 6, 22, 3, jacket);
+  circle(c, 14, -35, 3.6, skin);
+  // Head: dark hair in a short tail, a thoughtful look, and a small smile.
+  circle(c, 0, -74, 11.5, skin);
+  c.drawPath(
+    Path()
+      ..moveTo(-11.5, -75)
+      ..quadraticBezierTo(-12, -90, 1, -88)
+      ..quadraticBezierTo(13, -87, 11.5, -75)
+      ..quadraticBezierTo(5, -81, -2, -80)
+      ..quadraticBezierTo(-8, -79, -11.5, -75)
+      ..close(),
+    Paint()..color = const Color(0xFF3B2A22),
+  );
+  circle(c, -17, -78, 4, const Color(0xFF3B2A22));
+  circle(c, -4, -73, 1.4, const Color(0xFF2B1D14));
+  circle(c, 4, -73, 1.4, const Color(0xFF2B1D14));
+  strokePath(c, Path()..moveTo(-3.5, -67)..quadraticBezierTo(0, -64.5, 3.5, -67), 1.3, const Color(0xFF9C4B3A));
+  c.restore();
+}
+
+/// The goat who knocks at doors, chews on plans and has no interest in being busy: a
+/// cream goat in profile, with small horns, a beard and a very calm eye.
+void paintGoat(Canvas c, ActorState s) {
+  final chew = math.sin(s.time * 5) * 1.2;
+  final sway = math.sin(s.time * 1.3) * 0.8;
+  const coat = Color(0xFFF1E8D6);
+  const shade = Color(0xFFD8C9AE);
+  shadow(c, 24);
+  // Legs: two near, two far.
+  for (final x in [-14.0, -8.0, 10.0, 16.0]) {
+    rrect(c, x, -22, 4.5, 22, 2, x < 0 ? shade : coat);
+    rrect(c, x - 0.3, -3, 5.2, 3, 1, const Color(0xFF5D4037));
+  }
+  // Body and a short tail.
+  oval(c, 0, -30 + sway, 24, 13, coat);
+  oval(c, 3, -26 + sway, 20, 8, shade);
+  fillPath(c, poly([-23, -34 + sway, -30, -42 + sway, -26, -30 + sway]), shade);
+  // Neck and head, held high and calm.
+  fillPath(c, poly([14, -36 + sway, 22, -62, 30, -58, 24, -30 + sway]), coat);
+  circle(c, 29, -60, 7.4, coat);
+  oval(c, 36, -57 + chew * 0.2, 6, 4.2, coat);
+  circle(c, 41, -57 + chew * 0.2, 1.5, const Color(0xFF8D6E63));
+  // A pale beard, swaying as it chews.
+  fillPath(c, poly([34, -53 + chew * 0.3, 38, -53 + chew * 0.3, 36, -44 + chew * 0.6]), const Color(0xFFFFFFFF));
+  // Horns and an ear, an eye with a long horizontal pupil.
+  strokePath(c, Path()..moveTo(26, -66)..quadraticBezierTo(22, -76, 17, -72), 2.4, const Color(0xFFBCAAA4));
+  oval(c, 22, -62, 5, 2.4, shade);
+  circle(c, 31, -62, 2.4, const Color(0xFFFFF59D));
+  rrect(c, 29.4, -62.6, 3.4, 1.3, 0.6, const Color(0xFF2B1D14));
+  // A paper, half eaten, in its mouth: somebody's plan.
+  rrect(c, 38, -55 + chew * 0.2, 7, 5, 1, const Color(0xFFFFF3D6));
+  line(c, 39.5, -53.5 + chew * 0.2, 43.5, -53.5 + chew * 0.2, 0.7, const Color(0xFF8D6E63));
+}
+
 // ---------------------------------------------------------------------------
 // Cast
 // ---------------------------------------------------------------------------
@@ -410,6 +488,16 @@ bool _paintSpeaker(Canvas c, StorySpeaker who, ActorState s, HeroLook look) {
       paintSphinx(c, s);
     case StorySpeaker.worm:
       paintDuneWorm(c, s);
+    case StorySpeaker.brun:
+      paintForgemaster(c, s);
+    case StorySpeaker.magmara:
+      paintMagmara(c, s);
+    case StorySpeaker.juno:
+      paintJuno(c, s);
+    case StorySpeaker.comet:
+      paintCometKing(c, s);
+    case StorySpeaker.goat:
+      paintGoat(c, s);
     case StorySpeaker.hero:
       paintHero(c, look, s);
     case StorySpeaker.narrator:
@@ -436,6 +524,11 @@ double _scaleOf(StorySpeaker who) => switch (who) {
       StorySpeaker.bertram => 0.95,
       StorySpeaker.sphinx => 0.7,
       StorySpeaker.worm => 0.6,
+      StorySpeaker.brun => 1.0,
+      StorySpeaker.magmara => 0.8,
+      StorySpeaker.juno => 0.9,
+      StorySpeaker.comet => 0.85,
+      StorySpeaker.goat => 0.95,
       _ => 1.0,
     };
 
@@ -1242,6 +1335,159 @@ void paintStoryBackdrop(Canvas c, Size s, StoryBackdrop which, double time) {
           final f = 1 + math.sin(time * 9 + i) * 0.12;
           oval(c, x, ground - h * 0.18, 2.6 * f, 4.2 * f, const Color(0xFFFFB300));
         }
+      }
+    case StoryBackdrop.cellar:
+      // A stair going down under the hall, brick walls, two lanterns and a warm glow from below.
+      _gradient(c, full, const [Color(0xFF1E1713), Color(0xFF3B2A1E)]);
+      for (var y = 0.0; y < h; y += 22) {
+        line(c, 0, y, w, y, 1, const Color(0x22000000));
+      }
+      for (var i = 0; i < 9; i++) {
+        final t = i / 8;
+        final inset = w * (0.04 + 0.2 * (1 - t));
+        final y = h * (0.26 + 0.07 * i);
+        rrect(c, inset, y, w - inset * 2, h * 0.05, 3, Color.lerp(const Color(0xFF5B4636), const Color(0xFF8A6A4E), t)!);
+        rrect(c, inset, y + h * 0.05, w - inset * 2, 3, 1, const Color(0x55000000));
+      }
+      final glow = 0.75 + 0.2 * math.sin(time * 2.2);
+      circle(c, w * 0.5, h * 0.2, w * 0.3, Color.fromRGBO(255, 138, 61, 0.22 * glow));
+      circle(c, w * 0.5, h * 0.2, w * 0.14, Color.fromRGBO(255, 183, 77, 0.45 * glow));
+      for (final x in [w * 0.12, w * 0.88]) {
+        line(c, x, h * 0.08, x, h * 0.2, 1.6, const Color(0xFF3E2F26));
+        rrect(c, x - 6, h * 0.2, 12, 17, 3, const Color(0xFFFFE9A8));
+        circle(c, x, h * 0.22, 14 * glow, const Color(0x33FFC46B));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF4A3A2E));
+    case StoryBackdrop.forge:
+      // The forge below the hall: a big furnace, an anvil, tools on the wall and soot in the air.
+      _gradient(c, full, const [Color(0xFF241714), Color(0xFF4A2A22)]);
+      for (var y = 0.0; y < ground; y += 24) {
+        line(c, 0, y, w, y, 1, const Color(0x22000000));
+      }
+      // The furnace mouth, glowing and breathing.
+      final breath = 0.8 + 0.2 * math.sin(time * 1.7);
+      rrect(c, w * 0.34, h * 0.2, w * 0.32, h * 0.5, 14, const Color(0xFF3A2A25));
+      rrect(c, w * 0.39, h * 0.3, w * 0.22, h * 0.4, 10, Color.fromRGBO(255, 112, 67, breath));
+      rrect(c, w * 0.43, h * 0.4, w * 0.14, h * 0.3, 8, Color.fromRGBO(255, 213, 79, breath));
+      circle(c, w * 0.5, h * 0.45, w * 0.3, Color.fromRGBO(255, 138, 61, 0.14 * breath));
+      // Tools hanging in a row: tongs, a hammer and a ladle.
+      for (var i = 0; i < 3; i++) {
+        final x = w * (0.08 + i * 0.07);
+        line(c, x, h * 0.14, x, h * 0.34 + i * 6, 3, const Color(0xFF607D8B));
+        rrect(c, x - 7, h * 0.34 + i * 6, 14, 10, 2, const Color(0xFF78909C));
+      }
+      // The anvil, and a bellows leaning on the wall.
+      fillPath(c, poly([w * 0.7, ground - h * 0.1, w * 0.92, ground - h * 0.1, w * 0.97, ground - h * 0.14, w * 0.7, ground - h * 0.14]), const Color(0xFF546E7A));
+      rrect(c, w * 0.76, ground - h * 0.1, w * 0.1, h * 0.1, 3, const Color(0xFF37474F));
+      oval(c, w * 0.15, ground - h * 0.08, w * 0.08, h * 0.07, const Color(0xFF8D5E3C));
+      for (var i = 0; i < 12; i++) {
+        final p = ((time * 0.3 + i * 0.11) % 1);
+        circle(c, w * (0.42 + (i % 6) * 0.03) + math.sin(time + i) * 6, h * 0.34 - p * h * 0.3, 1.4 * (1 - p), Color.fromRGBO(255, 183, 77, 1 - p));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3A2B26));
+    case StoryBackdrop.embers:
+      // A cavern with a slow river of lava, rock arches either side, sparks and steam.
+      _gradient(c, full, const [Color(0xFF1B0E10), Color(0xFF7A2A16)]);
+      for (final side in [0.0, 1.0]) {
+        final x = side == 0 ? 0.0 : w;
+        final dir = side == 0 ? 1.0 : -1.0;
+        fillPath(c, poly([x, 0, x + dir * w * 0.22, 0, x + dir * w * 0.12, h * 0.4, x + dir * w * 0.2, ground, x, ground]), const Color(0xFF2A1512));
+      }
+      final river = 0.7 + 0.25 * math.sin(time * 1.4);
+      _fill(c, Rect.fromLTWH(0, h * 0.62, w, h * 0.12), Color.fromRGBO(255, 112, 67, river));
+      for (var i = 0; i < 10; i++) {
+        final x = ((time * 14 + i * 90) % (w + 80)) - 40;
+        rrect(c, x, h * 0.64 + (i % 3) * 8, 30, 3, 2, Color.fromRGBO(255, 213, 79, 0.6 * river));
+      }
+      _hill(c, s, h * 0.62, h * 0.04, 1.2, const Color(0xFF3A1D1A));
+      for (var i = 0; i < 24; i++) {
+        final p = ((time * 0.2 + i * 0.087) % 1);
+        circle(c, w * ((i * 37 % 100) / 100) + math.sin(time * 1.2 + i) * 10, h * 0.68 - p * h * 0.6, 1.3 + (i % 3) * 0.4, Color.fromRGBO(255, 183, 77, 0.9 * (1 - p)));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF4A2A22));
+    case StoryBackdrop.hearth:
+      // The great hearth in the hall, lit and banked, with a night sky in the windows.
+      _fill(c, full, const Color(0xFFB59A78));
+      for (var y = 0.0; y < ground; y += 26) {
+        line(c, 0, y, w, y, 1, const Color(0x1A000000));
+      }
+      _window(c, w * 0.08, h * 0.12, w * 0.13, h * 0.3, const Color(0xFF22305E));
+      _window(c, w * 0.79, h * 0.12, w * 0.13, h * 0.3, const Color(0xFF22305E));
+      circle(c, w * 0.145, h * 0.2, 2, const Color(0xFFFFF3D6));
+      circle(c, w * 0.855, h * 0.3, 2, const Color(0xFFFFF3D6));
+      // The chimney breast and the fire.
+      // Set high on the wall, so the fire stays in view above the people in front of it.
+      rrect(c, w * 0.28, h * 0.04, w * 0.44, h * 0.5, 6, const Color(0xFF8A7A66));
+      rrect(c, w * 0.34, h * 0.2, w * 0.32, h * 0.34, 16, const Color(0xFF2A1D17));
+      final f = 1 + math.sin(time * 6) * 0.06;
+      circle(c, w * 0.5, h * 0.44, w * 0.2, Color.fromRGBO(255, 138, 61, 0.2));
+      fillPath(c, poly([w * 0.4, h * 0.54, w * 0.43, h * 0.4 * f, w * 0.47, h * 0.47, w * 0.5, h * 0.33 * f, w * 0.54, h * 0.47, w * 0.58, h * 0.4 * f, w * 0.6, h * 0.54]), const Color(0xFFFF7043));
+      fillPath(c, poly([w * 0.45, h * 0.54, w * 0.48, h * 0.45, w * 0.5, h * 0.5, w * 0.53, h * 0.42 * f, w * 0.56, h * 0.54]), const Color(0xFFFFCA28));
+      rrect(c, w * 0.31, h * 0.52, w * 0.38, 7, 3, const Color(0xFF5D4037));
+      // A mantel with a lantern.
+      rrect(c, w * 0.26, h * 0.13, w * 0.48, 8, 3, const Color(0xFF6D4C41));
+      rrect(c, w * 0.31, h * 0.06, 8, 14, 2, const Color(0xFFFFE9A8));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF6B4528));
+      oval(c, w * 0.5, ground + 4, w * 0.28, h * 0.03, const Color(0xFF8E2B3B));
+    case StoryBackdrop.isles:
+      // Floating islands under a deep night sky, a pale moon and a little drifting mist.
+      _gradient(c, full, const [Color(0xFF0E1236), Color(0xFF4C3F95)]);
+      _stars(c, s, time, count: 60);
+      circle(c, w * 0.8, h * 0.16, w * 0.06, const Color(0x33F1F4C9));
+      circle(c, w * 0.8, h * 0.16, w * 0.04, const Color(0xFFF1F4C9));
+      for (var i = 0; i < 4; i++) {
+        final x = w * (0.1 + i * 0.27) + math.sin(time * 0.3 + i * 2) * 8;
+        final y = h * (0.42 + (i % 2) * 0.1) + math.sin(time * 0.6 + i) * 4;
+        fillPath(c, poly([x - w * 0.12, y, x + w * 0.12, y, x + w * 0.03, y + h * 0.14, x - w * 0.02, y + h * 0.09]), const Color(0xFF3A3470));
+        oval(c, x, y, w * 0.12, h * 0.022, const Color(0xFF5FA86A));
+        oval(c, x, y - 2, w * 0.1, h * 0.012, const Color(0xFF7BC47A));
+      }
+      for (var i = 0; i < 3; i++) {
+        oval(c, w * (0.2 + i * 0.3) + math.sin(time * 0.25 + i) * 14, h * 0.78, w * 0.2, h * 0.03, const Color(0x22FFFFFF));
+      }
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF3E3F88));
+    case StoryBackdrop.cometSky:
+      // A wide night with a comet crossing it, its long tail glowing.
+      _gradient(c, full, const [Color(0xFF070A24), Color(0xFF2B3A7A)]);
+      _stars(c, s, time, count: 70);
+      final p = (time * 0.05 + 0.15) % 1;
+      final head = Offset(w * (0.1 + p * 0.8), h * (0.08 + p * 0.22));
+      for (var i = 0; i < 12; i++) {
+        final t = i / 11;
+        circle(c, head.dx - t * w * 0.34, head.dy - t * h * 0.2, w * 0.03 * (1 - t * 0.8), Color.fromRGBO(150, 215, 255, 0.5 * (1 - t)));
+      }
+      circle(c, head.dx, head.dy, w * 0.05, const Color(0x44B3E5FC));
+      circle(c, head.dx, head.dy, w * 0.026, const Color(0xFFE1F5FE));
+      _hill(c, s, h * 0.7, h * 0.04, 0.8, const Color(0xFF1F2A5C));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF26331F));
+    case StoryBackdrop.garden:
+      // The hall's back garden on a warm afternoon: hedges, flowers, and two trees with a hammock.
+      _gradient(c, full, const [Color(0xFF9CD3F2), Color(0xFFEAF6FB)]);
+      _cloud(c, w * 0.22, h * 0.12, w * 0.1, const Color(0xE6FFFFFF));
+      _cloud(c, w * 0.7, h * 0.18, w * 0.08, const Color(0xCCFFFFFF));
+      _hill(c, s, h * 0.5, h * 0.03, 0.6, const Color(0xFF8CC47A));
+      // A hedge along the back, with a few flowers in it.
+      rrect(c, 0, h * 0.5, w, h * 0.12, 8, const Color(0xFF3F7F4A));
+      for (var i = 0; i < 16; i++) {
+        circle(c, w * (i + 0.5) / 16, h * 0.5 + (i % 3) * 4, 6, const Color(0xFF4F9A58));
+        if (i % 3 == 1) circle(c, w * (i + 0.5) / 16 + 4, h * 0.53, 2.2, [const Color(0xFFF2C94C), const Color(0xFFE26A9B), const Color(0xFFFFFFFF)][(i ~/ 3) % 3]);
+      }
+      // Two trees, and a hammock slung between them, swaying a very little.
+      for (final x in [w * 0.18, w * 0.82]) {
+        rrect(c, x - 5, h * 0.3, 10, h * 0.5, 3, const Color(0xFF7A5230));
+        circle(c, x, h * 0.26, w * 0.12, const Color(0xFF3F9E5A));
+        circle(c, x - w * 0.06, h * 0.32, w * 0.08, const Color(0xFF4FB06A));
+      }
+      final sag = h * 0.07 + math.sin(time * 0.9) * 2;
+      final hammock = Path()
+        ..moveTo(w * 0.2, h * 0.52)
+        ..quadraticBezierTo(w * 0.5, h * 0.52 + sag * 2, w * 0.8, h * 0.52);
+      strokePath(c, hammock, 7, const Color(0xFFE2663A));
+      strokePath(c, hammock, 2, const Color(0xFFFFE0B2));
+      _fill(c, Rect.fromLTWH(0, ground, w, h - ground), const Color(0xFF7DB66A));
+      for (var i = 0; i < 14; i++) {
+        final x = w * ((i * 37 % 100) / 100);
+        line(c, x, ground + 6 + (i % 4) * 8, x + 2, ground + 1 + (i % 4) * 8, 1.2, const Color(0xFF5E9A4E));
       }
   }
 }

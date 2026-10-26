@@ -34,6 +34,10 @@ Future<void> bootApp(
   DateTime? now,
   List<Override> overrides = const [],
   bool storyOffers = false,
+
+  /// Let the hall offer the warm-up to a player with no workouts. Off by default,
+  /// or it would sit over every first-time test.
+  bool warmUpOffers = false,
   StoreGateway? store,
 
   /// The pretend ad system. By default a test never reaches Google, and there is
@@ -72,6 +76,7 @@ Future<void> bootApp(
       showTitleOnLaunchProvider.overrideWithValue(showTitle),
       // The hall would otherwise offer story chapters over every test.
       storyAutoOfferProvider.overrideWithValue(storyOffers),
+      warmUpAutoOfferProvider.overrideWithValue(warmUpOffers),
       // Never reach a real store from a test.
       storeGatewayProvider.overrideWithValue(store ?? TestStoreGateway()),
       adGatewayProvider.overrideWithValue(ads ?? TestAdGateway()),
@@ -106,7 +111,12 @@ Future<void> openExercise(WidgetTester tester, String name) async {
   await settle(tester);
   // The search box also contains this text, so only look at card titles. With a journal, the
   // "Do It Again" shelf above the cards may name it too, so take the last (the card).
-  final card = find.byWidgetPredicate((w) => w is Text && w.data == name).last;
+  final titles = find.byWidgetPredicate((w) => w is Text && w.data == name);
+  // The panels above the list push it down, and a lazy list has not built what is far off screen.
+  if (titles.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(titles, 300, scrollable: find.byType(Scrollable).first);
+  }
+  final card = titles.last;
   await tester.ensureVisible(card);
   await settle(tester, frames: 3);
   await tester.tap(card);

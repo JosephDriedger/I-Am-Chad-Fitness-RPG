@@ -50,7 +50,7 @@ void main() {
     expect(grants.length, 1);
     expect(grants.single.day, '2026-10-22');
     expect(grants.single.xp, 40);
-    expect(grants.single.rulesVersion, RewardRules.v1.version);
+    expect(grants.single.rulesVersion, RewardRules.current.version);
   });
 
   test('daily cap holds across many entries', () async {
@@ -95,15 +95,16 @@ void main() {
   });
 
   test('rebalancing never rewrites days the player did not touch', () async {
-    await repo.addWorkout(_walk(today, 10));
+    final v1 = GameRepository(db, rules: RewardRules.v1);
+    await v1.addWorkout(_walk(today, 10));
     // A later app version ships new rules.
-    final v2 = GameRepository(db, rules: const RewardRules(version: 2, xpPerCreditedMinute: 9));
-    await v2.addWorkout(_walk(today.add(const Duration(days: 3)), 10));
-    final grants = {for (final g in await v2.watchGrants().first) g.day: g};
+    final later = GameRepository(db, rules: const RewardRules(version: 3, xpPerCreditedMinute: 9));
+    await later.addWorkout(_walk(today.add(const Duration(days: 3)), 10));
+    final grants = {for (final g in await later.watchGrants().first) g.day: g};
     expect(grants['2026-10-22']!.xp, 40);
     expect(grants['2026-10-22']!.rulesVersion, 1);
     expect(grants['2026-10-25']!.xp, 90);
-    expect(grants['2026-10-25']!.rulesVersion, 2);
+    expect(grants['2026-10-25']!.rulesVersion, 3);
   });
 
   test('hero round-trips and energy math is derived, never negative', () async {

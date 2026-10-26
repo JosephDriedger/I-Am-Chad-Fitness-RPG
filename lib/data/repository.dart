@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 import '../domain/activity.dart';
+import '../domain/combat.dart' show FightingStyle;
 import '../domain/expedition.dart';
 import '../domain/hero.dart';
 import '../domain/items.dart';
@@ -19,7 +20,7 @@ import 'database.dart';
 /// Single access point for saved data. Workouts are written first and
 /// rewards are re-derived from them, never the other way around.
 class GameRepository {
-  GameRepository(this._db, {this.rules = RewardRules.v1});
+  GameRepository(this._db, {this.rules = RewardRules.current});
 
   final AppDatabase _db;
   final RewardRules rules;
@@ -30,6 +31,12 @@ class GameRepository {
     final q = _db.select(_db.workouts)
       ..orderBy([(t) => OrderingTerm.desc(t.performedAt)]);
     return q.watch().map((rows) => rows.map(_toEntry).toList());
+  }
+
+  /// Every workout once, newest first, for something that wants the journal as it is now.
+  Future<List<WorkoutEntry>> allWorkouts() async {
+    final rows = await (_db.select(_db.workouts)..orderBy([(t) => OrderingTerm.desc(t.performedAt)])).get();
+    return rows.map(_toEntry).toList();
   }
 
   Future<int> addWorkout(WorkoutEntry e) async {
@@ -176,6 +183,13 @@ class GameRepository {
     if (!valid) return;
     await (_db.update(_db.heroes)..where((h) => h.id.equals(1)))
         .write(HeroesCompanion(weeklyGoalDays: Value(days)));
+  }
+
+  /// Sets how the hero fights. An id that is not a style is ignored.
+  Future<void> setFightingStyle(String id) async {
+    if (!FightingStyle.values.any((s) => s.id == id)) return;
+    await (_db.update(_db.heroes)..where((h) => h.id.equals(1)))
+        .write(HeroesCompanion(fightingStyle: Value(id)));
   }
 
   Future<void> spendEnergy(int amount) async {
@@ -328,6 +342,10 @@ class GameRepository {
   /// The numbers of the chapters the player has read.
   Stream<Set<int>> watchStoryRead() =>
       _db.select(_db.storyProgress).watch().map((rows) => {for (final r in rows) r.chapter});
+
+  /// When each chapter was first read, by chapter number.
+  Stream<Map<int, DateTime>> watchStoryReadAt() =>
+      _db.select(_db.storyProgress).watch().map((rows) => {for (final r in rows) r.chapter: r.readAt});
 
   /// The player's remembered story choices, by key.
   Stream<Map<String, int>> watchStoryChoices() =>
@@ -564,6 +582,7 @@ class GameRepository {
           'cape': hero.cape,
           'hairDye': hero.hairDye,
           'weeklyGoalDays': hero.weeklyGoalDays,
+          'fightingStyle': hero.fightingStyle,
         },
       'purchases': [
         for (final r in receipts) {'productId': r.productId, 'grantedAt': r.grantedAt.toIso8601String()}
@@ -736,5 +755,6 @@ class GameRepository {
         cape: r.cape,
         hairDye: r.hairDye,
         weeklyGoalDays: r.weeklyGoalDays,
+        fightingStyle: r.fightingStyle,
       );
 }

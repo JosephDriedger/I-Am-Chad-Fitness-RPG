@@ -17,9 +17,18 @@ class RewardRules {
     this.xpPerCreditedMinute = 4,
     this.minutesPerEnergy = 5,
     this.restAllowancePerExtraSetSeconds = 45,
+    this.maxFlooredEntriesPerDay,
   });
 
   static const v1 = RewardRules();
+
+  /// Version 2 keeps "showing up counts" for the first few short entries of a day,
+  /// then counts further short ones at their real length, so a pile of tiny entries
+  /// cannot fill the daily limit. Nothing else changed.
+  static const v2 = RewardRules(version: 2, maxFlooredEntriesPerDay: 3);
+
+  /// The rules new days are granted under.
+  static const current = v2;
 
   /// Persisted with each day's grant so rebalancing never rewrites history.
   final int version;
@@ -36,6 +45,11 @@ class RewardRules {
   final int xpPerCreditedMinute;
   final int minutesPerEnergy;
   final int restAllowancePerExtraSetSeconds;
+
+  /// How many entries in one day the [minEffortPerEntry] minimum lifts, oldest
+  /// first. Later short entries count for what they really were. Null means every
+  /// entry is lifted (version 1).
+  final int? maxFlooredEntriesPerDay;
 
   double get maxCreditedMinutes => fullValueMinutes + halfValueMinutes * 0.5;
   int get maxDailyXp => (maxCreditedMinutes * xpPerCreditedMinute).round();
@@ -90,10 +104,29 @@ class RewardRules {
   /// Reward for one local day, given every entry logged that day.
   DayReward rewardForDay(Iterable<WorkoutEntry> entries) {
     var raw = 0.0;
-    for (final e in entries) {
-      // Back-dated workouts are for the journal only.
-      if (!e.countsForRewards) continue;
-      raw += effortMinutes(e);
+    var lifted = 0;
+    var unlifted = 0;
+    // Oldest first, so the minimum goes to the entries done first.
+    final counted = [
+      for (final e in entries)
+        // Back-dated workouts are for the journal only.
+        if (e.countsForRewards) e,
+    ]..sort((a, b) {
+        final byTime = a.performedAt.compareTo(b.performedAt);
+        return byTime != 0 ? byTime : (a.id ?? 0).compareTo(b.id ?? 0);
+      });
+    for (final e in counted) {
+      final real = unflooredEffortMinutes(e);
+      if (real <= 0) continue;
+      if (real >= minEffortPerEntry) {
+        raw += real;
+      } else if (maxFlooredEntriesPerDay == null || lifted < maxFlooredEntriesPerDay!) {
+        lifted++;
+        raw += minEffortPerEntry;
+      } else {
+        unlifted++;
+        raw += real;
+      }
     }
     final credited = creditedMinutes(raw);
     final xp = (credited * xpPerCreditedMinute).round();
@@ -105,6 +138,7 @@ class RewardRules {
       energy: energy,
       rulesVersion: version,
       capReached: raw >= fullValueMinutes + halfValueMinutes,
+      shortEntriesAtRealLength: unlifted,
     );
   }
 
@@ -127,6 +161,12 @@ class RewardRules {
     if (r.capReached) {
       b.write(' You\'ve hit today\'s reward limit. Resting is part of training!');
     }
+    if (r.shortEntriesAtRealLength > 0 && maxFlooredEntriesPerDay != null) {
+      b.write(
+        ' The first $maxFlooredEntriesPerDay short entries of a day count as ${_fmt(minEffortPerEntry)} minutes each; '
+        'shorter ones after that count for their real length.',
+      );
+    }
     return b.toString();
   }
 
@@ -142,6 +182,7 @@ class DayReward {
     required this.energy,
     required this.rulesVersion,
     required this.capReached,
+    this.shortEntriesAtRealLength = 0,
   });
 
   static const none = DayReward(
@@ -152,6 +193,10 @@ class DayReward {
     rulesVersion: 0,
     capReached: false,
   );
+
+  /// Short entries that were past the day's allowance for the minimum and so
+  /// counted for what they really were.
+  final int shortEntriesAtRealLength;
 
   final double rawEffortMinutes;
   final double creditedMinutes;

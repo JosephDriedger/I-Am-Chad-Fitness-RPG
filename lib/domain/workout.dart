@@ -63,6 +63,24 @@ class WorkoutEntry {
 
   ActivityType? get activity => ActivityCatalog.byId(activityId);
 
+  /// The words for the optional 1-5 "How did it feel?" rating, easiest first.
+  static const feelLabels = ['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'];
+
+  /// How the player said it felt, or null if they did not say.
+  String? get feel {
+    final p = perceivedEffort;
+    return p == null || p < 1 || p > feelLabels.length ? null : feelLabels[p - 1];
+  }
+
+  /// Whether the query appears in the exercise's name, its variant or the note,
+  /// ignoring case. An empty query matches everything. Only for finding things in
+  /// the journal.
+  bool matches(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    return [activity?.name, variant, notes].any((t) => t != null && t.toLowerCase().contains(q));
+  }
+
   /// True when the entry holds enough data to be worth saving.
   bool get hasMeasurement =>
       (durationSeconds ?? 0) > 0 ||

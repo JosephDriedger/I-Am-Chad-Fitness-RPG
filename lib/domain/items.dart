@@ -360,6 +360,47 @@ class ItemCatalog {
       tier: 7,
       accent: 0xFFFFF59D,
     ),
+
+    // ---- The Ember Deeps (region 8) -------------------------------------------
+    EquipmentItem(
+      id: 'emberbrand',
+      name: 'Emberbrand',
+      slot: EquipmentSlot.weapon,
+      description: 'Still warm from the forge. It would like a word about oven gloves.',
+      attack: 9,
+      tier: 8,
+      accent: 0xFFFF7043,
+    ),
+    EquipmentItem(
+      id: 'forgehand_helm',
+      name: 'Forgehand Helm',
+      slot: EquipmentSlot.head,
+      description: 'A helm with a visor that only goes up. Nobody knows why.',
+      hp: 18,
+      defense: 5,
+      tier: 8,
+      accent: 0xFF8D6E63,
+    ),
+    EquipmentItem(
+      id: 'cinderweave_coat',
+      name: 'Cinderweave Coat',
+      slot: EquipmentSlot.body,
+      description: 'Woven from something that does not catch fire. It has tried.',
+      defense: 9,
+      hp: 6,
+      tier: 8,
+      accent: 0xFFBF360C,
+    ),
+    EquipmentItem(
+      id: 'pocket_forge',
+      name: 'Pocket Forge',
+      slot: EquipmentSlot.trinket,
+      description: 'A tiny anvil, a tiny hammer, and a very tiny argument.',
+      attack: 5,
+      hp: 16,
+      tier: 8,
+      accent: 0xFFFFAB40,
+    ),
   ];
 
   static final Map<String, EquipmentItem> _byId = {

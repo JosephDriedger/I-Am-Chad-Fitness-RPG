@@ -1,4 +1,4 @@
-/// Seeded expeditions: a short sequence of battles and events in one of seven
+/// Seeded expeditions: a short sequence of battles and events in one of eight
 /// regions, each tougher than the last. See docs/COMBAT_AND_EXPEDITIONS.md.
 library;
 
@@ -29,7 +29,7 @@ class EnemyTemplate {
   final double defense;
   final bool boss;
 
-  /// The region this enemy belongs to (1 to 7).
+  /// The region this enemy belongs to (1 to 8).
   final int tier;
 
   /// How it picks its moves: whether it braces, mends, strikes twice, or gets
@@ -271,6 +271,35 @@ class EnemyPool {
       tier: 7,
       behavior: EnemyBehavior(heavy: 0.2, brace: 0.3, mend: 0.2),
     ),
+
+    // ---- The Ember Deeps (region 8) ----------------------------------------------
+    EnemyTemplate(
+      name: 'Cinder Sprite',
+      blurb: 'A spark with ambitions. Warms up every conversation.',
+      hp: 0.8,
+      attack: 1.1,
+      defense: 0.75,
+      tier: 8,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.35),
+    ),
+    EnemyTemplate(
+      name: 'Anvil Golem',
+      blurb: 'Hit it and it rings. Hit it again and it rings louder.',
+      hp: 1.15,
+      attack: 0.95,
+      defense: 1.25,
+      tier: 8,
+      behavior: EnemyBehavior(heavy: 0.25, brace: 0.3),
+    ),
+    EnemyTemplate(
+      name: 'Magma Slug',
+      blurb: 'Slow, glowing, and perfectly sure of its pace.',
+      hp: 1.1,
+      attack: 0.9,
+      defense: 1.0,
+      tier: 8,
+      behavior: EnemyBehavior(heavy: 0.15, brace: 0.2, mend: 0.3),
+    ),
   ];
 
   static const bosses = <EnemyTemplate>[
@@ -422,6 +451,28 @@ class EnemyPool {
       boss: true,
       tier: 7,
       behavior: EnemyBehavior(heavy: 0.2, flurry: 0.2, brace: 0.2, mend: 0.1, enrageBelow: 0.45),
+    ),
+
+    // ---- The Ember Deeps -----------------------------------------------------------
+    EnemyTemplate(
+      name: 'Forgemaster Brun',
+      blurb: 'Made every sword in the guild, and has opinions about all of them.',
+      hp: 1.7,
+      attack: 1.2,
+      defense: 1.15,
+      boss: true,
+      tier: 8,
+      behavior: EnemyBehavior(heavy: 0.25, flurry: 0.15, brace: 0.2, enrageBelow: 0.4),
+    ),
+    EnemyTemplate(
+      name: 'Magmara, the Slow Simmer',
+      blurb: 'Takes eleven years to get annoyed. It has been eleven years.',
+      hp: 1.6,
+      attack: 1.2,
+      defense: 1.1,
+      boss: true,
+      tier: 8,
+      behavior: EnemyBehavior(heavy: 0.2, flurry: 0.25, mend: 0.15, enrageBelow: 0.45),
     ),
   ];
 
@@ -597,6 +648,30 @@ class ExpeditionEvent {
       'A small star has dropped into the grass. It is happy to be picked up and leaves a few coins behind.',
       tier: 7,
     ),
+    ExpeditionEvent(
+      EventKind.rest,
+      'A Warm Hearthstone',
+      'A flat, glowing stone as warm as a cat on a radiator. You sit a while and your aches go quiet.',
+      tier: 8,
+    ),
+    ExpeditionEvent(
+      EventKind.restock,
+      'A Wandering Smith',
+      'A smith with a cart of bellows and bottles hammers out a spare potion for you. "No charge. Mind the sparks."',
+      tier: 8,
+    ),
+    ExpeditionEvent(
+      EventKind.bard,
+      'A Chorus at the Forge',
+      'Hammers ring in time and somebody harmonises. You start the next fight with focus to spare.',
+      tier: 8,
+    ),
+    ExpeditionEvent(
+      EventKind.treasure,
+      'A Cooled Nugget',
+      'A lump of bright metal has fallen off a cart and cooled in a crack in the floor. There are coins inside.',
+      tier: 8,
+    ),
   ];
 
   /// Camps where the path splits and the player picks a way. Each option is an
@@ -671,6 +746,16 @@ class ExpeditionEvent {
         EventChoice('Chase the comet trail', EventKind.bard),
       ],
     ),
+    ExpeditionEvent(
+      EventKind.fork,
+      'Anvil or Ember',
+      'One passage rings with hammers and cheerful shouting. The other glows softly and smells of toast.',
+      tier: 8,
+      choices: [
+        EventChoice('Follow the hammers', EventKind.bard),
+        EventChoice('Warm up by the embers', EventKind.rest),
+      ],
+    ),
   ];
 
   /// The first region only meets the original three. Later ones add the other
@@ -727,7 +812,7 @@ class Expedition {
   final int heroLevel;
   final List<ExpeditionStep> steps;
 
-  /// The region, 1 to 7. Decides the enemies, the scenery, the loot and how
+  /// The region, 1 to 8. Decides the enemies, the scenery, the loot and how
   /// tough everything is.
   final int tier;
 
@@ -895,6 +980,9 @@ class ExpeditionRun {
       );
 
   Combatant hero;
+
+  /// How the hero fights, from the hero's saved choice.
+  FightingStyle style = FightingStyle.steady;
   int potions = 2;
   int focus = 0;
   int stepIndex = 0;
@@ -917,6 +1005,7 @@ class ExpeditionRun {
       rng: rng,
       focus: focus,
       potions: potions,
+      style: style,
     );
   }
 

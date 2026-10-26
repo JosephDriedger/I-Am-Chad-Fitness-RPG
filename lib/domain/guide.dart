@@ -40,13 +40,13 @@ class Guide {
 
   static String _n(num x) => x == x.roundToDouble() ? '${x.round()}' : x.toStringAsFixed(1);
 
-  static final _r = RewardRules.v1;
+  static final _r = RewardRules.current;
 
   static List<GuideSection> get sections => [
         GuideSection('Moving and Rewards', [
           GuideEntry(
             'Effort Minutes',
-            'A common measure, so a walk, a stretch and a set of push-ups can sit side by side. Every entry is worth at least ${_n(_r.minEffortPerEntry)} of them, because showing up counts.',
+            'A common measure, so a walk, a stretch and a set of push-ups can sit side by side. Every entry is worth at least ${_n(_r.minEffortPerEntry)} of them, because showing up counts. That holds for the first ${_r.maxFlooredEntriesPerDay} short entries of a day; after that, a very short one counts for its real length.',
           ),
           const GuideEntry(
             'Easier Versions',
@@ -84,7 +84,11 @@ class Guide {
           ),
           GuideEntry(
             'Weekly Goal',
-            'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like.',
+            'A gentle target of active days in a week, from ${HeroProfile.minWeeklyGoal} to ${HeroProfile.maxWeeklyGoal}. You choose it on the quest board, and you can change it whenever you like. Until you do, Chad suggests about what you have been doing lately, once you have a few weeks behind you.',
+          ),
+          const GuideEntry(
+            'Warm-Up and Calm Minute',
+            'On the Train screen Chad offers a one-minute warm-up and a minute of slow breathing. Both are optional, pay nothing, save nothing, and you can stop whenever you like.',
           ),
           const GuideEntry(
             'Last Week',
@@ -118,11 +122,15 @@ class Guide {
           ),
           const GuideEntry(
             'Your Moves',
-            'Attack builds focus. Guard halves the damage you take this turn and also builds focus. Power Strike spends 2 focus for a big hit. Potion heals about a third of your health.',
+            'Attack builds focus. Guard halves the damage you take this turn and also builds focus. Power Strike spends focus for a big hit. Potion heals about a third of your health.',
+          ),
+          const GuideEntry(
+            'Fighting Styles',
+            'On the Hero screen you can pick how you fight: Steady, Guardian (guarding builds more focus, and Power Strike costs more but hits harder) or Striker (attacking builds more focus, guarding builds none, and Power Strike hits a little lighter). It is free, you can change it any time, and no style is stronger than another.',
           ),
           const GuideEntry(
             'Focus',
-            'You gain 1 focus each time you attack or guard, up to ${BattleState.maxFocus}, and it resets at the start of every battle.',
+            'In the Steady style you gain 1 focus each time you attack or guard, and a Power Strike costs 2. You can hold up to ${BattleState.maxFocus}, and it resets at the start of every battle.',
           ),
           GuideEntry(
             'Potions',
@@ -148,7 +156,7 @@ class Guide {
           ),
           const GuideEntry(
             'Pennants and Trophies',
-            'Milestones hang as pennants across the top of the guild hall, and the bigger ones stand as trophies on the top shelf of the Journal bookshelf. They appear as you earn them, and they never go away.',
+            'Milestones hang as pennants across the top of the guild hall, and the bigger ones stand as trophies on the top shelf of the Journal bookshelf. Small keepsakes for each finished story season stand on the hall floor. They appear as you earn them, and they never go away.',
           ),
           const GuideEntry(
             'Mantles and Hair Dyes',
@@ -162,7 +170,7 @@ class Guide {
         GuideSection('Story', [
           const GuideEntry(
             'The Chronicle',
-            'Each chapter opens at a hero level and waits for you, so nothing can be missed and nothing is timed. You can skip a chapter, leave it, or read it again whenever you like. The first season is in the game. Later seasons download once, the first time you read them, and stay on your phone.',
+            'Each chapter opens at a hero level (the last season opens after days of moving instead, once the levels run out) and waits for you, so nothing can be missed and nothing is timed. You can skip a chapter, leave it, or read it again whenever you like. The first season is in the game. Later seasons download once, the first time you read them, and stay on your phone.',
           ),
           const GuideEntry(
             'Choices',
@@ -176,7 +184,7 @@ class Guide {
         GuideSection('Your Data', [
           const GuideEntry(
             'Saved on Your Device',
-            'Your hero, workouts and progress stay on your phone. There is no account. In Settings you can copy a full backup to keep or to move to a new phone, restore one, or delete it all.',
+            'Your hero, workouts and progress stay on your phone. There is no account. In Settings you can copy a full backup to keep or to move to a new phone, restore one, save your workouts as a spreadsheet to look at, or delete it all.',
           ),
           const GuideEntry(
             'Camera Counting',

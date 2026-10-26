@@ -1,4 +1,4 @@
-# Reward rules (version 1)
+# Reward rules (version 2)
 
 How a logged workout becomes **XP** and **adventure energy**. The code is `RewardRules` in [`lib/domain/rewards.dart`](../lib/domain/rewards.dart); the numbers below are the `RewardRules.v1` defaults.
 
@@ -22,7 +22,7 @@ Every entry is converted to **effort minutes**, a common currency across activit
 | Distance only | `km × minutes per km × factor` |
 | None of these | 0 (the entry cannot be saved) |
 
-Each entry is worth **at least 3 effort minutes**, so showing up always counts.
+Each entry is worth **at least 3 effort minutes**, so showing up counts. In version 2 this minimum is given to the **first 3 short entries of a day** (oldest first). A fourth or later entry under 3 minutes counts for its real length. Entries of 3 minutes or more are never affected, and an honest small day (three short moves and a walk) earns exactly what it did before.
 
 Activity factors:
 
@@ -153,6 +153,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 | Thunder Heights gear (4 pieces) | 1,900 to 2,100 | Found in region 5, or bought |
 | Sunstone Dunes gear (4 pieces) | 2,600 to 3,000 | Found in region 6, or bought |
 | Starlit Isles gear (4 pieces) | 3,500 to 4,000 | Found in region 7, or bought |
+| Ember Deeps gear (4 pieces) | 4,600 to 5,200 | Found in region 8, or bought |
 | Healing Potion | 25 each | Up to 5 in the pouch |
 
 - **Gear** is also found as expedition loot, so buying is never the only way, and a duplicate drop pays 10 coins back. The bonuses are deliberately small and unchanged.
@@ -161,7 +162,7 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 
 ## Versioning and history
 
-- `RewardRules.version` is stored on each day's row in `reward_grants`.
+- `RewardRules.version` is stored on each day's row in `reward_grants`.  Version 1 days (before the floor limit) keep their rewards; only days touched later are recomputed under version 2.
 - A day is recomputed (with the *current* rules) only when its workouts are added, edited or deleted. Untouched days keep the rules they were granted under.
 - Balance changes therefore never alter anyone's recorded exercise, and never retroactively change days they did not touch.
 - To change the numbers: add a new `RewardRules` constant with a bumped `version`, switch `GameRepository`'s default, and update this document and the tests.
@@ -178,9 +179,19 @@ Coins come from expeditions (about 5 to 10 per battle), duplicate loot (10), and
 
 ## Known gaps and ideas
 
-- The 3-minute floor lets someone log many tiny entries to reach the cap quickly. The cap bounds the damage and the game is single-player, and the [honesty check](#honesty-check) now flags the pattern, but a per-day limit on floored entries is a possible tightening.
+- The 3-minute floor used to let someone log many tiny entries to reach the cap quickly. Version 2 limits the floor to 3 entries a day ([decision 43](DECISIONS.md#43-the-minimum-effort-floor-applies-to-three-short-entries-a-day)); the [honesty check](#honesty-check) still flags the pattern.
 - Camera-based rep recognition could verify reps, but it has real privacy, accessibility and accuracy costs. See the [roadmap](ROADMAP.md).
-- Weekly or personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is not implemented yet. See the [roadmap](ROADMAP.md).
+- Personal-baseline scaling ("rewards recognise consistency relative to personal baseline") is built as a suggestion for the weekly goal and not as a change to any reward: see [Personal baseline](#personal-baseline). XP, energy, quests and streaks are not scaled to the individual, on purpose.
+
+## Personal baseline
+
+`PersonalBaseline` in `lib/domain/quests.dart` works out how often the player really moves, and the weekly goal follows it. This is how "consistency relative to the individual" is recognised without ever changing what a workout earns.
+
+- **What it reads.** The active days in each of the last four complete Monday-to-Sunday weeks (only workouts that count for rewards, so back-dated entries are not part of it). Weeks before the player's first workout are not counted. A quiet week counts as zero.
+- **What it says.** The middle value of those weeks, rounded, kept between 1 and 5 days (rest days are part of the plan). With fewer than three complete weeks of history it says nothing, and the suggestion for the player's experience (2, 3 or 4 days) is used instead.
+- **Where it is used.** Only as the goal the player has not picked: the quest board's weekly goal and its chips, the hall's weekly count, the weekly look back and the gentle reminders (which stay quiet in a week whose goal is met). A goal the player chose always wins. The quest board says when the suggestion comes from their own recent weeks.
+- **It is never a step up.** The suggestion is what the player already does, not a bit more, so it cannot nudge anyone to do more than is right for them. It also goes down: someone who had a quiet spell is suggested a gentler week, with no message about it.
+- **Rewards are untouched.** The reward rules above, the daily limit, streaks, quests and personal bests do not read it, and a test checks that the same workouts earn the same with or without a history.
 
 ## Personal bests
 

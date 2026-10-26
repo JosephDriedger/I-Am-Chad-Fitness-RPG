@@ -784,3 +784,192 @@ void paintNova(Canvas c, ActorState s) {
   line(c, -2, hover - 4, 2, hover - 4, 1.6, const Color(0xFF263238));
   strokePath(c, Path()..moveTo(-6, hover + 5)..quadraticBezierTo(0, hover + 10, 6, hover + 5), 1.7, const Color(0xFFB8860B));
 }
+
+// ---------------------------------------------------------------------------
+// The Ember Deeps
+// ---------------------------------------------------------------------------
+
+/// A flame with a face, flickering, throwing the odd spark.
+void paintCinderSprite(Canvas c, ActorState s) {
+  final flicker = math.sin(s.time * 9) * 2 + math.sin(s.time * 5.3) * 1.5;
+  final hover = -22 + math.sin(s.time * 2.4) * 4 - s.attack * 6;
+  final grow = 1 + s.windUp * 0.25;
+  oval(c, 0, 0, 14, 3, const Color(0x24000000));
+  c.save();
+  c.translate(0, hover);
+  c.scale(grow, grow);
+  // Outer flame, then a hotter one inside it.
+  final outer = Path()
+    ..moveTo(0, -34 - flicker)
+    ..quadraticBezierTo(14, -14, 15, 2)
+    ..quadraticBezierTo(14, 17, 0, 18)
+    ..quadraticBezierTo(-14, 17, -15, 2)
+    ..quadraticBezierTo(-14, -14, 0, -34 - flicker)
+    ..close();
+  fillPath(c, outer, const Color(0xFFFF7043));
+  final inner = Path()
+    ..moveTo(0, -20 - flicker * 0.6)
+    ..quadraticBezierTo(9, -6, 9, 4)
+    ..quadraticBezierTo(8, 13, 0, 14)
+    ..quadraticBezierTo(-8, 13, -9, 4)
+    ..quadraticBezierTo(-9, -6, 0, -20 - flicker * 0.6)
+    ..close();
+  fillPath(c, inner, const Color(0xFFFFCA28));
+  circle(c, 0, 6, 5, const Color(0xFFFFF59D));
+  // A cheerful, slightly overconfident face.
+  circle(c, -4, -2, 2.4, const Color(0xFFFFFFFF));
+  circle(c, 4, -2, 2.4, const Color(0xFFFFFFFF));
+  circle(c, -3.4, -2, 1.1, _ink);
+  circle(c, 4.6, -2, 1.1, _ink);
+  strokePath(c, Path()..moveTo(-4, 4)..quadraticBezierTo(0, 8, 4, 4), 1.4, _ink);
+  c.restore();
+  // Sparks drifting up.
+  for (var i = 0; i < 5; i++) {
+    final p = (s.time * 0.8 + i / 5) % 1;
+    circle(c, math.sin(p * 6 + i * 2) * 14, hover - 10 - p * 38, 1.6 * (1 - p), Color.fromRGBO(255, 213, 79, 1 - p));
+  }
+}
+
+/// A block of iron in the shape of an anvil, with glowing seams and a stoic face.
+void paintAnvilGolem(Canvas c, ActorState s) {
+  final rock = math.sin(s.time * 1.6) * 1.2;
+  final lean = s.windUp * 6 - s.attack * 8;
+  const iron = Color(0xFF546E7A);
+  const dark = Color(0xFF37474F);
+  shadow(c, 30);
+  // Legs: two squat blocks.
+  rrect(c, -22, -16, 16, 16, 3, dark);
+  rrect(c, 6, -16, 16, 16, 3, dark);
+  c.save();
+  c.translate(lean, rock);
+  // The waist, then the broad face of the anvil, with its horn pointing forward.
+  fillPath(c, poly([-14, -16, 14, -16, 10, -34, -10, -34]), iron);
+  fillPath(c, poly([-30, -34, 26, -34, 26, -50, 44, -50, 26, -62, -30, -62]), shade(iron, 0.05));
+  rrect(c, -30, -64, 56, 6, 2, shade(iron, 0.14));
+  // Glowing seams, brighter when it winds up.
+  final glow = 0.55 + 0.25 * math.sin(s.time * 3) + s.windUp * 0.4;
+  final seam = Color.fromRGBO(255, 138, 61, glow.clamp(0.0, 1.0));
+  line(c, -10, -34, -8, -62, 1.8, seam);
+  line(c, 8, -34, 12, -58, 1.8, seam);
+  line(c, -22, -48, 14, -46, 1.6, seam);
+  // A slit of a face, calm and patient.
+  rrect(c, -4, -56, 20, 6, 2, const Color(0xFF263238));
+  circle(c, 3, -53, 1.6, const Color(0xFFFFB74D));
+  circle(c, 11, -53, 1.6, const Color(0xFFFFB74D));
+  c.restore();
+}
+
+/// A big slug made of cooling rock, glowing through the cracks.
+void paintMagmaSlug(Canvas c, ActorState s) {
+  final ooze = math.sin(s.time * 2) * 2;
+  final rear = s.windUp * 10 - s.attack * 6;
+  shadow(c, 34);
+  // A glowing trail behind.
+  oval(c, -22, -2, 26, 4, const Color(0x66FF7043));
+  // The body: a long dome that rises towards the head.
+  final body = Path()
+    ..moveTo(-36, 0)
+    ..quadraticBezierTo(-34, -28, -6, -30 + ooze)
+    ..quadraticBezierTo(18, -34 - rear * 0.5, 26, -46 - rear)
+    ..quadraticBezierTo(34, -30, 34, -14)
+    ..quadraticBezierTo(34, 0, 20, 0)
+    ..close();
+  fillPath(c, body, const Color(0xFF4E342E));
+  // Cracks of lava across the back.
+  final glow = 0.6 + 0.3 * math.sin(s.time * 2.6);
+  final lava = Color.fromRGBO(255, 112, 67, glow);
+  strokePath(c, Path()..moveTo(-28, -8)..lineTo(-20, -18)..lineTo(-10, -12)..lineTo(0, -24)..lineTo(10, -16), 2.4, lava);
+  strokePath(c, Path()..moveTo(-4, -26)..lineTo(2, -14)..lineTo(-6, -6), 2, lava);
+  oval(c, -6, -2, 30, 4, const Color(0xFFFF8A65));
+  // Two eye stalks, swaying, and a small smile.
+  for (final dx in [14.0, 24.0]) {
+    final sway = math.sin(s.time * 2.2 + dx) * 2;
+    line(c, dx, -36 - rear, dx + sway, -54 - rear, 2.6, const Color(0xFF6D4C41));
+    circle(c, dx + sway, -56 - rear, 4, const Color(0xFFFFFFFF));
+    circle(c, dx + sway + 1, -56 - rear, 1.7, _ink);
+  }
+  strokePath(c, Path()..moveTo(22, -26 - rear)..quadraticBezierTo(27, -22 - rear, 31, -27 - rear), 1.4, const Color(0xFFFFCCBC));
+}
+
+/// A broad smith in a leather apron with a very large hammer, sure of his opinions.
+void paintForgemaster(Canvas c, ActorState s) {
+  final breathe = math.sin(s.time * 1.8) * 1;
+  final raise = s.windUp * 40 - s.attack * 46;
+  shadow(c, 26);
+  // Legs and boots.
+  rrect(c, -16, -20, 12, 20, 3, const Color(0xFF3E2723));
+  rrect(c, 4, -20, 12, 20, 3, const Color(0xFF3E2723));
+  // Body, apron and belt.
+  rrect(c, -22, -62 + breathe, 44, 46, 10, const Color(0xFF8D5A3B));
+  rrect(c, -16, -58 + breathe, 32, 40, 6, const Color(0xFF5D4037));
+  rrect(c, -22, -34, 44, 5, 2, const Color(0xFF263238));
+  circle(c, 0, -31.5, 3.2, const Color(0xFFFFCA28));
+  // The hammer arm, hauling a big hammer up and over.
+  c.save();
+  c.translate(18, -52 + breathe);
+  c.rotate(-0.6 - raise / 30);
+  rrect(c, -4, -4, 9, 28, 4, const Color(0xFFA1704E));
+  line(c, 0, 24, 0, 54, 3.4, const Color(0xFF6D4C41));
+  rrect(c, -12, 50, 26, 17, 3, const Color(0xFF607D8B));
+  rrect(c, -12, 50, 26, 5, 2, const Color(0xFF90A4AE));
+  c.restore();
+  // The other arm, a fist on the hip.
+  line(c, -21, -52 + breathe, -30, -36, 8, const Color(0xFFA1704E));
+  circle(c, -30, -34, 5.5, const Color(0xFFA1704E));
+  // Head: bald and sooty, with a big red beard and welding goggles pushed up.
+  circle(c, 0, -76 + breathe, 13, const Color(0xFFD9A074));
+  fillPath(c, Path()
+    ..moveTo(-12, -72 + breathe)
+    ..quadraticBezierTo(0, -50 + breathe, 12, -72 + breathe)
+    ..quadraticBezierTo(0, -64 + breathe, -12, -72 + breathe)
+    ..close(), const Color(0xFFC0392B));
+  rrect(c, -12, -86 + breathe, 24, 6, 3, const Color(0xFF455A64));
+  circle(c, -5, -85 + breathe, 3.2, const Color(0xFFB3E5FC));
+  circle(c, 5, -85 + breathe, 3.2, const Color(0xFFB3E5FC));
+  circle(c, -4, -75 + breathe, 1.6, _ink);
+  circle(c, 5, -75 + breathe, 1.6, _ink);
+  line(c, -7, -79 + breathe, -1, -78 + breathe, 1.6, _ink);
+  line(c, 2, -78 + breathe, 9, -79 + breathe, 1.6, _ink);
+  // A smudge of soot.
+  circle(c, -7, -71 + breathe, 2.4, const Color(0x55263238));
+}
+
+/// A smouldering mountain with a calm, patient face and a crown of lava, mostly asleep.
+void paintMagmara(Canvas c, ActorState s) {
+  final heave = math.sin(s.time * 1.2) * 1.5;
+  final swell = 1 + s.windUp * 0.08 + s.attack * 0.04;
+  shadow(c, 42);
+  c.save();
+  c.scale(swell, swell);
+  // The mountain.
+  final cone = Path()
+    ..moveTo(-44, 0)
+    ..quadraticBezierTo(-30, -50, -14, -78 + heave)
+    ..lineTo(14, -78 + heave)
+    ..quadraticBezierTo(30, -50, 44, 0)
+    ..close();
+  fillPath(c, cone, const Color(0xFF5D4037));
+  fillPath(c, Path()..moveTo(-44, 0)..quadraticBezierTo(-36, -30, -24, -50)..lineTo(-10, -50)..lineTo(-12, 0)..close(), const Color(0xFF4E342E));
+  // The crater, with lava welling over the lip.
+  oval(c, 0, -78 + heave, 17, 6, const Color(0xFFFF7043));
+  final glow = 0.7 + 0.25 * math.sin(s.time * 2);
+  oval(c, 0, -80 + heave, 11, 3.4, Color.fromRGBO(255, 213, 79, glow));
+  final drip = Path()
+    ..moveTo(-12, -76 + heave)
+    ..quadraticBezierTo(-18, -56, -14, -44)
+    ..quadraticBezierTo(-10, -56, -8, -74 + heave)
+    ..close();
+  fillPath(c, drip, const Color(0xFFFF8A65));
+  // A sleepy, unbothered face.
+  circle(c, -10, -30, 5, const Color(0xFFFFE0B2));
+  circle(c, 10, -30, 5, const Color(0xFFFFE0B2));
+  line(c, -14, -30, -6, -29, 1.8, _ink);
+  line(c, 6, -29, 14, -30, 1.8, _ink);
+  strokePath(c, Path()..moveTo(-8, -16)..quadraticBezierTo(0, -11, 8, -16), 2, const Color(0xFF3E2723));
+  c.restore();
+  // Steam rising and a few lava bubbles popping.
+  for (var i = 0; i < 4; i++) {
+    final p = (s.time * 0.25 + i / 4) % 1;
+    circle(c, math.sin(p * 5 + i) * 10 + (i - 1.5) * 4, -90 - p * 36, 5 + p * 5, Color.fromRGBO(255, 255, 255, 0.35 * (1 - p)));
+  }
+}

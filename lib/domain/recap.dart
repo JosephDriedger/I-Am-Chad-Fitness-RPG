@@ -50,7 +50,7 @@ class WeeklyRecap {
     required DateTime now,
     required Iterable<WorkoutEntry> entries,
     required int goalDays,
-    RewardRules rules = RewardRules.v1,
+    RewardRules rules = RewardRules.current,
   }) {
     final (thisMonday, _) = QuestBoard.weekBounds(now);
     if (!entries.any((e) => e.performedAt.isBefore(thisMonday))) return null;

@@ -1,6 +1,6 @@
 # Story
 
-Four seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three) and **The Long Table** (Season Four). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
+Seven seasons, each told in a prologue and seven chapters: **The Dawn Bell** (Season One), **The Lantern Coast** (Season Two), **The Weather Chime** (Season Three), **The Long Table** (Season Four), **The Banked Fire** (Season Five), **The Comet Road** (Season Six) and **The Day Off** (Season Seven). The story is comedic and warm, and it is a reason to level up, not a reason to feel behind. For the tone rules every line has to follow, see [Content guidelines](CONTENT_GUIDELINES.md#story).
 
 **Every chapter of every season is free.** A story is never sold, never locked behind a payment and never gated by Premium (see [Monetization](MONETIZATION.md)). The one ad in the game comes before a chapter's first line, the first time that chapter is read. Premium removes it for good, and a chapter that is read again has none.
 
@@ -107,7 +107,7 @@ Chad, Maple, Biscuit, Pip, Brad and Grit come back (Biscuit arrives at the summi
 
 The guild hall has outgrown its own table: Maple built one that seats sixty, and the hall seats forty. Chad's answer is a feast for everyone who ever came through the door, and the hero helps carry the invitations out along every road. Fennel and Bertram deliver them to the coast, the hut on the pass, the old wood and the dunes; Chairs are grown, soup is made for sixty, and Tamsin comes down her four hundred and twelve steps by stages, as she promised in Season Three. The season ends at a long table under strings of lights, with every chair full and one kept for whoever comes next.
 
-The season is about **making room**: hosting, belonging, and the idea that a place gets better when there is a seat for the next person. It finishes before the level cap, so it doubles as a gentle thank-you for everything that came before.
+The season is about **making room**: hosting, belonging, and the idea that a place gets better when there is a seat for the next person. It finished just before the old level cap of 99, so it doubles as a gentle thank-you for everything that came before.
 
 ### New cast
 
@@ -132,6 +132,99 @@ Everyone who is still around comes back: Chad, Maple, Biscuit, Pip, Brad, Grit, 
 | 6 | The Night Before the Table | Level 93 | Lanterns go up, the guests arrive from every road, and someone counts the chairs again. |
 | 7 | The Long Table | Level 97 | The table is laid, the chairs are full, and there is room for one more. |
 
+## Season Five: The Banked Fire
+
+### The premise
+
+The great hearth in the Guild Hall has burned for longer than anyone can remember, and this morning it is the colour of a very tired peach. Chad's answer is to feed it, all night, until he is swaying. An old note in the founder's hand says something else: *Do not feed the fire. Keep it.* Under the stairs there is a door that everyone has always assumed was a cupboard. Behind it a stair goes down, warm and long, to a forge where a smith named Brun has been waiting eleven years for someone to knock. The hearth was lit from his forge, and nobody ever learned how to keep it. Below the forge, a mountain called Magmara has been very politely not annoyed by eleven years of poking. The guild learns to bank a fire (rake the coals, cover them, leave a thumb of air, and walk away), carries one coal up four hundred and twelve steps hand to hand, and lights the hearth. That evening somebody new knocks at the door.
+
+The season is about **keeping something going**: effort that lasts is low, steady and shared, a fire is banked rather than blazed, and everyone takes a turn. It is also where the story carries on past the old level cap of 99, and it finishes at the new one, 120.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Brun | The Forgemaster. Enormous, soot-smudged, goggles pushed up, a red beard. Has opinions about every sword he ever made, especially the third on the left, which he did on a Tuesday. Waits for the next word before he says anything. |
+| Magmara | A small, calm mountain with a sleepy face, whose front step is the end of the hearth. Takes eleven years to get annoyed, and speaks slowly. "Rest is training. Ask any mountain." |
+
+Chad, Maple, Biscuit, Pip and Bertram carry the season. Fennel, Hush, Wren and Tamsin come to help carry the coal. The newcomer at the end is never named, so that anyone can be them.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | The Hearth Goes Quiet | Level 100 | The fire is low, Chad has fed it all night, and the founder's note says to keep it. |
+| 1 | The Door Under the Stairs | Level 103 | A cupboard that was never a cupboard, a warm stair, and a letter for whoever finally asked. |
+| 2 | A Smith With Opinions | Level 106 | A forge that has waited eleven years, and a smith with a lot to say about fires. |
+| 3 | Magmara Is Not Annoyed | Level 109 | A mountain who takes eleven years to get annoyed, and a small conversation about poking. |
+| 4 | How to Bank a Fire | Level 112 | Rake, cover, leave a little air, and walk away. Everyone has a turn, and Chad has two. |
+| 5 | The Bucket Chain | Level 115 | One pot of coals, one very long stair, and friends to hand it along. |
+| 6 | The Night Before the Hearth | Level 118 | A cold hall, a warm pot and some true confessions. Maple tells the real story of the first fire. |
+| 7 | The Banked Fire | Level 120 | The hearth is lit and kept, and somebody new knocks at the door. |
+
+## Season Six: The Comet Road
+
+### The premise
+
+Bertram's notebook has an item that has waited seventy-six years: item twelve, written in pencil when he was eight and put to bed too early to see it. 'See the comet.' The comet passes over the Starlit Isles once every seventy-six years, and it is due this winter. The whole guild sets out to take him, along with Juno, the newcomer who knocked at the door at the end of Season Five. The road runs back through everywhere: the lighthouse, the hut at the snow line, the river and its slowest ferry, and out to the floating islands, where every moth, cat and turtle has been waiting too. The Comet King turns out to be three days early and mortified about it, and the guild tells him that early is only another way to arrive. On the last night everyone lies back on a floating island and says what they would tell the person they were at the start. The comet passes, item twelve gets a tick, and the road home is the road on.
+
+The season is about **arriving**: the long road is the point, something that takes seventy-six years can still be reached one night at a time, and it is the sort of person who goes that matters, not the getting there. It carries the story to the new level cap, 144.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| Juno | The newcomer from the end of Season Five, now a few months in. Thoughtful, quietly funny, a green jacket and a yellow scarf, and a backpack that has gained patches. Has not been anywhere yet, and wants to. Remembers what you handed them at the door. |
+| The Comet King | A bright, round, slightly pale light in a crooked crown, who arrives every seventy-six years and is, this time, three days early and worried about it. He is told that a king may be as slow as his guests like. |
+
+Chad, Maple, Biscuit, Pip and Bertram carry the season. Wren, Hush, Tamsin and Sedge appear on the road. The creatures of the Isles (a lantern moth, a comet cat and a very large star turtle) are described rather than given lines.
+
+### Chapters
+
+| Chapter | Title | Opens at | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Date in the Notebook | Level 123 | Item twelve, a comet, and a very big appointment that will not be rushed. |
+| 1 | Packing for the Sky | Level 126 | Maple has a list, Chad has a drum, and Biscuit has packed himself. |
+| 2 | The Road Back Through Everywhere | Level 129 | Wren, Hush and Tamsin each hand over something for the dark parts of the road. |
+| 3 | The Last Ferry | Level 132 | A slow tortoise, a wide sky, and a crossing that takes exactly as long as it takes. |
+| 4 | Moths, Cats and One Large Turtle | Level 135 | The Isles are full of polite creatures, all waiting for the same patch of sky. |
+| 5 | The Comet King Is Early | Level 138 | The most important guest in the sky is three days ahead of himself and is told he is welcome. |
+| 6 | The Night Before the Sky | Level 141 | Everyone lies back and says what they would tell the person they were at the start. |
+| 7 | The Comet Road | Level 144 | The comet passes, an old notebook gets a tick, and the hearth is still banked at home. |
+
+## Season Seven: The Day Off
+
+### The premise
+
+The guild votes, unanimously and with great kindness, to give Chad a day off. He has not sat down since the comet. He takes it extremely seriously, which is the problem: he draws up a Schedule of Rest in fifteen-minute blocks (Maple: "Rest that has a timetable is just work in slippers"), climbs into a hammock sitting perfectly upright, and is eventually helped to lie back by a goat who has no plan at all and has eaten his. Friends from every place the story has been come to show him how they rest: Hush with a bowl of soup held in both hands, Tamsin stopping at landings that are not there, Wren going to bed at sundown, Sedge who does not rest but goes slowly, which is the same thing from the inside. On the fourth day forty-one crates of Brun's hammers arrive at once and the hall deals with them calmly without him, to his enormous relief and slight dismay. In the garden, after the others have gone in, he says the true thing: that he thought if he stopped, everyone would see that under the cape it was just him. Maple, who lit the first fire, tells him that is the part everybody came for. The season ends with a Great Do Nothing, at which the whole guild lies on blankets in the garden and the hall is still standing at the end of it.
+
+The season is about **rest as the main event**: stopping is a skill, other people rest in other ways, a thing worth building keeps standing when you step back, and you are enough when you are still.
+
+### How it opens
+
+Season Seven is the first season that opens by **days of movement rather than by level**, because the levels have run out (the cap is 144 and Season Six finishes there; see [decision 55](DECISIONS.md#55-season-seven-opens-by-days-of-movement-not-level)). Every chapter needs level 144 and the Season Six finale to have been read. The prologue opens at once, and each later chapter waits for ten more days on which the player did something that counts (days after the day the finale was read, so finishing a season does not start the next on the spot): 10, 20, 30, 40, 50, 60 and 70 days. The Chronicle says it plainly ("Opens after 4 more days of moving"), a quiet week adds nothing and takes nothing away, and a chapter that has been read stays open.
+
+### New cast
+
+| Name | Who they are |
+| --- | --- |
+| The Goat | The cream-coloured goat who knocked at Brun's door when nobody else had in eleven years, and has walked up the stair since. Has no plan, no list and no interest in being busy, eats paper, and lies down in exactly the right place without checking. "The sun is warm. That is the whole plan." |
+
+Everyone else comes back: Chad, Maple, Pip, Juno, Bertram and Biscuit run the season, and Hush, Tamsin, Wren and Sedge visit.
+
+### Chapters
+
+| Chapter | Title | Opens after | What happens |
+| --- | --- | --- | --- |
+| Prologue | A Hall Without Chad | The Season Six finale | The guild votes Chad a day off. He takes it badly. |
+| 1 | Strategic Pauses | 10 days | A Schedule of Rest in fifteen-minute blocks, and Biscuit, who has simply stopped. |
+| 2 | The Hammock Problem | 20 days | A very upright man in a hammock, and a goat with an appetite for plans. |
+| 3 | Other People's Ways of Resting | 30 days | Soup, landings, early nights and a very slow tortoise. |
+| 4 | A Hall That Runs Itself | 40 days | Forty-one crates and a goose, handled calmly without him. |
+| 5 | Why Chad Does Not Stop | 50 days | In the garden, the true thing, and what Maple has watched for years. |
+| 6 | The Night Before the Nothing | 60 days | Preparing nothing in great detail. Forty blankets that do not match. |
+| 7 | The Great Do Nothing | 70 days | The whole guild does nothing, beautifully, and the hall is still standing. |
+
 ## Choices
 
 A few moments ask you something. The answer is saved, the character replies to it straight away, and a later chapter may remember it. Nothing is a wrong answer and nothing changes what you earn.
@@ -140,18 +233,21 @@ A few moments ask you something. The answer is saved, the character replies to i
 - **Season Two** asks how you welcome Pip, how you walk the road, how you spend the ferry crossing, what you say to Wren, to Murmur and to Pip, what you write back to Oakhelm, and how you light the lamp. It also remembers your Season One answers: Brad, Grit, Murmur and Oakhelm each greet you differently depending on what you said to them, and the final farewell again follows your very first answer.
 
 - **Season Four** asks what you say to Bertram, what the invitation says, what you bring to the table, which chair Chad gets, the Sphinx's riddle, what weather Skarn should send, what you would give the guild, and where you sit. It remembers what you told Pip, how you lit the lamp, what you said to Tamsin at her stair and how the Chime was started, and the farewell follows your very first answer once more.
+- **Season Five** asks what you do first when the hearth goes quiet, how you go down the stair, what you would make on Brun's anvil, how you speak to Magmara, how much air a banked fire needs, which stretch of the stair you carry the coal, what you do with Brun's little poker and what you hand the newcomer. It remembers what you said you would give the guild in Season Four (a story, a song or an afternoon), and the farewell follows your very first answer once more.
+- **Season Six** asks what you say to Bertram, what goes in your bag, what you take from the road, how you spend the ferry crossing, how you greet the creatures of the Isles, what you say to the Comet King, what you would tell the person you were at the start, and what you do as the comet passes. It remembers what you handed the newcomer at the end of Season Five (a warm cup, the little poker or a chair), and the farewell follows your very first answer once more.
+- **Season Seven** asks how you vote on Chad's day off, what you do with his Schedule of Rest, how you help him into the hammock, whose way of resting you try first, what you say to him at the window, what you tell him in the garden, what you bring to the Nothing and what you do with your nothing. It remembers what you told the person you were at the start (Season Six), and the farewell follows your very first answer once more.
 - **Season Three** asks how you greet Fennel, how you climb, what soup you ask Hush for, what you say to the ice cave, to Tamsin and to Skarn, what you share by the fire, and how the Chime is started. It remembers how you lit the lamp in Season Two (Chad and Pip react to it), what you told Pip (Pip passes it on to Fennel), and, once more, your very first answer in the farewell.
 
 Replaying a chapter lets you answer differently. The newest answer replaces the old one.
 
 ## How it works
 
-- **Unlocking:** a chapter is open when the hero's level reaches its unlock level. Nothing is timed, nothing can be missed, and nothing is lost if you stop exercising for a while.
+- **Unlocking:** a chapter is open when the hero's level reaches its unlock level. The exception is Season Seven, which also waits for days of moving after the Season Six finale (see above). Nothing is timed, nothing can be missed, and nothing is lost if you stop exercising for a while.
 - **The ad:** before a chapter's first line, the first time you read it, there is one full-screen ad unless you have Premium. The story shows "One moment..." while it waits and will not begin underneath it. If there is no ad or no connection, the story just begins. Re-reading a chapter never shows one. See [Monetization](MONETIZATION.md).
 - **Hall:** when you come back to the hall with an unread chapter, Chad offers it once per session ("Read Now" or "Later"), and he mentions it in his idle lines. Choosing "Later" is always fine and nothing nags afterwards.
 - **Reading:** tap anywhere to read on; the first tap finishes the line that is being typed. **Skip** counts the chapter as read, and the cross leaves without marking it, so it stays new. With reduced motion on, text appears at once and the scenery holds still.
 - **Chronicle:** the Quests screen has a Chronicle card, which opens a list of every chapter grouped by season. Chapters that have not opened keep their titles secret and say what level opens them. Anything opened can be read again whenever you like.
-- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 31 across all four seasons. See [Data model](DATA_MODEL.md).
+- **Saved data:** two small tables (`story_progress`, `story_choices`), included in the JSON export and cleared by Delete Everything. Chapter numbers run 0 to 55 across all seven seasons. See [Data model](DATA_MODEL.md).
 
 ## Where it lives
 
@@ -161,7 +257,10 @@ Replaying a chapter lets you answer differently. The newest answer replaces the 
 | Season Two's script, downloaded as a pack ([Content packs](CONTENT_PACKS.md)) | `tool/story_content/season_two.dart` |
 | Season Three's script | `tool/story_content/season_three.dart` |
 | Season Four's script | `tool/story_content/season_four.dart` |
-| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers) | `lib/game/art/story_art.dart` |
+| Season Five's script | `tool/story_content/season_five.dart` |
+| Season Six's script | `tool/story_content/season_six.dart` |
+| Season Seven's script | `tool/story_content/season_seven.dart` |
+| Backdrops and the story-only characters (Maple, Biscuit, Wren, Sedge, Pip, Fennel, Hush, Tamsin, Skarn, Bertram, and the Sphinx and Dune Worm as speakers; Season Five reuses the Forgemaster and Magmara from the enemy art as Brun and Magmara, and adds the cellar stair, the forge, the Ember Deeps and the lit hearth as backdrops; Season Six adds Juno and reuses the Comet King from the enemy art, with the Isles and the comet sky as backdrops; Season Seven adds the goat and the garden) | `lib/game/art/story_art.dart` |
 | Reading screen | `lib/features/story/story_screen.dart` |
 | Chronicle list and Quests card | `lib/features/story/chronicle_screen.dart` |
 | The chapter-start ad | `lib/app/ads.dart`, called from the reading screen only |

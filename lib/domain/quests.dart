@@ -45,6 +45,76 @@ class WeeklyGoal {
   double get progress => target == 0 ? 1 : (daysActive / target).clamp(0, 1);
 }
 
+/// What the weekly goal is when the player has not picked one: how often they
+/// really move, so the goal fits their own week instead of a one-size number.
+class GoalSuggestion {
+  const GoalSuggestion({required this.days, required this.fromHistory});
+
+  final int days;
+
+  /// True when [days] comes from the player's own recent weeks, false when there
+  /// is not enough history yet and it is the suggestion for their experience.
+  final bool fromHistory;
+}
+
+/// The player's own usual week, worked out from the journal each time. Only the
+/// weekly goal's suggestion uses it. It never touches XP, energy, quests or
+/// streaks (see docs/REWARD_RULES.md), so it cannot push anyone to do more than
+/// is right for them: the suggestion is what they already do, never a step up.
+class PersonalBaseline {
+  const PersonalBaseline._();
+
+  /// How many complete weeks before this one are looked at, at most.
+  static const weeksLooked = 4;
+
+  /// Fewer complete weeks of history than this, and the suggestion for the
+  /// player's experience is used instead.
+  static const minWeeks = 3;
+
+  /// The most a suggestion ever asks for: rest days are part of the plan.
+  static const maxSuggested = 5;
+
+  /// The middle number of active days over the last few complete weeks (counting
+  /// a quiet week as zero), or null with too little history. Weeks before the
+  /// player's first workout are not counted, and a week with nothing in it is a
+  /// rest, not a failure.
+  static int? usualDays({required DateTime now, required Iterable<WorkoutEntry> entries}) {
+    final counted = [for (final e in entries) if (e.countsForRewards) e];
+    if (counted.isEmpty) return null;
+    final first = startOfDay(counted.map((e) => e.performedAt).reduce((a, b) => a.isBefore(b) ? a : b));
+    final firstMonday = DateTime(first.year, first.month, first.day - (first.weekday - 1));
+    final (thisMonday, _) = QuestBoard.weekBounds(now);
+
+    final perWeek = <int>[];
+    for (var i = 1; i <= weeksLooked; i++) {
+      final monday = DateTime(thisMonday.year, thisMonday.month, thisMonday.day - 7 * i);
+      if (monday.isBefore(firstMonday)) break;
+      final next = DateTime(monday.year, monday.month, monday.day + 7);
+      perWeek.add({
+        for (final e in counted)
+          if (!e.performedAt.isBefore(monday) && e.performedAt.isBefore(next)) dayKey(e.performedAt),
+      }.length);
+    }
+    if (perWeek.length < minWeeks) return null;
+    perWeek.sort();
+    final n = perWeek.length;
+    return ((perWeek[(n - 1) ~/ 2] + perWeek[n ~/ 2]) / 2).round();
+  }
+
+  /// The goal to suggest: the player's usual week, kept between one day and
+  /// [maxSuggested], or the suggestion for their experience while there is not
+  /// enough history.
+  static GoalSuggestion suggest({
+    required ExperienceLevel level,
+    required DateTime now,
+    required Iterable<WorkoutEntry> entries,
+  }) {
+    final usual = usualDays(now: now, entries: entries);
+    if (usual == null) return GoalSuggestion(days: level.weeklyDaysGoal, fromHistory: false);
+    return GoalSuggestion(days: usual.clamp(HeroProfile.minWeeklyGoal, maxSuggested), fromHistory: true);
+  }
+}
+
 class QuestBoard {
   const QuestBoard._();
 
@@ -534,6 +604,14 @@ class QuestBoard {
           dayKey(e.performedAt),
     };
     return WeeklyGoal(target: target ?? level.weeklyDaysGoal, daysActive: days.length);
+  }
+
+  /// The days a week to aim for: the player's own choice, else the suggestion
+  /// from their usual week (see [PersonalBaseline]), else the one for their experience.
+  static int goalTarget({required HeroProfile hero, required DateTime now, required Iterable<WorkoutEntry> entries}) {
+    final chosen = hero.weeklyGoalDays;
+    if (chosen >= HeroProfile.minWeeklyGoal && chosen <= HeroProfile.maxWeeklyGoal) return chosen;
+    return PersonalBaseline.suggest(level: hero.experience, now: now, entries: entries).days;
   }
 
   /// Weekday numbers (1 = Monday ... 7 = Sunday) with any logged movement in

@@ -10,6 +10,7 @@ import '../../app/widgets.dart';
 import '../../domain/chad.dart';
 import '../../domain/cosmetics.dart';
 import '../../domain/expedition.dart';
+import '../../domain/first_steps.dart';
 import '../../domain/player_state.dart';
 import '../../domain/quests.dart';
 import '../../domain/story.dart';
@@ -24,6 +25,7 @@ import '../settings/settings_screen.dart';
 import 'hud_legend_dialog.dart';
 import '../story/chronicle_screen.dart';
 import '../story/pack_download.dart';
+import '../workout/warmup_screen.dart';
 import '../workout/workout_screen.dart';
 
 /// The home screen: a living guild hall you tap around in, with a HUD that
@@ -43,6 +45,9 @@ class _HubScreenState extends ConsumerState<HubScreen> {
   /// Chapters already offered this session, so "Later" is respected.
   final _offered = <int>{};
 
+  /// The warm-up is offered once per launch, so "Not Now" is respected.
+  bool _warmUpOffered = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +62,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     );
     // A returning player can already have a chapter waiting when the hall appears
     // (the title screen comes first, so the story status has long since loaded).
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeOfferStory());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _maybeOfferStory();
+      await _maybeOfferWarmUp();
+    });
   }
 
   HubState _stateFor(PlayerStatus p) {
@@ -70,7 +78,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       level: p.hero.experience,
       now: now,
       entries: workouts,
-      target: p.hero.weeklyGoalTarget,
+      target: QuestBoard.goalTarget(hero: p.hero, now: now, entries: workouts),
     );
     final quests = QuestBoard.dailySuggestions(
       level: p.hero.experience,
@@ -102,6 +110,7 @@ class _HubScreenState extends ConsumerState<HubScreen> {
       highlight: workouts.isEmpty ? HubTarget.train : null,
       pennants: cosmetics == null ? const [] : [for (final x in Cosmetics.earnedPennants(cosmetics)) x.color],
       trophies: cosmetics == null ? const [] : [for (final t in Cosmetics.earnedTrophies(cosmetics)) t.shape],
+      keepsakes: cosmetics == null ? const [] : [for (final k in Cosmetics.earnedKeepsakes(cosmetics)) k.shape],
       patronDecor: cosmetics == null ? const {} : Cosmetics.patronDecor(cosmetics),
       chadLine: quiet ? 'Tap me if you want a word.' : ChadDialogue.line(ctx, seed: seed),
       questPending: quests.any((q) => !q.isDoneBy(today)),
@@ -186,6 +195,51 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     if (opened) await _maybeOfferStory();
   }
 
+  /// Offers Chad's warm-up once per launch, only to someone who has not saved a
+  /// workout yet and only while the hall is what they are looking at. It never
+  /// blocks anything: "Not Now" leaves everything as it was, and the warm-up
+  /// stays on the Train screen.
+  Future<void> _maybeOfferWarmUp() async {
+    if (!mounted || _navigating || _warmUpOffered || !ref.read(warmUpAutoOfferProvider)) return;
+    if (ModalRoute.of(context)?.isCurrent != true) return;
+    // Null while the journal is still loading, which is not the same as empty.
+    final workouts = ref.read(workoutsProvider).value;
+    if (workouts == null || workouts.isNotEmpty) return;
+    _warmUpOffered = true;
+    _navigating = true;
+    final start = await showGameDialog<bool>(
+      context: context,
+      title: FirstSteps.warmUpOfferTitle,
+      content: const Text(FirstSteps.warmUpOfferText),
+      actions: [
+        Builder(
+          builder: (ctx) => GameButton(
+            key: const Key('warmup_offer_yes'),
+            label: 'Warm Up',
+            icon: Icons.self_improvement_rounded,
+            kind: GameButtonKind.positive,
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ),
+        Builder(
+          builder: (ctx) => GameButton(
+            key: const Key('warmup_offer_no'),
+            label: 'Not Now',
+            kind: GameButtonKind.secondary,
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+        ),
+      ],
+    );
+    if (!mounted) return;
+    if (start == true) {
+      await Navigator.of(context).push(gameRoute<void>(const WarmUpScreen()));
+      if (!mounted) return;
+    }
+    _navigating = false;
+    await _scene.resume();
+  }
+
   /// Plays the "you earned something" moments after returning to the hall.
   Future<void> _celebrate(PlayerStatus before) async {
     // Saved data reaches the screen a beat after the page closes, so give it
@@ -223,6 +277,10 @@ class _HubScreenState extends ConsumerState<HubScreen> {
     // The story status arrives a beat after launch; offer once it has.
     ref.listen(storyStatusProvider, (prev, next) {
       if (prev == null && next != null) _maybeOfferStory();
+    });
+    // The journal arrives a beat after launch too.
+    ref.listen(workoutsProvider, (prev, next) {
+      if (prev?.value == null && next.value != null) _maybeOfferWarmUp();
     });
     // Rebuild whenever anything the hall shows changes.
     ref.watch(workoutsProvider);
@@ -375,9 +433,17 @@ class _Hud extends StatelessWidget {
                                 color: _cream, fontWeight: FontWeight.w800, fontSize: 15)),
                       ),
                       const SizedBox(width: 8),
-                      Text('Lv ${player.level}',
-                          style: const TextStyle(
-                              color: Color(0xFFF2C94C), fontWeight: FontWeight.w800, fontSize: 14)),
+                      // Three digits past level 99, so at the largest text it shrinks to fit
+                      // instead of pushing the name out.
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 110),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('Lv ${player.level}',
+                              style: const TextStyle(
+                                  color: Color(0xFFF2C94C), fontWeight: FontWeight.w800, fontSize: 14)),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

@@ -4,6 +4,7 @@ library;
 import 'dart:math' as math;
 
 import 'activity.dart';
+import 'combat.dart' show FightingStyle;
 
 enum ExperienceLevel {
   starting('Just Starting', 'New to exercise. Keep it gentle.'),
@@ -40,6 +41,7 @@ class HeroProfile {
     this.cape = 'classic',
     this.hairDye = '',
     this.weeklyGoalDays = 0,
+    this.fightingStyle = 'steady',
   });
 
   final String name;
@@ -69,6 +71,11 @@ class HeroProfile {
   /// The days a week the player chose to aim for, or 0 if they have not.
   final int weeklyGoalDays;
 
+  /// The id of the way the hero fights (see [FightingStyle]).
+  final String fightingStyle;
+
+  FightingStyle get style => FightingStyle.fromId(fightingStyle);
+
   /// Days a week to aim for: the player's own choice, else the suggestion for
   /// their experience.
   int get weeklyGoalTarget => weeklyGoalDays >= minWeeklyGoal && weeklyGoalDays <= maxWeeklyGoal
@@ -95,6 +102,7 @@ class HeroProfile {
     String? cape,
     String? hairDye,
     int? weeklyGoalDays,
+    String? fightingStyle,
   }) =>
       HeroProfile(
         name: name ?? this.name,
@@ -113,6 +121,7 @@ class HeroProfile {
         cape: cape ?? this.cape,
         hairDye: hairDye ?? this.hairDye,
         weeklyGoalDays: weeklyGoalDays ?? this.weeklyGoalDays,
+        fightingStyle: fightingStyle ?? this.fightingStyle,
       );
 }
 
@@ -120,7 +129,7 @@ class HeroProfile {
 class Progression {
   const Progression._();
 
-  static const int maxLevel = 99;
+  static const int maxLevel = 144;
 
   static int xpForLevel(int level) {
     if (level <= 1) return 0;

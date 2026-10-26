@@ -5,19 +5,34 @@ import 'package:intl/intl.dart';
 import '../../app/game_ui.dart';
 import '../../app/providers.dart';
 import '../../domain/activity.dart';
+import '../../domain/exercise_history.dart';
 import '../../domain/player_state.dart';
 import '../../domain/records.dart';
 import '../../domain/workout.dart';
 import '../workout/log_workout_screen.dart';
+import 'exercise_page.dart';
 import 'mark_progress.dart';
 import 'month_panel.dart';
 
 /// The journal: a chronicle of everything you have done.
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final workoutsAsync = ref.watch(workoutsProvider);
     final grantList = ref.watch(grantsProvider).value ?? const <DayGrant>[];
     final grants = {for (final g in grantList) g.day: g};
@@ -59,8 +74,10 @@ class HistoryScreen extends ConsumerWidget {
           );
         }
 
+        final query = _search.text.trim();
+        final shown = [for (final w in workouts) if (w.matches(query)) w];
         final byDay = <String, List<WorkoutEntry>>{};
-        for (final w in workouts) {
+        for (final w in shown) {
           byDay.putIfAbsent(dayKey(w.performedAt), () => []).add(w);
         }
         final days = byDay.keys.toList(); // already newest first
@@ -69,6 +86,36 @@ class HistoryScreen extends ConsumerWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 14, 16, 28),
           children: [
+            TextField(
+              key: const Key('journal_search'),
+              controller: _search,
+              onChanged: (_) => setState(() {}),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: 'Search Exercises and Notes',
+                prefixIcon: const Icon(Icons.search_rounded),
+                suffixIcon: _search.text.isEmpty
+                    ? null
+                    : IconButton(
+                        tooltip: 'Clear Search',
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => setState(_search.clear),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            if (query.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  shown.isEmpty
+                      ? 'Nothing matches "$query". Try another word.'
+                      : '${shown.length} ${shown.length == 1 ? 'workout matches' : 'workouts match'} "$query".',
+                  key: const Key('journal_search_result'),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ] else ...[
             GamePanel(
               title: 'Chronicle',
               child: Wrap(
@@ -90,6 +137,9 @@ class HistoryScreen extends ConsumerWidget {
             const SizedBox(height: 14),
             _BestsPanel(bests: PersonalBests.of(workouts), entries: workouts, metric: metric),
             const SizedBox(height: 14),
+            _ExercisesPanel(summaries: ExerciseHistory.summaries(workouts), now: now),
+            const SizedBox(height: 14),
+            ],
             for (final day in days) ...[
               _DayHeader(day: day, grant: grants[day]),
               for (final w in byDay[day]!) _WorkoutTile(entry: w, metric: metric),
@@ -184,6 +234,93 @@ class _BestsPanelState extends State<_BestsPanel> {
   }
 }
 
+/// Every exercise in the journal, most recent first. Tap one for its own page.
+/// Collapsed to a few until asked.
+class _ExercisesPanel extends StatefulWidget {
+  const _ExercisesPanel({required this.summaries, required this.now});
+
+  final List<ExerciseSummary> summaries;
+  final DateTime now;
+
+  @override
+  State<_ExercisesPanel> createState() => _ExercisesPanelState();
+}
+
+class _ExercisesPanelState extends State<_ExercisesPanel> {
+  static const _shown = 4;
+  bool _all = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final list = widget.summaries;
+    if (list.isEmpty) return const SizedBox.shrink();
+    final visible = _all ? list : list.take(_shown).toList();
+    final date = DateFormat('MMM d');
+    return GamePanel(
+      title: 'Your Exercises',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (final s in visible)
+            Semantics(
+              button: true,
+              label: '${ActivityCatalog.byId(s.activityId)?.name ?? 'Unknown'}, ${s.days} ${s.days == 1 ? 'day' : 'days'}, '
+                  'last ${date.format(s.last)}. Show its story.',
+              child: ExcludeSemantics(
+                child: InkWell(
+                  key: Key('exercise_${s.activityId}'),
+                  borderRadius: BorderRadius.circular(8),
+                  onTap: () => Navigator.of(context).push(gameRoute(ExercisePage(activityId: s.activityId))),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minHeight: 48),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.fitness_center_rounded, color: GameColors.teal, size: 22),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 3,
+                          child: Text(
+                            ActivityCatalog.byId(s.activityId)?.name ?? 'Unknown',
+                            style: const TextStyle(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            '${s.days} ${s.days == 1 ? 'day' : 'days'} · ${date.format(s.last)}',
+                            textAlign: TextAlign.end,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                        const SizedBox(width: 2),
+                        const Icon(Icons.chevron_right_rounded, color: GameColors.inkSoft),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          const SizedBox(height: 4),
+          const Text(
+            'Tap one to see how often you have done it and your own marks. Only for looking back on.',
+            style: TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 12.5),
+          ),
+          if (list.length > _shown)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const Key('exercises_toggle'),
+                onPressed: () => setState(() => _all = !_all),
+                child: Text(_all ? 'Show Fewer' : 'Show All ${list.length}'),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DayHeader extends StatelessWidget {
   const _DayHeader({required this.day, required this.grant});
 
@@ -232,11 +369,27 @@ class _WorkoutTile extends ConsumerWidget {
       child: Card(
         child: ListTile(
           title: Text(a?.name ?? 'Unknown activity', style: gameTitle(18)),
-          subtitle: Text(
-            '${DateFormat('h:mm a').format(entry.performedAt)} · ${entry.summary(metric: metric)}'
-            '${entry.cameraCounted ? ' · Camera Counted' : ''}'
-            '${entry.countsForRewards ? '' : ' · Journal Only'}',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${DateFormat('h:mm a').format(entry.performedAt)} · ${entry.summary(metric: metric)}'
+                '${entry.cameraCounted ? ' · Camera Counted' : ''}'
+                '${entry.countsForRewards ? '' : ' · Journal Only'}',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              if (entry.feel != null || entry.notes != null)
+                Text(
+                  [
+                    if (entry.feel != null) 'Felt ${entry.feel}',
+                    if (entry.notes != null) entry.notes!,
+                  ].join(' · '),
+                  key: Key('note_${entry.id}'),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: GameColors.inkSoft, fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+            ],
           ),
           trailing: IconButton(
             tooltip: 'Delete workout',

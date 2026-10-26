@@ -637,7 +637,7 @@ class _LogWorkoutScreenState extends ConsumerState<LogWorkoutScreen> {
                   children: [
                     for (var i = 1; i <= 5; i++)
                       ChoiceChip(
-                        label: Text(['Very Easy', 'Easy', 'Okay', 'Hard', 'Very Hard'][i - 1]),
+                        label: Text(WorkoutEntry.feelLabels[i - 1]),
                         selected: _effort == i,
                         onSelected: (on) {
                           ref.read(feedbackProvider).haptic(Haptic.select);

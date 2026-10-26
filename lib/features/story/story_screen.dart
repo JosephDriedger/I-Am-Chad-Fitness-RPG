@@ -358,7 +358,8 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
   }
 
   Widget _doneCard() {
-    final next = StoryRules.next(ref.read(playerProvider)?.level ?? 1);
+    final status = ref.read(storyStatusProvider);
+    final next = status?.next;
     return Container(
       color: const Color(0xE61B1109),
       alignment: Alignment.center,
@@ -391,7 +392,7 @@ class _StoryScreenState extends ConsumerState<StoryScreen>
           Text(
             next == null
                 ? 'That is the end of the story for now. The hall is always open, and every chapter can be read again.'
-                : 'The next chapter opens at Level ${next.unlockLevel}. There is no rush.',
+                : 'The next chapter opens ${status!.whenOpens(next)}. There is no rush.',
             textAlign: TextAlign.center,
             style: const TextStyle(
               color: Color(0xFFCDB68C),

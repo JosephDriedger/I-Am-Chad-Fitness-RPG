@@ -1,5 +1,5 @@
 /// Gentle guidance for someone who has not logged a workout yet. It shows on the
-/// Train and log screens until the first one is saved and then never again, never
+/// Train and log screens (and as a warm-up offer in the hall) until the first one is saved and then never again, never
 /// blocks anything, and has no timer. See docs/CONTENT_GUIDELINES.md before
 /// changing the words.
 library;
@@ -18,6 +18,20 @@ class FirstSteps {
   static const trainLine =
       'First time here? Pick anything you did today, even a short walk. Any version counts, and nothing you log is ever wrong.';
 
+  /// The hall offers the warm-up once per launch until the first workout is saved.
+  static const warmUpOfferTitle = 'A Warm-Up First?';
+
+  static const warmUpOfferText =
+      'Want me to walk you through a one-minute warm-up? Four gentle moves, no rewards, and you can stop any time.';
+
+  /// Under the battle buttons in the first fight, until an expedition has been won.
+  static const battleHint =
+      'First fight? Attack and Guard build focus, Power Strike spends it, and Potion heals. Guarding softens a big blow.';
+
+  /// Chad on the quest board before anything has been logged.
+  static const questsLine =
+      'These are ideas for today, not orders. Tap one to log it, or do something else entirely. Anything you do counts.';
+
   static const logTitle = 'Your First Log';
 
   static const logIntro = 'Rough numbers are fine, and you can edit or delete it later.';
@@ -31,6 +45,10 @@ class FirstSteps {
   /// Every line a player reads, for tests.
   static List<String> get words => [
         trainLine,
+        warmUpOfferTitle,
+        warmUpOfferText,
+        battleHint,
+        questsLine,
         logTitle,
         logIntro,
         for (final s in logSteps) ...[s.title, s.text],

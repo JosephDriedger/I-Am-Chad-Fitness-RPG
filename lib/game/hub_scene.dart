@@ -12,7 +12,7 @@ import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/painting.dart'
     show TextPainter, TextSpan, TextStyle, FontWeight, TextDirection, TextAlign;
 
-import '../domain/cosmetics.dart' show PatronDecor, TrophyShape;
+import '../domain/cosmetics.dart' show KeepsakeShape, PatronDecor, TrophyShape;
 import 'art/painters.dart';
 import 'core.dart';
 import 'look.dart';
@@ -33,6 +33,7 @@ class HubState {
     this.itemsOwned = 0,
     this.pennants = const [],
     this.trophies = const [],
+    this.keepsakes = const [],
     this.patronDecor = const {},
     this.highlight,
   });
@@ -55,6 +56,9 @@ class HubState {
   /// The trophies set out on the Journal shelf, in order. The shelf has room
   /// for six; it shows books on that row until the first one is earned.
   final List<TrophyShape> trophies;
+
+  /// The keepsakes standing on the hall floor, in order, one for each later season finished.
+  final List<KeepsakeShape> keepsakes;
 
   /// Ids from `PatronDecor` for the optional Patron Pack. Looks only.
   final Set<String> patronDecor;
@@ -391,10 +395,11 @@ class HubScene extends GameScene {
     for (var row = 0; row < 4; row++) {
       final y = r.top + 10 + row * 50;
       rrect(c, r.left + 6, y + 40, r.width - 12, 5, 0, const Color(0xFF6F4727));
-      if (row == 0 && trophies.isNotEmpty) {
-        // The top shelf holds the trophies instead of books.
-        for (var t = 0; t < trophies.length && t < 6; t++) {
-          _trophy(c, trophies[t], r.left + 20 + t * 14.5, y + 40);
+      // The top shelf holds the first six trophies instead of books, and the second the next six.
+      final firstOnRow = row * 6;
+      if (row < 2 && trophies.length > firstOnRow) {
+        for (var t = firstOnRow; t < trophies.length && t < firstOnRow + 6; t++) {
+          _trophy(c, trophies[t], r.left + 20 + (t - firstOnRow) * 14.5, y + 40);
         }
         continue;
       }
@@ -408,12 +413,13 @@ class HubScene extends GameScene {
         i++;
       }
     }
-    // Open ledger on the second shelf, glowing a little when there is history.
-    rrect(c, r.center.dx - 18, r.top + 70, 36, 10, 2, const Color(0xFFF6EED8));
-    line(c, r.center.dx, r.top + 70, r.center.dx, r.top + 80, 1.2, const Color(0xFF8D6E63));
+    // Open ledger on the third shelf, so the trophies' two rows stay clear. It glows a little when
+    // there is history.
+    rrect(c, r.center.dx - 18, r.top + 120, 36, 10, 2, const Color(0xFFF6EED8));
+    line(c, r.center.dx, r.top + 120, r.center.dx, r.top + 130, 1.2, const Color(0xFF8D6E63));
     if (s.wobble > 0) {
       final w = math.sin(s.wobble * math.pi * 5) * 1.5 * s.wobble;
-      oval(c, r.center.dx + w, r.top + 66, 3, 2, const Color(0xFFFFF59D));
+      oval(c, r.center.dx + w, r.top + 116, 3, 2, const Color(0xFFFFF59D));
     }
   }
 
@@ -497,6 +503,63 @@ class HubScene extends GameScene {
             Paint()..color = const Color(0xFFD9A441),
           );
         }
+      case TrophyShape.table:
+        // A long table with a cloth, two plates and a candle.
+        rrect(c, x - 7, b - 12, 14, 3, 1, const Color(0xFFF6EED8));
+        rrect(c, x - 6, b - 9, 2, 8, 0, const Color(0xFF8D5E3C));
+        rrect(c, x + 4, b - 9, 2, 8, 0, const Color(0xFF8D5E3C));
+        circle(c, x - 3.5, b - 13.5, 1.8, const Color(0xFFFFFFFF));
+        circle(c, x + 3.5, b - 13.5, 1.8, const Color(0xFFFFFFFF));
+        rrect(c, x - 0.8, b - 19, 1.6, 6, 0, const Color(0xFFFFF3D6));
+        final f = 1 + math.sin(clock * 6) * 0.15;
+        oval(c, x, b - 20.5, 1.5 * f, 2.4 * f, const Color(0xFFFFB300));
+      case TrophyShape.crown:
+        rrect(c, x - 1.5, b - 7, 3, 7, 0, goldDark);
+        c.drawPath(
+          Path()
+            ..moveTo(x - 8, b - 10)
+            ..lineTo(x - 8, b - 24)
+            ..lineTo(x - 4, b - 18)
+            ..lineTo(x, b - 26)
+            ..lineTo(x + 4, b - 18)
+            ..lineTo(x + 8, b - 24)
+            ..lineTo(x + 8, b - 10)
+            ..close(),
+          Paint()..color = gold,
+        );
+        rrect(c, x - 8, b - 12, 16, 3, 1, goldDark);
+        circle(c, x, b - 17, 1.6, const Color(0xFFE53935));
+      case TrophyShape.flame:
+        // A small banked fire in a stone cradle: a low red glow with one steady flame.
+        final glow = 0.7 + 0.3 * math.sin(clock * 2.4);
+        oval(c, x, b - 5, 7, 4, const Color(0xFF6D5A4A));
+        oval(c, x, b - 7, 5, 2.4, Color.lerp(const Color(0xFFBF360C), const Color(0xFFFF7043), glow)!);
+        final flick = math.sin(clock * 7) * 0.8;
+        c.drawPath(
+          Path()
+            ..moveTo(x, b - 25 + flick)
+            ..quadraticBezierTo(x + 6, b - 15, x + 4, b - 9)
+            ..quadraticBezierTo(x, b - 6, x - 4, b - 9)
+            ..quadraticBezierTo(x - 6, b - 15, x, b - 25 + flick)
+            ..close(),
+          Paint()..color = const Color(0xFFFF7043),
+        );
+        oval(c, x, b - 12, 2.2, 4, const Color(0xFFFFCA28));
+      case TrophyShape.comet:
+        // A small comet with a long tail, on a stand.
+        rrect(c, x - 1.5, b - 8, 3, 8, 0, goldDark);
+        for (var i = 0; i < 6; i++) {
+          final t = i / 5;
+          circle(c, x - 2 - t * 7, b - 21 - t * 4, 4.2 * (1 - t * 0.7), Color.fromRGBO(129, 212, 250, 0.7 * (1 - t)));
+        }
+        circle(c, x + 3, b - 18, 5.2, const Color(0x55B3E5FC));
+        circle(c, x + 3, b - 18, 3.4, const Color(0xFFE1F5FE));
+      case TrophyShape.hammock:
+        // A tiny hammock slung between two posts, with a sleeper-shaped dip.
+        rrect(c, x - 7, b - 22, 2, 22, 0, const Color(0xFF8D5E3C));
+        rrect(c, x + 5, b - 22, 2, 22, 0, const Color(0xFF8D5E3C));
+        strokePath(c, Path()..moveTo(x - 6, b - 19)..quadraticBezierTo(x, b - 8, x + 6, b - 19), 3.4, const Color(0xFFE2663A));
+        strokePath(c, Path()..moveTo(x - 6, b - 19)..quadraticBezierTo(x, b - 8, x + 6, b - 19), 1, const Color(0xFFFFE0B2));
     }
   }
 
@@ -868,6 +931,7 @@ class HallBackdrop extends Component {
     canvas.drawRRect(RRect.fromRectAndRadius(const Rect.fromLTWH(78, 476, 204, 104), const Radius.circular(8)), _p..style = PaintingStyle.stroke..strokeWidth = 3);
     _p.style = PaintingStyle.fill;
 
+    _keepsakes(canvas, night);
     if (state.patronDecor.contains(PatronDecor.lantern)) _lanternTree(canvas, night);
 
     // Night tint over everything so far; torches stay warm on top.
@@ -915,6 +979,86 @@ class HallBackdrop extends Component {
         poly([x - 10, top - 0.5, x + 10, top - 0.5, x + 8, top + 3, x - 8, top + 3]),
         const Color(0x26FFFFFF),
       );
+    }
+  }
+
+
+  /// Where each keepsake stands on the floor by the left wall, so earlier ones never
+  /// shift as more are earned.
+  static const _keepsakeSlots = <double>[54, 76, 98, 120, 142, 164];
+
+  /// Small things that stand on the hall floor for each story season finished.
+  /// Earned, never sold, and never taken away.
+  void _keepsakes(Canvas canvas, double night) {
+    const base = 408.0;
+    for (var i = 0; i < state.keepsakes.length && i < _keepsakeSlots.length; i++) {
+      final x = _keepsakeSlots[i];
+      oval(canvas, x, base + 1, 10, 2.6, const Color(0x2E000000));
+      switch (state.keepsakes[i]) {
+        case KeepsakeShape.lamp:
+          // A small harbour lamp on a post, glowing a little more at night.
+          final glow = 0.7 + 0.3 * math.sin(_t * 2.2 + 1) + night * 0.3;
+          rrect(canvas, x - 1.5, base - 20, 3, 20, 1, const Color(0xFF5D4037));
+          circle(canvas, x, base - 24, 10, Color.fromRGBO(255, 200, 87, 0.22 * glow.clamp(0.0, 1.5)));
+          rrect(canvas, x - 5, base - 30, 10, 12, 2, const Color(0xFFFFE9A8));
+          circle(canvas, x, base - 24, 2.6, const Color(0xFFFFB02E));
+          rrect(canvas, x - 6, base - 31, 12, 3, 1, const Color(0xFFC49A4A));
+        case KeepsakeShape.chime:
+          // A short stand with three small bells, swaying.
+          line(canvas, x - 6, base, x - 6, base - 22, 1.6, const Color(0xFFCFD8DC));
+          line(canvas, x + 6, base, x + 6, base - 22, 1.6, const Color(0xFFCFD8DC));
+          line(canvas, x - 6, base - 22, x + 6, base - 22, 1.6, const Color(0xFFCFD8DC));
+          for (var b = 0; b < 3; b++) {
+            final bx = x - 4 + b * 4.0 + math.sin(_t * 1.8 + b * 1.3) * 0.7;
+            line(canvas, bx, base - 22, bx, base - 17, 0.9, const Color(0xFFCFD8DC));
+            fillPath(canvas, poly([bx - 1.4, base - 17, bx + 1.4, base - 17, bx + 2.8, base - 10, bx - 2.8, base - 10]), const Color(0xFFD9A441));
+          }
+        case KeepsakeShape.table:
+          // A small laid table with a candle.
+          rrect(canvas, x - 10, base - 12, 20, 3, 1, const Color(0xFFF6EED8));
+          rrect(canvas, x - 8, base - 9, 2.4, 9, 0, const Color(0xFF8D5E3C));
+          rrect(canvas, x + 5.6, base - 9, 2.4, 9, 0, const Color(0xFF8D5E3C));
+          circle(canvas, x - 5, base - 13.5, 2, const Color(0xFFFFFFFF));
+          circle(canvas, x + 5, base - 13.5, 2, const Color(0xFFFFFFFF));
+          rrect(canvas, x - 1, base - 20, 2, 7, 0, const Color(0xFFFFF3D6));
+          final f = 1 + math.sin(_t * 7) * 0.15;
+          oval(canvas, x, base - 22, 1.8 * f, 2.8 * f, const Color(0xFFFFB300));
+        case KeepsakeShape.hearth:
+          // A small stone hearth with one low, steady flame.
+          oval(canvas, x, base - 5, 10, 5, const Color(0xFF6D5A4A));
+          oval(canvas, x, base - 7, 7, 3, Color.lerp(const Color(0xFFBF360C), const Color(0xFFFF7043), 0.6 + 0.4 * math.sin(_t * 2.4))!);
+          final flick = math.sin(_t * 6) * 0.8;
+          canvas.drawPath(
+            Path()
+              ..moveTo(x, base - 24 + flick)
+              ..quadraticBezierTo(x + 6, base - 15, x + 4, base - 9)
+              ..quadraticBezierTo(x, base - 6, x - 4, base - 9)
+              ..quadraticBezierTo(x - 6, base - 15, x, base - 24 + flick)
+              ..close(),
+            Paint()..color = const Color(0xFFFF7043),
+          );
+          oval(canvas, x, base - 12, 2.2, 4, const Color(0xFFFFCA28));
+        case KeepsakeShape.comet:
+          // A little comet glass: a small round lamp with a trailing tail, glowing blue.
+          final glow = 0.7 + 0.3 * math.sin(_t * 2 + 2);
+          rrect(canvas, x - 1.2, base - 12, 2.4, 12, 1, const Color(0xFF5D4037));
+          for (var k = 0; k < 5; k++) {
+            final t = k / 4;
+            circle(canvas, x - 2 - t * 7, base - 26 - t * 3, 4.2 * (1 - t * 0.7), Color.fromRGBO(129, 212, 250, 0.55 * (1 - t) * glow));
+          }
+          circle(canvas, x + 2, base - 24, 6, Color.fromRGBO(179, 229, 252, 0.4 * glow));
+          circle(canvas, x + 2, base - 24, 3.6, const Color(0xFFE1F5FE));
+        case KeepsakeShape.hammock:
+          // A small hammock between two posts, rocking very slightly.
+          final rock = math.sin(_t * 0.9) * 1.2;
+          rrect(canvas, x - 11, base - 26, 2.4, 26, 1, const Color(0xFF7A5230));
+          rrect(canvas, x + 9, base - 26, 2.4, 26, 1, const Color(0xFF7A5230));
+          final path = Path()
+            ..moveTo(x - 10, base - 22)
+            ..quadraticBezierTo(x + rock, base - 9, x + 10, base - 22);
+          strokePath(canvas, path, 4, const Color(0xFFE2663A));
+          strokePath(canvas, path, 1.2, const Color(0xFFFFE0B2));
+      }
     }
   }
 

@@ -21,6 +21,7 @@ void main() {
         );
         INSERT INTO app_settings (id, use_metric, reduced_motion, sound_on, haptics_on, music_on)
           VALUES (1, 0, 1, 0, 1, 1);
+        CREATE TABLE heroes (id INTEGER NOT NULL PRIMARY KEY);
         PRAGMA user_version = 11;
       ''');
     }));

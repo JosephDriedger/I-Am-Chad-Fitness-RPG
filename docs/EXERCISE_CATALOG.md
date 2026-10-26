@@ -6,7 +6,7 @@ Every exercise a player can log, with how it is recorded, what it needs, and how
 CATALOG_DOC=docs/EXERCISE_CATALOG.md flutter test test/tool/catalog_doc_test.dart
 ```
 
-There are **79 exercises** in 6 categories, and every one has an animated demonstration with step-by-step cues. 53 need no gear beyond a floor, a wall or a chair.
+There are **86 exercises** in 6 categories, and every one has an animated demonstration with step-by-step cues. 58 need no gear beyond a floor, a wall or a chair.
 
 ## Reading the tables
 
@@ -15,13 +15,15 @@ There are **79 exercises** in 6 categories, and every one has an animated demons
 - **Honesty limits** are the reps per set or speed above which the friendly honesty check asks the player to look again. They are deliberately generous.
 - **Easier version** is shown in the log screen for anyone who needs it.
 
-## Bodyweight (14)
+## Bodyweight (16)
 
 | Exercise | Records | Equipment | Tuning | Honesty limits | Easier version |
 | --- | --- | --- | --- | --- | --- |
 | **Push-ups** (`push_up`) | sets, reps | No Equipment | 6 s per rep | 80 reps per set | Wall push-ups are a great place to start. |
 | **Squats** (`squat`) | sets, reps | No Equipment | 6 s per rep | 120 reps per set | Try sitting down to a chair and standing back up. |
 | **Lunges** (`lunge`) | sets, reps | No Equipment | 5 s per rep | 60 reps per set | Hold a chair or a wall for balance, and take a shorter step. |
+| **Reverse Lunges** (`reverse_lunge`) | sets, reps | No Equipment | 5 s per rep | 60 reps per set | Hold a chair or a wall for balance, and take a shorter step back. |
+| **Skater Hops** (`skater_hop`) | sets, reps | No Equipment | 3 s per rep | 80 reps per set | Step side to side instead of hopping, and tap your back toe down. |
 | **Side Lunges** (`side_lunge`) | sets, reps | No Equipment | 5 s per rep | 60 reps per set | Take a smaller step and hold a chair for balance. |
 | **Glute Bridges** (`glute_bridge`) | sets, reps | No Equipment | 5 s per rep | 100 reps per set | – |
 | **Donkey Kicks** (`donkey_kick`) | sets, reps | No Equipment | 4 s per rep | 60 reps per set | – |
@@ -70,7 +72,7 @@ There are **79 exercises** in 6 categories, and every one has an animated demons
 | **Shadow Boxing** (`shadow_boxing`) | time | No Equipment | × 1.2 | – | Slow the punches down and take rests between rounds. |
 | **Swimming** (`swimming`) | time, distance | Cardio Gear | × 1.3 | 6 km/h | – |
 
-## Resistance (18)
+## Resistance (21)
 
 | Exercise | Records | Equipment | Tuning | Honesty limits | Easier version |
 | --- | --- | --- | --- | --- | --- |
@@ -79,6 +81,9 @@ There are **79 exercises** in 6 categories, and every one has an animated demons
 | **Barbell Squat** (`barbell_squat`) | sets, reps, weight | Barbell | 6 s per rep | 30 reps per set | – |
 | **Goblet Squat** (`goblet_squat`) | sets, reps, weight | Dumbbells | 6 s per rep | 40 reps per set | – |
 | **Bicep Curls** (`bicep_curl`) | sets, reps, weight | Dumbbells | 6 s per rep | 50 reps per set | – |
+| **Dumbbell Front Raises** (`front_raise`) | sets, reps, weight | Dumbbells | 6 s per rep | 40 reps per set | – |
+| **Good Mornings** (`good_morning`) | sets, reps | No Equipment | 5 s per rep | 40 reps per set | Hinge only as far as feels comfortable, with your hands on your hips. |
+| **Dumbbell Lunges** (`dumbbell_lunge`) | sets, reps, weight | Dumbbells | 5 s per rep | 40 reps per set | Practise without weights first, or hold a chair for balance. |
 | **Lateral Raises** (`lateral_raise`) | sets, reps, weight | Dumbbells | 6 s per rep | 40 reps per set | – |
 | **Overhead Tricep Extension** (`overhead_tricep_extension`) | sets, reps, weight | Dumbbells | 6 s per rep | 40 reps per set | – |
 | **Bench Press** (`bench_press`) | sets, reps, weight | Barbell | 6 s per rep | 40 reps per set | – |
@@ -93,7 +98,7 @@ There are **79 exercises** in 6 categories, and every one has an animated demons
 | **Farmer's Carry** (`farmer_carry`) | time, distance, weight | Dumbbells | × 1.2 | 8 km/h | – |
 | **Resistance Band Row** (`band_row`) | sets, reps | Resistance Band | 6 s per rep | 60 reps per set | – |
 
-## Mobility & Recovery (16)
+## Mobility & Recovery (18)
 
 | Exercise | Records | Equipment | Tuning | Honesty limits | Easier version |
 | --- | --- | --- | --- | --- | --- |
@@ -110,6 +115,8 @@ There are **79 exercises** in 6 categories, and every one has an animated demons
 | **Side Bend** (`side_bend`) | time | No Equipment | × 0.6 | – | – |
 | **Seated Spinal Twist** (`spinal_twist`) | time | Chair or Step | × 0.6 | – | – |
 | **Butterfly Stretch** (`butterfly_stretch`) | time | No Equipment | × 0.6 | – | – |
+| **Arm Circles** (`arm_circles`) | time | No Equipment | × 0.6 | – | – |
+| **Calf Stretch** (`calf_stretch`) | time | Wall | × 0.6 | – | – |
 | **Hip Circles** (`hip_circles`) | time | No Equipment | × 0.6 | – | – |
 | **Tai Chi** (`tai_chi`) | time | No Equipment | × 0.7 | – | – |
 | **Sun Salutation** (`sun_salutation`) | time | No Equipment | × 0.8 | – | – |

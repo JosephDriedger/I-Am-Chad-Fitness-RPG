@@ -24,6 +24,7 @@ void main() {
           hero_hp INTEGER NOT NULL, potions INTEGER NOT NULL, battles_won INTEGER NOT NULL,
           xp INTEGER NOT NULL, coins INTEGER NOT NULL
         );
+        CREATE TABLE heroes (id INTEGER NOT NULL PRIMARY KEY);
         PRAGMA user_version = 9;
       ''');
     }));

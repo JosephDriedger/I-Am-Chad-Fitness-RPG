@@ -23,7 +23,9 @@ Defense =  4 + 0.9 × softLevel(L)
 | 10 | 2,018 | 85 | 20 | 11 |
 | 20 | 6,670 | 112 | 27 | 15 |
 | 50 | 30,371 | 153 | 38 | 21 |
-| 99 (cap) | 92,069 | 178 | 45 | 25 |
+| 99 | 92,069 | 178 | 45 | 25 |
+| 120 | 125,611 | 184 | 46 | 26 |
+| 144 (cap) | 168,535 | 189 | 48 | 26 |
 
 Level XP is `60 × (level − 1)^1.6`. XP comes from workouts (derived) and from expeditions.
 
@@ -38,9 +40,21 @@ Each turn the player picks one action, then the enemy answers. **The enemy's nex
 | Power Strike | Costs 2 focus. About double damage, plus 1. |
 | Potion | Heal one third of max HP. Uses a potion (2 per expedition, plus up to 3 from the pouch). Only usable when hurt. |
 
-- Focus is capped at 5 and resets between battles (a bard's tune starts the next one with 2).
+- Focus is capped at 5 (in every style) and resets between battles (a bard's tune starts the next one with 2).
 - Damage: `max(1, attack − defense ÷ 2) + random(0..2)`, then multiplied, minimum 1.
 - A battle ends when either side reaches 0 HP.
+
+### Fighting styles
+
+On the Hero screen the player picks how their hero fights. It is free, it can be changed at any time (even between battles of the same expedition, since a new battle reads it), and it never adds power: it only shifts how focus is built and spent. The default is Steady, which is exactly how the game fought before styles existed.
+
+| Style | Attack builds | Guard builds | Power Strike costs | Power Strike hits for |
+| --- | --- | --- | --- | --- |
+| Steady | 1 focus | 1 focus | 2 | 2.0 times a blow |
+| Guardian | 1 focus | 2 focus | 3 | 2.3 times a blow |
+| Striker | 2 focus | 0 focus | 2 | 1.9 times a blow |
+
+`test/domain/styles_test.dart` plays 250 expeditions in each of four regions with a scripted player who knows their style, and fails if any style's win rate drifts more than 6 points from Steady's on average, or 12 in any one region. At the tuned numbers they are within a few points of each other. The buttons and the guide say what the chosen style does.
 
 ### Enemy moves
 
@@ -58,7 +72,7 @@ A **boss** can also get **fired up**: once it drops below a set share of its hea
 
 ## Regions
 
-The world is seven regions, defined in `difficulty.dart`. Each opens at a hero level, has its own enemies, bosses, scenery, camp events and loot, and is a little tougher than the one before. **A region stays open for good**, so the player can always go back to an easier one, and a picker on the Adventure screen chooses where to set out. The toughest open region is the default.
+The world is eight regions, defined in `difficulty.dart`. Each opens at a hero level, has its own enemies, bosses, scenery, camp events and loot, and is a little tougher than the one before. **A region stays open for good**, so the player can always go back to an easier one, and a picker on the Adventure screen chooses where to set out. The toughest open region is the default.
 
 | # | Region | Opens at | Steps | Scenery | Bonus per battle (XP / coins) |
 | --- | --- | --- | --- | --- | --- |
@@ -69,6 +83,7 @@ The world is seven regions, defined in `difficulty.dart`. Each opens at a hero l
 | 5 | Thunder Heights | Level 24 | 6 | Storm, peak | +8 / +4 |
 | 6 | The Sunstone Dunes | Level 36 | 6 | Desert dunes | +10 / +5 |
 | 7 | The Starlit Isles | Level 50 | 6 | Floating islands, night sky | +12 / +6 |
+| 8 | The Ember Deeps | Level 66 | 6 | Lava caverns, glowing forges | +14 / +7 |
 
 An enemy's HP, attack and defense are the hero's stats at that level, times the enemy's own build, times the region's three dials (`hpScale`, `attackScale`, `defenseScale`). The later regions' attack dials are below 1 on purpose: enemies hit a little less, but fights last longer and the tactics matter more. A boss's bonus is doubled. Difficulty is meant to come from enemy variety and tactics, not from stat inflation.
 
@@ -82,7 +97,7 @@ A reward-bearing expedition costs **2 adventure energy** (spent when you set out
 | 3 | `b e b b B` |
 | 4 | `b b e b B` |
 | 5 | `b b e b e B` |
-| 6 and 7 | `b b e b b B` |
+| 6, 7 and 8 | `b b e b b B` |
 
 `Expedition.generate(seed, heroLevel, tier)` builds it deterministically:
 
@@ -135,12 +150,13 @@ Each action also returns structured `BattleEvent`s (`PlayerAttacked`, `PlayerGua
 | Thunder Heights | Thunder Cloud (flurries), Gale Hawk (flurries), Static Imp (braces and mends) | The Thunderhead, Stormcaller Skarn |
 | The Sunstone Dunes | Dust Devil (flurries), Cactus Knight (heavy blows, braces), Scarab Roller (braces and mends) | The Great Dune Worm, The Riddling Sphinx |
 | The Starlit Isles | Lantern Moth (flurries, mends), Comet Cat (flurries), Star Turtle (braces and mends) | The Comet King, Nova, the Very Bright |
+| The Ember Deeps | Cinder Sprite (flurries, heavy blows), Anvil Golem (braces, heavy blows), Magma Slug (mends, braces) | Forgemaster Brun, Magmara, the Slow Simmer |
 
 Chad teaches each region's enemy moves when you set out: `ChadDialogue.adventureLine` mixes his usual send-offs with tips for that region, and a test requires tips for every region. Enemies are intentionally whimsical obstacles, not insults aimed at the player. See [Content guidelines](CONTENT_GUIDELINES.md). The enemy art is in [`enemy_art.dart`](../lib/game/art/enemy_art.dart); several bosses are a recoloured or crowned version of a regular enemy's drawing.
 
 ## Equipment
 
-Thirty-two pieces across four slots (head, body, weapon, trinket), one worn per slot: the original eight, and four from each later region. Bonuses stay small, from +1 on the first pieces to +8 at the top, and each region's pieces are a little stronger than the last one's. Gear is found as loot and also sold in the Guild Shop for coins (see [Reward rules](REWARD_RULES.md#coins-and-the-shop)), at prices that rise with the region. Duplicates convert to coins. The pieces from later regions have no hand-drawn art of their own and are drawn on the hero in the colour in their `accent` field.
+Thirty-six pieces across four slots (head, body, weapon, trinket), one worn per slot: the original eight, and four from each later region. Bonuses stay small, from +1 on the first pieces to +9 at the top, and each region's pieces are a little stronger than the last one's. Gear is found as loot and also sold in the Guild Shop for coins (see [Reward rules](REWARD_RULES.md#coins-and-the-shop)), at prices that rise with the region. Duplicates convert to coins. The pieces from later regions have no hand-drawn art of their own and are drawn on the hero in the colour in their `accent` field.
 
 ## Balance status
 
@@ -155,13 +171,14 @@ Thirty-two pieces across four slots (head, body, weapon, trinket), one worn per 
 | 5 | 68%, 61%, 64% |
 | 6 | 57%, 52%, 66% |
 | 7 | 47%, 63%, 57% |
+| 8 | 48%, 56%, 54% |
 
 Real players will have gear (a few points of attack, defense and HP), can read the intent line better than a script, and can drop back to an easier region. The tests only guard the shape: the first region is gentle, no region is a wall (every case above 45%), each region is harder than the one before on average, each step is a noticeable but small drop, and no battle runs past 30 turns. They are a regression guard, not proof of fun. Real playtesting should drive the next tuning pass (see the [roadmap](ROADMAP.md)).
 
 ## Extending
 
 - **New enemy:** add an `EnemyTemplate` to `EnemyPool.regular` or `bosses` with the `tier` of its region and a `behavior`, then draw it in `enemy_art.dart` and register the painter. Existing seeds will map to different enemies afterwards, which is fine because only the results of expeditions are stored.
-- **New region:** add a `Region` to `Difficulty.regions` (and a `Terrain` and `Biome` if it needs new scenery), give it two bosses, at least three regular enemies and four pieces of gear, a shape in `_shapeFor`, and a shop price for each piece. Check `balance_test.dart` still passes, or extend its table.
+- **New region:** (the Ember Deeps is a worked example) add a `Region` to `Difficulty.regions` (and a `Terrain` and `Biome` if it needs new scenery), give it two bosses, at least three regular enemies and four pieces of gear, a shape in `_shapeFor`, and a shop price for each piece. Check `balance_test.dart` still passes, or extend its table.
 - **New item:** add to `ItemCatalog.all`. Never rename or reuse an `id`; it is persisted in the inventory.
 - **New action or status effect:** extend `BattleAction` and `BattleEngine.act`, then add tests alongside the existing ones in `test/domain/combat_test.dart`.
 - **New visual for an action:** add a `BattleEvent` type in the engine, emit it from `act`, and handle it in `BattleScene.play`. Add a test next to the existing event tests.

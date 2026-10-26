@@ -55,6 +55,9 @@ final streakProvider = Provider<StreakStatus?>((ref) {
 final storyReadProvider = StreamProvider<Set<int>>(
     (ref) => ref.watch(repositoryProvider).watchStoryRead());
 
+final storyReadAtProvider = StreamProvider<Map<int, DateTime>>(
+    (ref) => ref.watch(repositoryProvider).watchStoryReadAt());
+
 final storyChoicesProvider = StreamProvider<Map<String, int>>(
     (ref) => ref.watch(repositoryProvider).watchStoryChoices());
 
@@ -62,12 +65,24 @@ final storyChoicesProvider = StreamProvider<Map<String, int>>(
 final storyStatusProvider = Provider<StoryStatus?>((ref) {
   final player = ref.watch(playerProvider);
   final read = ref.watch(storyReadProvider).value;
-  if (player == null || read == null) return null;
-  return StoryStatus(level: player.level, read: read);
+  final readAt = ref.watch(storyReadAtProvider).value;
+  final workouts = ref.watch(workoutsProvider).value;
+  if (player == null || read == null || readAt == null || workouts == null) return null;
+  // Chapters that open by movement count the days moved since the chapter before them was read.
+  final since = <int, int>{
+    for (final c in Story.chapters)
+      if (c.afterChapter != null && readAt[c.afterChapter] != null)
+        c.afterChapter!: StoryRules.daysMovedAfter(readAt[c.afterChapter]!, workouts),
+  };
+  return StoryStatus(level: player.level, read: read, daysSince: since);
 });
 
 /// Whether the hall offers an unread chapter by itself. Tests switch it off.
 final storyAutoOfferProvider = Provider<bool>((_) => true);
+
+/// Whether the hall offers Chad's warm-up to someone who has not logged a workout
+/// yet. Tests switch it off.
+final warmUpAutoOfferProvider = Provider<bool>((_) => true);
 
 /// What the player's saved store purchases unlock (cosmetics only).
 final entitlementsProvider = StreamProvider<Entitlements>(
